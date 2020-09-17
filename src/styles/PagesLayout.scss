@@ -1,4 +1,58 @@
+@import "./Variables.scss";
+@import "./Mixins.scss";
+
 .page {
-    padding: 20px;
-    border: 1px solid blue;
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 14px 28px;
+    border: 1px solid darken($black, 5);
+    border-radius: 4px;
+    @extend .box-shadow;
+}
+
+.page-research {
+    .paper-card {
+        display: flex;
+        flex-direction: row;
+        text-decoration: none;
+        align-items: center;
+        padding: 14px 0;
+        @extend .transition;
+
+        &:hover {
+            background-color: darken($black, 5);
+            transform: scale(1.01);
+        }
+
+        .year {
+            font-family: $font-headings;
+            font-size: 24px;
+            font-weight: bold;
+            display: inline-block;
+            padding: 14px;
+        }
+
+        h3 {
+            margin: 0;
+        }
+
+        p {
+            margin: 0;
+        }
+    }
+}
+
+.back-link {
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 12px;
+    display: inline-block;
+
+    &:before {
+        content: "< ";
+    }
+
+    &:hover {
+        transform: translate(-2px, 0);
+    }
 }

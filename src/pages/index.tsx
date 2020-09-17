@@ -1,6 +1,7 @@
 import { link } from "fs"
 import React from "react"
 import PageLayout from "../components/PageLayout"
+import "../styles/General.scss"
 
 const Home = () => {
   return <PageLayout>

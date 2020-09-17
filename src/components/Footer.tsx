@@ -1,5 +1,6 @@
 import React from "react"
 import { social } from "../resources/social"
+import "../styles/Footer.scss"
 
 const Footer = () => {
     const links = social.map( (link, i) => {
