@@ -8,3 +8,5 @@ const p404 = () => {
         </PageLayout>
     )
 }
+
+export default p404
