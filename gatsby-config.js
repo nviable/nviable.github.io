@@ -20,9 +20,9 @@ module.exports = {
       resolve: `gatsby-plugin-web-font-loader`,
       options: {
         google: {
-          families: ['Playfair Display', 'Lato']
+          families: [`Playfair Display`, `Lato`]
         }
       }
-    }
+    },
   ],
 }
