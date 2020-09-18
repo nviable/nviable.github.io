@@ -1,3 +1,5 @@
+@import "./Variables.scss";
+
 header {
     display: flex;
     flex-wrap: wrap;
@@ -7,7 +9,7 @@ header {
     margin: 0;
     .logo-container {
         font-weight: bold;
-        margin: 0 14px;
+        margin: 0 14px 14px;
     }
 
     ul {
@@ -22,7 +24,7 @@ header {
             display: inline-block;
 
             &:hover {
-                background-color: rgba(255,255,255,0.3);
+                background-color: darken($black, 5);
             }
         }
     }

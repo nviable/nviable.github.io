@@ -6,7 +6,7 @@ const PaperLink = (paper) => {
     const { id, frontmatter, fields } = paper.data
     const { title, authors, year } = frontmatter
     return (
-        <Link className="paper-card" to={fields.slug}>
+        <Link className="paper-card card" to={fields.slug}>
             <span className="year">{year}</span>
             <div className="card-content">
                 <h3>{title}</h3>

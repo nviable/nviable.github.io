@@ -24,5 +24,9 @@ module.exports = {
         }
       }
     },
+    `gatsby-source-fontawesome`,
+    `gatsby-image`,
+    `gatsby-transformer-sharp`,
+    `gatsby-plugin-sharp`
   ],
 }

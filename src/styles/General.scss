@@ -1,5 +1,6 @@
 @import "./Variables.scss";
 @import "./Mixins.scss";
+@import url("https://pro.fontawesome.com/releases/v5.13.0/css/all.css");
 
 h1, h2, h3, h4, h5, .heading {
     font-family: $font-headings;
@@ -14,5 +15,10 @@ body {
 
 a {
     color: $white;
+    @extend .transition;
+}
+
+.card {
+    border-radius: $border-radius;
     @extend .transition;
 }
