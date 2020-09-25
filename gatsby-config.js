@@ -20,13 +20,21 @@ module.exports = {
       resolve: `gatsby-plugin-web-font-loader`,
       options: {
         google: {
-          families: [`Playfair Display`, `Lato`]
+          families: [`Poppins`, `Lato`]
         }
       }
     },
     `gatsby-source-fontawesome`,
     `gatsby-image`,
     `gatsby-transformer-sharp`,
-    `gatsby-plugin-sharp`
+    `gatsby-plugin-sharp`,
+    {
+      resolve: "gatsby-plugin-react-svg",
+      options: {
+        rule: {
+          include:`/resources/`
+        }
+      }
+    }
   ],
 }

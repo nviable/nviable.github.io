@@ -2,49 +2,94 @@
 @import "./Mixins.scss";
 
 .page {
-    max-width: 1024px;
-    margin: 0 auto;
-    padding: 14px 28px;
-    border: 1px solid darken($black, 5);
-    border-radius: 4px;
-    @extend .box-shadow;
-
     p {
         line-height: 1.4;
     }
 }
 
+.article {
+    .content {
+        // padding: 20px 0 40px;
+    }
+}
+
+.feature + .content {
+    margin-top: -20px;
+    position: relative;
+}
+
+.feature {
+    position: relative;
+    width: 100%;
+    padding: 0 0 48px;
+    padding-top: 100px;
+    background: $purple-grad;
+
+    &:before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-image: url(../resources/images/bck-corner.png);
+        background-repeat: no-repeat;
+        background-size: contain;
+        z-index: 0;
+        max-width: 30%;
+        width: 250px;
+        height: 100%;
+    }
+
+    &:after {
+        content: " ";
+        display: block;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background-image: url(../resources/images/bck-corner.png);
+        background-repeat: no-repeat;
+        background-size: contain;
+        transform: rotate(180deg);
+        z-index: 0;
+        max-width: 30%;
+        width: 250px;
+        height: 100%;
+    }
+
+    h1, h2 {
+        color: $white;
+    }
+
+
+}
+
+.content {
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 14px 28px;
+
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+
+        &.two-col {
+            justify-content: space-between;
+            .card {
+                width: 49%;
+            }
+
+            @media screen and (max-width: 800px) {
+                .card {
+                    width: 100%;
+                }
+            }
+        }
+    }
+}
+
 .page-research {
     .paper-card {
-        display: flex;
-        flex-direction: row;
-        text-decoration: none;
-        align-items: center;
-        padding: 14px 0;
-
-        &:hover {
-            background-color: darken($black, 5);
-            transform: scale(1.01);
-        }
-
-        .year {
-            font-family: $font-headings;
-            font-size: 24px;
-            font-weight: bold;
-            display: inline-block;
-            padding: 0 14px;
-            align-self: baseline;
-        }
-
-        h3 {
-            margin: 0;
-            font-weight: normal;
-        }
-
-        p {
-            margin: 0;
-            color: $grey;
-        }
+        
     }
 }
 
@@ -66,6 +111,12 @@
 .page-home {
     display: flex;
     flex-wrap: wrap;
+
+    .feature .content {
+        display: flex;
+        max-width: 800px;
+    }
+
     .profile-image {
         border-radius: 100%;
         width: 100%;
@@ -74,6 +125,14 @@
     .left, .right {
         width: 100%;
     }
+
+    .card {
+        h3 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    }
+
     @media screen and (min-width: 600px) {
         .left {
             width: 25%;

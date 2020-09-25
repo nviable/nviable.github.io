@@ -5,13 +5,19 @@ import PageLayout from "../components/PageLayout"
 const Paper = ({data}) => {
     const paper = data.markdownRemark
     console.log(paper)
-    return <PageLayout>
+    return <PageLayout className="article">
+      <div className="feature">
+          <div className="content">
+          <h1>{paper.frontmatter.title}</h1>
+          </div>
+      </div>
+      <div className="content">
         <Link className="back-link" to="/research/">Back to Papers</Link>
-        <h1>{paper.frontmatter.title}</h1>
         <span className="year">{paper.frontmatter.year}</span>|
         <span className="authors">{paper.frontmatter.authors}</span>
         <div dangerouslySetInnerHTML={{__html: paper.html}}/>
         <Link className="back-link" to="/research/">Back to Papers</Link>
+      </div>
     </PageLayout>
 }
 
