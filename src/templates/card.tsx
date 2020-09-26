@@ -11,7 +11,7 @@ const Card = ({children, url=null, className="", year=null, img=null, title=null
             {year ? <span className="year">{year}</span> : null}
             <div className="card-content">
                 { title ? <h3>{title}</h3> : null}
-                <p>{children}</p>
+                {children}
             </div>
             {learnMore ? <span className="learn-more">Learn More</span> : null}
         </Link>

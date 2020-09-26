@@ -11,12 +11,22 @@ const Paper = ({data}) => {
           <h1>{paper.frontmatter.title}</h1>
           </div>
       </div>
+      <div className="band band-dark">
+        <div className="content">
+          <span className="year">{paper.frontmatter.year}</span>
+          <span className="authors">{paper.frontmatter.authors}</span>
+        </div>
+      </div>
       <div className="content">
         <Link className="back-link" to="/research/">Back to Papers</Link>
-        <span className="year">{paper.frontmatter.year}</span>|
-        <span className="authors">{paper.frontmatter.authors}</span>
+      </div>
+      <div className="content primary">
         <div dangerouslySetInnerHTML={{__html: paper.html}}/>
-        <Link className="back-link" to="/research/">Back to Papers</Link>
+      </div>
+      <div className="band band-light">
+        <div className="content">
+          <Link className="back-link" to="/research/">Back to Papers</Link>
+        </div>
       </div>
     </PageLayout>
 }

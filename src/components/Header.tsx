@@ -6,12 +6,15 @@ const Header = () => {
     const [ headerTop, setHeaderTop ] = useState(false)
 
     useEffect(() => {
-        document.addEventListener('scroll', () => {
+        const handleScroll = () => {
             const isTop = window.scrollY > 80;
             if (isTop !== headerTop) {
                 setHeaderTop(isTop)
             }
-        })
+        }
+        document.addEventListener('scroll', handleScroll)
+
+        return document.removeEventListener('scroll', handleScroll)
     })
 
     const data = useStaticQuery(graphql`

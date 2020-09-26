@@ -16,9 +16,6 @@ const Home = () => {
         }
       }
     }
-    allMarkdownRemark {
-      totalCount
-    }
     allFile(filter: {relativePath: {in: ["images/icon-projects.png", "images/icon-research.png"]}}) {
       nodes {
         childImageSharp {
