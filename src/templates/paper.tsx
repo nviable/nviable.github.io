@@ -1,11 +1,10 @@
 import React from "react"
 import { graphql, Link } from "gatsby"
-import PageLayout from "../components/PageLayout"
 
 const Paper = ({data}) => {
     const paper = data.markdownRemark
     console.log(paper)
-    return <PageLayout className="article">
+    return <div className="article">
       <div className="feature">
           <div className="content">
           <h1>{paper.frontmatter.title}</h1>
@@ -28,7 +27,7 @@ const Paper = ({data}) => {
           <Link className="back-link" to="/research/">Back to Papers</Link>
         </div>
       </div>
-    </PageLayout>
+    </div>
 }
 
 export const query = graphql`

@@ -1,6 +1,5 @@
 import React from "react"
 // import { papers } from "../resources/papers"
-import PageLayout from "../components/PageLayout"
 import PaperLink from "../templates/paperLink"
 import { graphql } from "gatsby"
 
@@ -14,7 +13,7 @@ const Research = ({data}) => {
     return project.node.fields.slug.includes("/projects/") ? <PaperLink key={"project-"+index} data={project.node} /> : null
   })
 
-  return <PageLayout className="page-research">
+  return <main>
       <div className="feature">
         <div className="content">
           <h1>Research Work</h1>
@@ -26,7 +25,7 @@ const Research = ({data}) => {
         {/* <h2>Projects</h2>
         {projects} */}
       </div>
-  </PageLayout>
+  </main>
 }
 
 export const query = graphql`

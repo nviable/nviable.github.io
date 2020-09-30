@@ -6,6 +6,13 @@
 
 module.exports = {
   /* Your site config here */
+  siteMetadata: {
+    title: "Nviable",
+    titleTemplate: "%s | Nviable",
+    description: "My name is Saniat Sohrawardi (John). I’m a PhD student at B. Thomas Golisano College of Computing and Information Sciences, RIT",
+    url: "https://www.nviable.me",
+    image: "seo.png",
+  },
   plugins: [
     `gatsby-plugin-sass`,
     {
@@ -35,6 +42,7 @@ module.exports = {
           include:`/resources/`
         }
       }
-    }
+    },
+    `gatsby-plugin-layout`
   ],
 }

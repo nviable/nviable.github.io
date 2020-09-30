@@ -1,6 +1,11 @@
 @import "./Variables.scss";
 @import "./Mixins.scss";
 
+
+main {
+    width: 100%;
+}
+
 .page {
     p {
         line-height: 1.4;
@@ -101,13 +106,6 @@
     }
 }
 
-.page-research {
-    .paper-card {
-        
-    }
-}
-
-
 .back-link {
     @extend .btn;    
     color: $black;
@@ -130,6 +128,7 @@
 
     .feature .content {
         display: flex;
+        flex-wrap: wrap;
         max-width: 800px;
     }
 

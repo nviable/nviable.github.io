@@ -1,6 +1,5 @@
 import { link } from "fs"
 import React from "react"
-import PageLayout from "../components/PageLayout"
 import "../styles/General.scss"
 import { useStaticQuery, graphql } from "gatsby"
 import Img from "gatsby-image"
@@ -27,7 +26,7 @@ const Home = () => {
       }
     }
   }`)
-  return <PageLayout className="page-home">
+  return <main>
     <div className="feature">
       <div className="content">
         <div className="left">
@@ -61,7 +60,7 @@ const Home = () => {
       </div>
       
     </div>
-  </PageLayout>
+  </main>
 }
 
 export default Home

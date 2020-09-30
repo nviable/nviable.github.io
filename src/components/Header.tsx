@@ -14,7 +14,7 @@ const Header = () => {
         }
         document.addEventListener('scroll', handleScroll)
 
-        return document.removeEventListener('scroll', handleScroll)
+        // return document.removeEventListener('scroll', handleScroll)
     })
 
     const data = useStaticQuery(graphql`

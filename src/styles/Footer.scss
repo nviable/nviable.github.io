@@ -1,13 +1,16 @@
 @import "./Variables.scss";
 @import "./Mixins.scss";
 
+.page-home + #footer {
+    margin-top: -35px;
+}
+
 #footer {
     display: flex;
     flex-direction: row;
     justify-content: center;
     background: $dark-grey;
     padding: 28px 0;
-    margin-top: -35px;
     
     .social {
         margin: 0;
