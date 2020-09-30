@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack:///./src/pages/404.tsx"],"names":["p404"],"mappings":"6FAAA,gCAQeA,UANF,WACT,OACI","file":"component---src-pages-404-tsx-ea12a6e80d175400de0d.js","sourcesContent":["import React from \"react\"\n\nconst p404 = () => {\n    return (\n        <div>404</div>\n    )\n}\n\nexport default p404"],"sourceRoot":""}
