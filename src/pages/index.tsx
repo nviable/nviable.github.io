@@ -41,6 +41,7 @@ const Home = () => {
           I’m a PhD student at
           B. Thomas Golisano College of Computing and Information Sciences, RIT
           </p>
+          <a className="btn btn-yellow" target="_blank" href="mailto:saniat.s@mail.rit.edu">Contact Me</a>
         </div>
       </div>
     </div>
