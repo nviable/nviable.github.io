@@ -47,12 +47,12 @@ const Home = () => {
     </div>
     <div className="content" >
       <div className="card-container two-col">
-        <Card title="Research" learnMore={true} url="/research" img={data.allFile.nodes[0].childImageSharp.fluid}>
+        <Card title="Research" learnMore={true} url="/research/" img={data.allFile.nodes[0].childImageSharp.fluid}>
           <p>
             My research involves Usable Security, Privacy, Image Forensics, Deep Learning. More specifically, I’ve been working with journalists on deepfake detection.
           </p>
         </Card>
-        <Card title="Projects" learnMore={true} url="/research" img={data.allFile.nodes[1].childImageSharp.fluid} className="wip">
+        <Card title="Projects" learnMore={true} url="/research/" img={data.allFile.nodes[1].childImageSharp.fluid} className="wip">
         <p>
           My project work usually revolves around my research. <br />
           <strong>Under Construction</strong>
