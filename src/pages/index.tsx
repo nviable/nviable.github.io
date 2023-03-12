@@ -1,5 +1,6 @@
 import React from 'react'
 import Layout from '../components/Layout'
+import { SEO } from '../components/Seo'
 
 const IndexPage = () => {
   return (
@@ -12,7 +13,7 @@ const IndexPage = () => {
 // #todo check SEO component tutorial https://www.gatsbyjs.com/docs/how-to/adding-common-features/adding-seo-component/
 export const Head = () => {
   return (
-    <title>Nviable v2</title>
+    <SEO title="Home" />
   )
 }
 
