@@ -5,7 +5,6 @@ import { SEO } from '../components/Seo'
 const AboutPage = () => {
     return (
         <Layout pageTitle="About Page">
-            <h1>About Me</h1>
             <p>I'll probably be talking about myself here</p>
         </Layout>
     )

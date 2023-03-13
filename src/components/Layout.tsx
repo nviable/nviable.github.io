@@ -30,6 +30,12 @@ const Layout = ({ pageTitle, children }: LayoutProps) => {
                         <Link to="/about">About</Link>
                     </li>
                     <li>
+                        <Link to="/research">Research</Link>
+                    </li>
+                    <li>
+                        <Link to="/projects">Projects</Link>
+                    </li>
+                    <li>
                         <Link to="/blog">Blog</Link>
                     </li>
                 </ul>
