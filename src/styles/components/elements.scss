@@ -1,0 +1,32 @@
+.card {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    width: 100%;
+
+    &:hover {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .gatsby-image-wrapper {
+        max-width: 100%;
+        height: auto;
+    }
+
+    svg {
+        width: 100px;
+        height: auto;
+
+    }
+
+    h2 {
+        font-size: 24px;
+        margin-bottom: 0;
+    }
+
+    p {
+        margin-top: 0;
+    }
+}

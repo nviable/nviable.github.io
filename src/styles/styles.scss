@@ -1,8 +1,13 @@
-$font-stack: Helvetica, sans-serif;
-$primary-color: #333;
+@import 'components/colors';
+@import 'components/typography';
+@import 'components/filters';
+@import 'components/layout';
+@import 'components/elements';
 
 body {
-    font: 100% $font-stack;
-    color: $primary-color;
     background: gainsboro;
+}
+
+svg title {
+    display: none;
 }

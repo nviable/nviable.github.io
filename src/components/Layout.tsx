@@ -1,9 +1,10 @@
 import React from 'react'
 import { Link, useStaticQuery, graphql } from 'gatsby'
 import '../styles/styles.scss'
+import SVGIcon from './SVGIcons'
 
 interface LayoutProps {
-    pageTitle: string
+    pageTitle?: string
     children: React.ReactNode
 }
 
@@ -20,7 +21,7 @@ const Layout = ({ pageTitle, children }: LayoutProps) => {
 
     return (
         <div>
-            <header>{data.site.siteMetadata.title}</header>
+            <header><SVGIcon icon="favicon" />{data.site.siteMetadata.title}</header>
             <nav>
                 <ul>
                     <li>

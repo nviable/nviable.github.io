@@ -83,6 +83,14 @@ const config: GatsbyConfig = {
       },
       __key: "projects"
     },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        "name": "blocks",
+        "path": "./src/blocks/",
+      },
+      __key: "blocks"
+    },
     "gatsby-plugin-mdx",
   ]
 };

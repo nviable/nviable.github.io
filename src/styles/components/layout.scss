@@ -1,0 +1,68 @@
+// Hero page
+.hero {
+    padding: 160px 0 120px 0;
+    background: $gradient-purple;
+    color: white;
+    position: relative;
+
+    &:before,
+    &:after {
+        content: '';
+        position: absolute;
+        display: block;
+        top: 0;
+        left: 0;
+        width: 40%;
+        height: 40%;
+        background-image: url('../images/bck-corner.png');
+        z-index: 1;
+        background-repeat: no-repeat;
+        background-size: contain;
+    }
+
+    &:after {
+        top: auto;
+        bottom: 0;
+        left: auto;
+        right: 0;
+        transform: rotate(180deg);
+    }
+
+    .container {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        grid-gap: 40px;
+        z-index: 2;
+    }
+
+    .gatsby-image-wrapper {
+        max-width: 100%;
+        height: auto;
+    }
+
+    h1 {
+        font-size: 32px;
+        line-height: 1;
+        margin-bottom: 0;
+    }
+}
+
+.container {
+    position: inherit;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.sub-header {
+    font-style: italic;
+    margin-top: 0;
+}
+
+// cards
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-gap: 40px;
+    margin: 40px 0;
+}
