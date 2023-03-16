@@ -1,4 +1,116 @@
-// Hero page
+// Header
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 100px;
+    z-index: 5;
+    color: white;
+
+    &.scrolled {
+        background: $gradient-purple;
+        box-shadow: $dropshadow;
+    }
+
+    .container {
+        display: flex;
+        flex: wrap;
+        align-items: center;
+    }
+
+    .svg-icon {
+        margin: 0 10px 0 0;
+    }
+
+    .nav {
+        ul {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        a {
+            font-style: $font-family-accent;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: white;
+            text-decoration: none;
+            padding: 10px 0;
+            margin: 0 20px;
+            position: relative;
+            display: inline-block;
+
+            // underline after element for hover that animates out
+            &:after {
+                content: '';
+                position: absolute;
+                bottom: -5px;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background: white;
+                transform: scaleX(0);
+                transform-origin: left;
+                transition: transform 0.3s ease-in-out;
+            }
+
+            &[aria-current="page"] {
+                &:after {
+                    background: $yellow;
+                    transform: scaleX(1);
+                }
+            }
+
+            &:hover {
+                &:after {
+                    transform: scaleX(1);
+                }
+            }
+        }
+    }
+
+}
+
+// Footer
+footer {
+    background: $grey-dark;
+    color: white;
+
+    .container {
+        padding: 100px 0 40px;
+    }
+
+    .social-links {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 30px 0;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        a {
+            margin: 0 10px;
+            padding: 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.5em;
+            transition: all 0.3s ease-in-out;
+            display: inline-block;
+
+            &:hover {
+                color: $yellow;
+                transform: scale(1.2);
+            }
+        }
+
+
+    }
+}
+
+// Hero section
 .hero {
     padding: 160px 0 120px 0;
     background: $gradient-purple;
@@ -30,14 +142,23 @@
 
     .container {
         display: grid;
-        grid-template-columns: 120px 1fr;
+        grid-template-columns: 130px auto;
         grid-gap: 40px;
         z-index: 2;
+        align-items: center;
+    }
+
+    svg {
+        margin: 0 5px 0 0;
     }
 
     .gatsby-image-wrapper {
         max-width: 100%;
         height: auto;
+
+        img {
+            height: auto;
+        }
     }
 
     h1 {
@@ -48,8 +169,8 @@
 }
 
 .container {
-    position: inherit;
-    max-width: 1200px;
+    position: relative;
+    max-width: 730px;
     margin: 0 auto;
 }
 
@@ -61,8 +182,77 @@
 // cards
 
 .card-container {
+    position: relative;
+    margin-top: -60px;
+    margin-bottom: -40px;
+    z-index: 2;
+
+    .container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+}
+
+.pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.skill-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    grid-gap: 40px;
-    margin: 40px 0;
+    grid-template-columns: 200px auto;
+    grid-gap: 14px;
+
+    h4 {
+        display: inline-block;
+        margin-right: 14px;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .card-container {
+
+        h3,
+        h4 {
+            text-align: center;
+        }
+
+        h4 {
+            margin-bottom: 0;
+        }
+
+        .container {
+            grid-template-columns: 1fr;
+        }
+
+        .card,
+        .card-full,
+        .card-half,
+        .card.has-icon {
+            grid-column-start: 1;
+            grid-column-end: 2;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+            grid-template-areas:
+                "image"
+                "content"
+                "expand-bar";
+            align-items: center;
+            justify-items: center;
+        }
+
+        .skill-container {
+            grid-template-columns: 1fr;
+        }
+
+        .pill-container {
+            justify-content: center;
+        }
+    }
+
+    .container {
+        margin: 0 20px;
+    }
 }

@@ -1,7 +1,8 @@
 import React from 'react'
-import { Link, useStaticQuery, graphql } from 'gatsby'
+import { useStaticQuery, graphql } from 'gatsby'
 import '../styles/styles.scss'
-import SVGIcon from './SVGIcons'
+import Header from './Header'
+import Footer from './Footer'
 
 interface LayoutProps {
     pageTitle?: string
@@ -20,32 +21,14 @@ const Layout = ({ pageTitle, children }: LayoutProps) => {
         `)
 
     return (
-        <div>
-            <header><SVGIcon icon="favicon" />{data.site.siteMetadata.title}</header>
-            <nav>
-                <ul>
-                    <li>
-                        <Link to="/">Home</Link>
-                    </li>
-                    <li>
-                        <Link to="/about">About</Link>
-                    </li>
-                    <li>
-                        <Link to="/research">Research</Link>
-                    </li>
-                    <li>
-                        <Link to="/projects">Projects</Link>
-                    </li>
-                    <li>
-                        <Link to="/blog">Blog</Link>
-                    </li>
-                </ul>
-            </nav>
+        <>
+            <Header />
             <main>
-                <h1>{pageTitle}</h1>
+                {(pageTitle) ? <h1>{pageTitle}</h1> : null}
                 {children}
             </main>
-        </div>
+            <Footer />
+        </>
     )
 }
 

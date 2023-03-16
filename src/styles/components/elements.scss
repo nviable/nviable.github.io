@@ -1,10 +1,32 @@
 .card {
     background: white;
-    padding: 40px;
+    padding: 20px 20px 0 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease-in-out;
-    width: 100%;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 40px;
+    gap: 14px;
+    grid-template-areas:
+        "content"
+        "expand-bar";
+
+    &.card-full {
+        grid-column-start: 1;
+        grid-column-end: 3;
+    }
+
+    &.has-icon {
+        grid-template-columns: 100px 1fr;
+        grid-template-rows: 1fr 1fr 40px;
+        gap: 14px;
+        grid-template-areas:
+            "image content"
+            "image content"
+            "expand-bar expand-bar";
+    }
 
     &:hover {
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
@@ -18,15 +40,78 @@
     svg {
         width: 100px;
         height: auto;
-
+        grid-area: image;
     }
 
-    h2 {
+    h3 {
         font-size: 24px;
-        margin-bottom: 0;
+        margin-bottom: 14px;
+    }
+
+    .card-content {
+        width: auto;
+        grid-area: content;
+    }
+
+    .bottom-bar {
+        border-top: 1px solid $grey-light;
+        grid-area: expand-bar;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+        padding: 4px 0;
+        color: $grey-dark;
+        font-family: $font-family-accent;
+        transition: all 0.3s ease-in-out;
+        width: 100%;
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        svg {
+            width: 14px;
+            height: auto;
+            margin: 0 5px 0 0;
+        }
+
+        a {
+            color: $grey-dark;
+            text-decoration: none;
+            display: inline-block;
+        }
+
     }
 
     p {
         margin-top: 0;
     }
+}
+
+.pill {
+    display: inline-block;
+    background: $black;
+    color: white;
+    padding: 4px 10px;
+    border-radius: $corners;
+    margin: 0 5px 5px 0;
+}
+
+.pill--grey {
+    background: $grey-light;
+    color: $grey-dark;
+}
+
+.pill--yellow {
+    background: $yellow;
+    color: $black;
+}
+
+.pill--green {
+    background: $green;
+    color: $black;
+}
+
+.grey-icon {
+    color: $grey-dark;
 }

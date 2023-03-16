@@ -18,13 +18,14 @@ interface IndexPageProps {
           icon: string
           link: string
           slug: string
-          content: {
-            excerpt?: string
-            frameworks?: string[]
-            coding?: string[]
-            languages?: string[]
-            project_management?: string[]
-            tools?: string[]
+          richContent: {
+            abovefold: string
+            belowfold: string
+            coding: string[]
+            design: string[]
+            research: string[]
+            tools: string[]
+            project_management: string[]
           }
         }
       }>
@@ -36,30 +37,36 @@ const IndexPage = ({ data }: IndexPageProps) => {
   const { nodes } = data.allMdx
   const blocks = nodes.map((node) => {
     const { id, body, frontmatter } = node
-    const { title, expand, icon, link, content } = frontmatter
-
+    const { title, expand, icon, link, richContent } = frontmatter
     const cardContent: React.ReactNode[] = []
-    if (content?.excerpt) {
-      cardContent.push(<p key="card-excerpt">{content.excerpt}</p>)
-    }
-    if (content) {
-      for (const [key, value] of Object.entries(content)) {
-        if (key === 'excerpt') {
-          continue
+    if (richContent) {
+      for (const [key, value] of Object.entries(richContent)) {
+        if (value) {
+          if (key === 'abovefold') {
+            cardContent.push(<p key={`card-excerpt-${id}`}>{value}</p>)
+          }
+          else if (key === 'belowfold') {
+            cardContent.push(<p key={`card-extended-${id}`}>{value}</p>)
+          }
+          else {
+            const list = Array.isArray(value) && value.map((item, index) => {
+              return <span className="pill" key={`pill-${key}-${index}`}>{item}</span>
+            })
+            if (value) {
+              cardContent.push(
+                <div key={key} className="skill-container">
+                  <h4>{key}</h4>
+                  <div className="pill-container">{list}</div>
+                </div>
+              )
+            }
+          }
         }
-        const list = Array.isArray(value) && value.map((item, index) => {
-          return <span className="pill" key={`${key}-${index}`}>{item}</span>
-        })
-        cardContent.push(
-          <div key={key}>
-            <h3>{key}</h3>
-            <div className="pill-container">{list}</div>
-          </div>
-        )
       }
     }
+    const cardClasses = (title == 'research' || title == 'projects') ? 'card-half' : 'card-full'
 
-    return <Card key={id} title={title} link={link} expand={expand} icon={icon}>
+    return <Card key={`card-${title}-${id}`} title={title} link={link} expand={expand} icon={icon} extraClass={cardClasses}>
       {cardContent}
       {body}
     </Card>
@@ -96,31 +103,27 @@ export const Head = () => {
 
 export const query = graphql`{
   allMdx(
-    filter: {fields: {source: {eq: "blocks"}}, frontmatter: {order: {ne: 0}}}
+    filter: {frontmatter: {order: {gt: 0}}}
     sort: {frontmatter: {order: ASC}}
   ) {
     nodes {
-      id
-      body
       frontmatter {
-        topics
-        topic
-        title
-        slug
-        link
-        icon
-        expand
-        paper
-        order
-        content {
+        richContent {
+          abovefold
+          belowfold
           coding
-          excerpt
           frameworks
+          tools
           languages
           project_management
-          tools
         }
-      }      
+        expand
+        order
+        title
+        link
+        icon
+      }
+      body
     }
   }
 }

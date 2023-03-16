@@ -15,21 +15,21 @@ interface SVGIconProps {
 export const SVGIcon = ({ icon }: SVGIconProps) => {
     switch (icon) {
         case "research":
-            return <ResearchIcon />
+            return <ResearchIcon className="svg-icon" />
         case "experience":
-            return <ExperienceIcon />
+            return <ExperienceIcon className="svg-icon" />
         case "media":
-            return <MediaIcon />
+            return <MediaIcon className="svg-icon" />
         case "projects":
-            return <ProjectsIcon />
+            return <ProjectsIcon className="svg-icon" />
         case "skills":
-            return <SkillsIcon />
+            return <SkillsIcon className="svg-icon" />
         case "location":
-            return <LocationIcon />
+            return <LocationIcon className="svg-icon" />
         case "book-reader":
-            return <BookReaderIcon />
+            return <BookReaderIcon className="svg-icon" />
         default:
-            return <Favicon />
+            return <Favicon className="svg-icon" />
     }
 }
 

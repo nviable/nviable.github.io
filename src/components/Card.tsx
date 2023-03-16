@@ -1,6 +1,8 @@
 import { Link } from 'gatsby-link'
 import React from 'react'
 import SVGIcon from './SVGIcons'
+import { faArrowAltCircleDown } from '@fortawesome/free-regular-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface CardProps {
     title: string
@@ -8,6 +10,7 @@ interface CardProps {
     link?: string
     icon?: string
     expand?: boolean
+    extraClass?: string
 }
 
 // Card element accepts a title, children, optional link, optional icon, and optional expansion boolean
@@ -16,29 +19,41 @@ interface CardProps {
 // If the card is expandable, it will show an expand bar at the bottom
 // If the card is not expandable, it will not show an expand bar
 
-const Card = ({ title, link, expand, icon, children }: CardProps) => {
+const Card = ({ title, link, expand, icon, children, extraClass }: CardProps) => {
     const [expanded, setExpanded] = React.useState(false)
 
     const toggleExpand = () => {
         setExpanded(!expanded)
     }
 
-    const expandBar = (
-        <div className="expand-bar" onClick={toggleExpand}>Expand</div>
-    )
+    const expandBar = expanded ? (
+        <div className="bottom-bar expanded" onClick={toggleExpand}>
+            <FontAwesomeIcon icon={faArrowAltCircleDown} rotation={180} className="grey-icon" />
+            collapse
+        </div>
+    ) : <div className="bottom-bar" onClick={toggleExpand}>
+        <FontAwesomeIcon icon={faArrowAltCircleDown} className="grey-icon" />
+        expand
+    </div>
+
+    const cardClasses = ['card']
+    if (expand) cardClasses.push('expandable')
+    if (expanded) cardClasses.push('expanded')
+    if (extraClass) cardClasses.push(extraClass)
+    if (icon && extraClass !== 'card-half') cardClasses.push('has-icon')
 
     const content = (
-        <div className="card">
-            {icon && <SVGIcon icon={icon} />}
-            <h3>{title}</h3>
+        <div className={cardClasses.join(" ")}>
+            {icon && extraClass !== 'card-half' && <SVGIcon icon={icon} />}
             <div className="card-content">
+                <h3>{title}</h3>
                 {expand && !expanded ? React.Children.map(children, (child, index) => {
                     if (index === 0) return child
                     return null
                 }) : children}
             </div>
             {expand && expandBar}
-            {link && <Link to={link} className="card-link">Read More</Link>}
+            {link && <div className="bottom-bar"><Link to={link}>Read More</Link></div>}
         </div>
     )
     return content
