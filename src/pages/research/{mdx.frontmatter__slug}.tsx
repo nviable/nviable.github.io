@@ -12,53 +12,57 @@ interface ResearchPostProps {
                 authors: string[]
                 categories: string[]
                 conferences: string[]
-                paper: string
+                link: string
                 topics: string[]
             }
         }
     }
     children: React.ReactNode
+    location: Location
 }
 
 const ResearchPost = ({ data, children }: ResearchPostProps) => {
-    const { title, date, authors, categories, conferences, paper, topics } = data.mdx.frontmatter
-
-    const authorsList = authors.map((author, index) => {
+    const { title, date, authors, categories, conferences, link, topics } = data.mdx.frontmatter
+    const authorsList = authors && authors.map((author, index) => {
         return (
             <span key={`author-${index}`}>{author}</span>
         )
     })
 
-    const topicList = topics.map((topic, index) => {
+    const topicList = topics && topics.map((topic, index) => {
         return (
             <span key={`topic-${index}`}>{topic}</span>
         )
     })
 
-    const categoryList = categories.map((category, index) => {
+    const categoryList = categories && categories.map((category, index) => {
         return (
             <span key={`category-${index}`}>{category}</span>
         )
     })
 
-    const conferenceList = conferences.map((conference, index) => {
+    const conferenceList = conferences && conferences.map((conference, index) => {
         return (
             <span key={`conference-${index}`}>{conference}</span>
         )
     })
 
+    const heroContent = (
+        <>
+            <h1>{title}</h1>
+            <div className="date">{date || null}</div>
+            <div className="authors">{authorsList || null}</div>
+            <div className="topics">{topicList || null}</div>
+            <div className="conferences">{conferenceList || null}</div>
+            <div className="categories">{categoryList || null}</div>
+        </>
+    )
+
     return (
-        <Layout pageTitle={title}>
+        <Layout heroContent={heroContent} className="research post">
             <article>
-                <div className="meta">
-                    <div className="date">{date}</div>
-                    <div className="authors">{authorsList}</div>
-                    <div className="topics">{topicList}</div>
-                    <div className="conferences">{conferenceList}</div>
-                    <div className="categories">{categoryList}</div>
-                </div>
                 {children}
-                <a href={paper}>Link to paper</a>
+                <a href={link}>Link to paper</a>
             </article>
         </Layout>
     )
@@ -73,7 +77,7 @@ export const query = graphql`
                 categories
                 conferences
                 date(formatString: "YYYY")
-                paper
+                link
                 slug
                 topics
             }

@@ -64,31 +64,32 @@ const IndexPage = ({ data }: IndexPageProps) => {
         }
       }
     }
+    if (body) {
+      cardContent.push(<p key={`card-excerpt-${id}`}>{body}</p>)
+    }
     const cardClasses = (title == 'research' || title == 'projects') ? 'card-half' : 'card-full'
 
     return <Card key={`card-${title}-${id}`} title={title} link={link} expand={expand} icon={icon} extraClass={cardClasses}>
       {cardContent}
-      {body}
     </Card>
   })
+
+  const heroContent = (
+    <>
+      <StaticImage alt="Saniat Javid Sohrawardi" src="../images/portrait.png" />
+      <div className="introduction">
+        <h1>Hello, I'm John!</h1>
+        <p className="sub-header">or more formally, Saniat J. Sohrawardi</p>
+        <p className="bio">I'm a multidisciplinary researcher in Human-Computer Interaction, Computer Vision, Cybersecurity, and AI Ethics</p>
+      </div>
+      <div className="location"><SVGIcon icon="location" /> Rochester, NY</div>
+      <div className="education"><SVGIcon icon="book-reader" />5th year Ph.D. at Rochester Institute of Technology</div>
+    </>
+  )
   return (
-    <Layout>
-      <section className='hero'>
-        <div className="container">
-          <StaticImage alt="Saniat Javid Sohrawardi" src="../images/portrait.png" />
-          <div className="introduction">
-            <h1>Hello, I'm John!</h1>
-            <p className="sub-header">or more formally, Saniat J. Sohrawardi</p>
-            <p className="bio">I'm a multidisciplinary researcher in Human-Computer Interaction, Computer Vision, Cybersecurity, and AI Ethics</p>
-          </div>
-          <div className="location"><SVGIcon icon="location" /> Rochester, NY</div>
-          <div className="education"><SVGIcon icon="book-reader" />5th year Ph.D. at Rochester Institute of Technology</div>
-        </div>
-      </section>
+    <Layout heroContent={heroContent} className="home">
       <section className="card-container">
-        <div className="container">
-          {blocks}
-        </div>
+        {blocks}
       </section>
     </Layout>
   )

@@ -17,9 +17,13 @@ interface ProjectPostProps {
 
 const ProjectPost = ({ data, children }: ProjectPostProps) => {
     const { title, date } = data.mdx.frontmatter
-
+    const heroContent = (
+        <>
+            <h1>{title}</h1>
+        </>
+    )
     return (
-        <Layout pageTitle={title}>
+        <Layout heroContent={heroContent} className="projects post" >
             <p>{date}</p>
             {children}
         </Layout>

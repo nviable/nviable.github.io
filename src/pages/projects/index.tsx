@@ -21,16 +21,26 @@ interface ProjectsPageProps {
 
 const ProjectsPage = ({ data }: ProjectsPageProps) => {
     const projects = data.allMdx.nodes.map(({ id, frontmatter, excerpt }) =>
-        <article key={id}>
-            <h2><Link to={frontmatter.slug}>{frontmatter.title}</Link></h2>
-            <p>Posted: {frontmatter.date}</p>
-            <p>{excerpt}</p>
+        <article key={id} className="card card-full card-linked">
+            <Link to={frontmatter.slug}>
+                <h2>{frontmatter.title}</h2>
+                <p>Posted: {frontmatter.date}</p>
+                <p>{excerpt}</p>
+            </Link>
         </article>
     )
 
+    const heroContent = (
+        <>
+            <h1>Projects</h1>
+        </>
+    )
+
     return (
-        <Layout pageTitle='Projects'>
-            {projects}
+        <Layout heroContent={heroContent} className="projects archive">
+            <div className="card-container">
+                {projects}
+            </div>
         </Layout>
     )
 }

@@ -63,7 +63,7 @@ const config: GatsbyConfig = {
       resolve: 'gatsby-source-filesystem',
       options: {
         "name": "blog",
-        "path": "./src/blog/",
+        "path": "./src/content/blog/",
       },
       __key: "blog"
     },
@@ -71,7 +71,7 @@ const config: GatsbyConfig = {
       resolve: 'gatsby-source-filesystem',
       options: {
         "name": "research",
-        "path": "./src/research/",
+        "path": "./src/content/research/",
       },
       __key: "research"
     },
@@ -79,7 +79,7 @@ const config: GatsbyConfig = {
       resolve: 'gatsby-source-filesystem',
       options: {
         "name": "projects",
-        "path": "./src/projects/",
+        "path": "./src/content/projects/",
       },
       __key: "projects"
     },
@@ -87,9 +87,17 @@ const config: GatsbyConfig = {
       resolve: 'gatsby-source-filesystem',
       options: {
         "name": "blocks",
-        "path": "./src/blocks/",
+        "path": "./src/content/blocks/",
       },
       __key: "blocks"
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        "name": "publicity",
+        "path": "./src/content/publicity/",
+      },
+      __key: "publicity"
     },
     "gatsby-plugin-mdx",
   ]

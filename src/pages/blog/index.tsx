@@ -21,17 +21,26 @@ interface BlogPageProps {
 
 const BlogPage = ({ data }: BlogPageProps) => {
     const blogPosts = data.allMdx.nodes.map(({ id, frontmatter, excerpt }) =>
-        <article key={id}>
-            <Link to={frontmatter.slug}> {frontmatter.title}</Link>
-            <p>Posted: {frontmatter.date}</p>
-            <p>{excerpt}</p>
+        <article key={id} className="card card-half card-linked">
+            <Link to={frontmatter.slug}>
+                <h2>{frontmatter.title}</h2>
+                <p>Posted: {frontmatter.date}</p>
+                <p>{excerpt}</p>
+            </Link>
         </article>
     )
 
+    const heroContent = (
+        <>
+            <h1>Blog</h1>
+        </>
+    )
+
     return (
-        <Layout pageTitle="Blog Page">
-            <p>Blog posts will go here</p>
-            {blogPosts}
+        <Layout heroContent={heroContent} className="blog archive">
+            <div className="card-container">
+                {blogPosts}
+            </div>
         </Layout>
     )
 }

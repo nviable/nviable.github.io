@@ -5,11 +5,12 @@ import Header from './Header'
 import Footer from './Footer'
 
 interface LayoutProps {
-    pageTitle?: string
+    heroContent?: React.ReactNode
     children: React.ReactNode
+    className: string
 }
 
-const Layout = ({ pageTitle, children }: LayoutProps) => {
+const Layout = ({ heroContent, children, className }: LayoutProps) => {
     const data = useStaticQuery(graphql`
         query {
             site {
@@ -20,12 +21,22 @@ const Layout = ({ pageTitle, children }: LayoutProps) => {
         }
         `)
 
+    const heroClass = className ? `hero ${className}` : 'hero'
+
     return (
         <>
             <Header />
             <main>
-                {(pageTitle) ? <h1>{pageTitle}</h1> : null}
-                {children}
+                <section className={heroClass}>
+                    <div className="container">
+                        {heroContent}
+                    </div>
+                </section>
+                <section className="content">
+                    <div className="container">
+                        {children}
+                    </div>
+                </section>
             </main>
             <Footer />
         </>

@@ -18,8 +18,14 @@ interface BlogPostProps {
 const BlogPost = ({ data, children }: BlogPostProps) => {
     const { title, date } = data.mdx.frontmatter
 
+    const heroContent = (
+        <>
+            <h1>{title}</h1>
+        </>
+    )
+
     return (
-        <Layout pageTitle={title}>
+        <Layout heroContent={heroContent} className="blog post">
             <p>{date}</p>
             {children}
         </Layout>

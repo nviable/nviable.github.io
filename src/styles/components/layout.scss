@@ -84,6 +84,7 @@ footer {
 
     .social-links {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: center;
         margin: 30px 0;
@@ -116,6 +117,7 @@ footer {
     background: $gradient-purple;
     color: white;
     position: relative;
+    z-index: 1;
 
     &:before,
     &:after {
@@ -140,31 +142,33 @@ footer {
         transform: rotate(180deg);
     }
 
-    .container {
-        display: grid;
-        grid-template-columns: 130px auto;
-        grid-gap: 40px;
-        z-index: 2;
-        align-items: center;
-    }
-
-    svg {
-        margin: 0 5px 0 0;
-    }
-
-    .gatsby-image-wrapper {
-        max-width: 100%;
-        height: auto;
-
-        img {
-            height: auto;
+    &.home {
+        .container {
+            display: grid;
+            grid-template-columns: 130px auto;
+            grid-gap: 40px;
+            z-index: 2;
+            align-items: center;
         }
-    }
 
-    h1 {
-        font-size: 32px;
-        line-height: 1;
-        margin-bottom: 0;
+        svg {
+            margin: 0 5px 0 0;
+        }
+
+        .gatsby-image-wrapper {
+            max-width: 100%;
+            height: auto;
+
+            img {
+                height: auto;
+            }
+        }
+
+        h1 {
+            font-size: 32px;
+            line-height: 1;
+            margin-bottom: 0;
+        }
     }
 }
 
@@ -187,11 +191,9 @@ footer {
     margin-bottom: -40px;
     z-index: 2;
 
-    .container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
-    }
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
 }
 
 .pill-container {
@@ -211,8 +213,9 @@ footer {
     }
 }
 
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: 730px) {
     .card-container {
+        grid-template-columns: 1fr;
 
         h3,
         h4 {
@@ -221,10 +224,6 @@ footer {
 
         h4 {
             margin-bottom: 0;
-        }
-
-        .container {
-            grid-template-columns: 1fr;
         }
 
         .card,

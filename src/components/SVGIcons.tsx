@@ -1,12 +1,12 @@
 import * as React from "react"
-import BookReaderIcon from "../svgIcons/book-reader"
-import ExperienceIcon from "../svgIcons/experience"
-import Favicon from "../svgIcons/favicon"
-import LocationIcon from "../svgIcons/location"
-import MediaIcon from "../svgIcons/media"
-import ProjectsIcon from "../svgIcons/projects"
-import ResearchIcon from "../svgIcons/research"
-import SkillsIcon from "../svgIcons/skills"
+import BookReaderIcon from "../content/svgIcons/book-reader"
+import ExperienceIcon from "../content/svgIcons/experience"
+import Favicon from "../content/svgIcons/favicon"
+import LocationIcon from "../content/svgIcons/location"
+import MediaIcon from "../content/svgIcons/media"
+import ProjectsIcon from "../content/svgIcons/projects"
+import ResearchIcon from "../content/svgIcons/research"
+import SkillsIcon from "../content/svgIcons/skills"
 
 interface SVGIconProps {
     icon: string

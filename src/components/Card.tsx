@@ -39,6 +39,7 @@ const Card = ({ title, link, expand, icon, children, extraClass }: CardProps) =>
     const cardClasses = ['card']
     if (expand) cardClasses.push('expandable')
     if (expanded) cardClasses.push('expanded')
+    if (link) cardClasses.push('read-more')
     if (extraClass) cardClasses.push(extraClass)
     if (icon && extraClass !== 'card-half') cardClasses.push('has-icon')
 

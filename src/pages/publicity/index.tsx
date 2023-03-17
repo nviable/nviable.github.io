@@ -3,7 +3,7 @@ import React from 'react'
 import Layout from '../../components/Layout'
 import { SEO } from '../../components/Seo'
 
-interface ResearchPageProps {
+interface PublicityPageProps {
     data: {
         allMdx: {
             nodes: Array<{
@@ -19,8 +19,8 @@ interface ResearchPageProps {
     }
 }
 
-const ResearchPage = ({ data }: ResearchPageProps) => {
-    const researchPosts = data.allMdx.nodes.map(({ id, frontmatter, excerpt }) =>
+const PublicityPage = ({ data }: PublicityPageProps) => {
+    const articles = data.allMdx.nodes.map(({ id, frontmatter, excerpt }) =>
         <article key={id} className="card card-full card-linked">
             <Link to={frontmatter.slug}>
                 <h2>{frontmatter.title}</h2>
@@ -29,15 +29,17 @@ const ResearchPage = ({ data }: ResearchPageProps) => {
             </Link>
         </article>
     )
+
     const heroContent = (
         <>
-            <h1>Research</h1>
+            <h1>Publicity</h1>
         </>
     )
+
     return (
-        <Layout heroContent={heroContent} className="research archive">
+        <Layout heroContent={heroContent} className="publicity archive">
             <div className="card-container">
-                {researchPosts}
+                {articles}
             </div>
         </Layout>
     )
@@ -46,7 +48,7 @@ const ResearchPage = ({ data }: ResearchPageProps) => {
 export const query = graphql`
     query {
         allMdx(
-            filter: {fields: {source: {eq: "research"}}}
+            filter: {fields: {source: {eq: "publicity"}}}
             sort: {frontmatter: {date: DESC}}
           ) {
             nodes {
@@ -54,7 +56,7 @@ export const query = graphql`
                     title
                     date(fromNow: true)
                     slug
-                }
+                  }
                 id
                 excerpt(pruneLength: 40)
             }
@@ -64,8 +66,8 @@ export const query = graphql`
 
 export const Head = () => {
     return (
-        <SEO title='Research' />
+        <SEO title='Publicity' />
     )
 }
 
-export default ResearchPage
+export default PublicityPage
