@@ -141,8 +141,10 @@ footer {
         right: 0;
         transform: rotate(180deg);
     }
+}
 
-    &.home {
+.home {
+    .hero {
         .container {
             display: grid;
             grid-template-columns: 130px auto;
@@ -181,6 +183,26 @@ footer {
 .sub-header {
     font-style: italic;
     margin-top: 0;
+}
+
+// post
+
+.post {
+    .content {
+        max-width: 730px;
+        margin: 0 auto;
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+            margin: -60px 0;
+            max-width: auto;
+            padding: 40px;
+            z-index: 2;
+        }
+    }
 }
 
 // cards
@@ -253,5 +275,17 @@ footer {
 
     .container {
         margin: 0 20px;
+    }
+}
+
+.post-meta {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    grid-row-gap: 14px;
+    align-items: center;
+
+    @media screen and (max-width: 730px) {
+        grid-template-columns: 1fr;
+        grid-row-gap: 8px;
     }
 }

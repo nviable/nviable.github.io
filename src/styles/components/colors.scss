@@ -7,6 +7,18 @@ $grey-light: rgba(221, 221, 221, 1);
 $grey-dark: rgba(40, 40, 40, 1);
 $black: rgba(0, 0, 0, 1);
 
+$yellow-darker: darken($yellow, 10%);
+$yellow-lighter: lighten($yellow, 10%);
+
+$blue-darker: darken($blue, 10%);
+$blue-lighter: lighten($blue, 10%);
+
+$green-darker: darken($green, 10%);
+$green-lighter: lighten($green, 10%);
+
+$pink-darker: darken($pink, 10%);
+$pink-lighter: lighten($pink, 10%);
+
 $primary: $blue;
 $secondary: $pink;
 

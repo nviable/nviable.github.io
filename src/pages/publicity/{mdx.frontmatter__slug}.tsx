@@ -2,6 +2,8 @@ import React from 'react'
 import Layout from '../../components/Layout'
 import { graphql } from 'gatsby'
 import { SEO } from '../../components/Seo'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFileText } from '@fortawesome/free-regular-svg-icons'
 
 interface PublicityPostProps {
   data: {
@@ -45,7 +47,7 @@ const PublicityPost = ({ data, children }: PublicityPostProps) => {
     <Layout heroContent={heroContent} className="media post">
       <article>
         {children}
-        <a href={link}>Link to paper</a>
+        <a href={link} className="button button-primary" target="_blank"><FontAwesomeIcon icon={faFileText} />Article</a>
       </article>
     </Layout>
   )

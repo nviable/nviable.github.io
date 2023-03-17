@@ -24,7 +24,7 @@ const ResearchPage = ({ data }: ResearchPageProps) => {
         <article key={id} className="card card-full card-linked">
             <Link to={frontmatter.slug}>
                 <h2>{frontmatter.title}</h2>
-                <p>Posted: {frontmatter.date}</p>
+                <p>Published: {frontmatter.date}</p>
                 <p>{excerpt}</p>
             </Link>
         </article>
@@ -52,11 +52,11 @@ export const query = graphql`
             nodes {
                 frontmatter {
                     title
-                    date(fromNow: true)
+                    date(formatString: "YYYY")
                     slug
                 }
                 id
-                excerpt(pruneLength: 40)
+                excerpt(pruneLength: 100)
             }
         }
     }

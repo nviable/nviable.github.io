@@ -12,6 +12,7 @@ interface IndexPageProps {
       nodes: Array<{
         id: string
         body: string
+        excerpt: string
         frontmatter: {
           title: string
           expand: boolean
@@ -36,7 +37,7 @@ interface IndexPageProps {
 const IndexPage = ({ data }: IndexPageProps) => {
   const { nodes } = data.allMdx
   const blocks = nodes.map((node) => {
-    const { id, body, frontmatter } = node
+    const { id, body, frontmatter, excerpt } = node
     const { title, expand, icon, link, richContent } = frontmatter
     const cardContent: React.ReactNode[] = []
     if (richContent) {
@@ -65,7 +66,7 @@ const IndexPage = ({ data }: IndexPageProps) => {
       }
     }
     if (body) {
-      cardContent.push(<p key={`card-excerpt-${id}`}>{body}</p>)
+      cardContent.push(<p key={`card-excerpt-${id}`}>{excerpt}</p>)
     }
     const cardClasses = (title == 'research' || title == 'projects') ? 'card-half' : 'card-full'
 
@@ -104,7 +105,7 @@ export const Head = () => {
 
 export const query = graphql`{
   allMdx(
-    filter: {frontmatter: {order: {gt: 0}}}
+    filter: {frontmatter: {order: {gt: 0}}, fields: {source: {eq: "blocks"}}}
     sort: {frontmatter: {order: ASC}}
   ) {
     nodes {
@@ -125,6 +126,7 @@ export const query = graphql`{
         icon
       }
       body
+      excerpt(pruneLength: 200)
     }
   }
 }

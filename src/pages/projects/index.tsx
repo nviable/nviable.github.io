@@ -24,7 +24,6 @@ const ProjectsPage = ({ data }: ProjectsPageProps) => {
         <article key={id} className="card card-full card-linked">
             <Link to={frontmatter.slug}>
                 <h2>{frontmatter.title}</h2>
-                <p>Posted: {frontmatter.date}</p>
                 <p>{excerpt}</p>
             </Link>
         </article>
@@ -49,7 +48,7 @@ export const query = graphql`
     query {
         allMdx(
             filter: {fields: {source: {eq: "projects"}}}
-            sort: {frontmatter: {date: DESC}}
+            sort: {frontmatter: {order: ASC}}
           ) {
             nodes {
                 frontmatter {
@@ -58,7 +57,7 @@ export const query = graphql`
                     slug
                   }
                 id
-                excerpt(pruneLength: 40)
+                excerpt(pruneLength: 100)
             }
         }
     }

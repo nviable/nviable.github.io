@@ -21,12 +21,12 @@ const Layout = ({ heroContent, children, className }: LayoutProps) => {
         }
         `)
 
-    const heroClass = className ? `hero ${className}` : 'hero'
+    const heroClass = 'hero'
 
     return (
         <>
             <Header />
-            <main>
+            <main className={className}>
                 <section className={heroClass}>
                     <div className="container">
                         {heroContent}
