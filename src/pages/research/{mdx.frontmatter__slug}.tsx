@@ -1,7 +1,7 @@
-import { faFileText } from '@fortawesome/free-regular-svg-icons'
+import { faFileText, faCopy, faThumbsUp } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { graphql } from 'gatsby'
-import React from 'react'
+import React, { useEffect } from 'react'
 import Layout from '../../components/Layout'
 import { SEO } from '../../components/Seo'
 
@@ -16,6 +16,7 @@ interface ResearchPostProps {
                 conferences: string[]
                 link: string
                 topics: string[]
+                bibtex: string
             }
         }
     }
@@ -24,7 +25,7 @@ interface ResearchPostProps {
 }
 
 const ResearchPost = ({ data, children }: ResearchPostProps) => {
-    const { title, date, authors, categories, conferences, link, topics } = data.mdx.frontmatter
+    const { title, date, authors, categories, conferences, link, topics, bibtex } = data.mdx.frontmatter
     const authorsList = authors && authors.map((author, index) => {
         return (
             <span key={`author-${index}`} className="pill pill--white">{author}</span>
@@ -33,21 +34,35 @@ const ResearchPost = ({ data, children }: ResearchPostProps) => {
 
     const topicList = topics && topics.map((topic, index) => {
         return (
-            <span key={`topic-${index}`} className="pill pill--grey">{topic}</span>
+            <span key={`topic-${index}`} className="pill pill--purple">{topic}</span>
         )
     })
 
     const categoryList = categories && categories.map((category, index) => {
         return (
-            <span key={`category-${index}`} className="pill pill--grey">{category}</span>
+            <span key={`category-${index}`} className="pill pill--purple">{category}</span>
         )
     })
 
     const conferenceList = conferences && conferences.map((conference, index) => {
         return (
-            <span key={`conference-${index}`} className="pill pill--grey">{conference}</span>
+            <span key={`conference-${index}`} className="pill pill--purple">{conference}</span>
         )
     })
+
+    const [bibtexCopied, setBibtexCopied] = React.useState(false)
+
+    const bibtexButtonIcon = (bibtexCopied) ? <FontAwesomeIcon icon={faThumbsUp} /> : <FontAwesomeIcon icon={faCopy} />
+
+    // handleBibtexCopy should copy bibtex to clipboard and set bibtexCopied to true for 2 seconds then useEffect should clear timeout
+    const handleBibtexCopy = () => {
+        navigator.clipboard.writeText(bibtex)
+        setBibtexCopied(true)
+        setTimeout(() => {
+            setBibtexCopied(false)
+        }, 2000)
+    }
+
 
     const heroContent = (
         <>
@@ -72,6 +87,13 @@ const ResearchPost = ({ data, children }: ResearchPostProps) => {
             <article>
                 {children}
                 <a href={link} className="button button-primary" target="_blank"><FontAwesomeIcon icon={faFileText} />paper</a>
+                {
+                    (bibtex)
+                        ? <button className="button button-primary" onClick={handleBibtexCopy} disabled={bibtexCopied}>
+                            {bibtexButtonIcon} {(bibtexCopied) ? "Copied" : "BibTeX"}
+                        </button>
+                        : null
+                }
             </article>
         </Layout>
     )
@@ -89,6 +111,7 @@ export const query = graphql`
                 link
                 slug
                 topics
+                bibtex
             }
         }
     }

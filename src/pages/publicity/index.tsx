@@ -2,6 +2,8 @@ import { graphql, Link } from 'gatsby'
 import React from 'react'
 import Layout from '../../components/Layout'
 import { SEO } from '../../components/Seo'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCalendar } from '@fortawesome/free-regular-svg-icons'
 
 interface PublicityPageProps {
     data: {
@@ -11,6 +13,7 @@ interface PublicityPageProps {
                     title: string
                     slug: string
                     date: string
+                    categories: string[]
                 }
                 id: string
                 excerpt: string
@@ -20,15 +23,20 @@ interface PublicityPageProps {
 }
 
 const PublicityPage = ({ data }: PublicityPageProps) => {
-    const articles = data.allMdx.nodes.map(({ id, frontmatter, excerpt }) =>
-        <article key={id} className="card card-full card-linked">
-            <Link to={frontmatter.slug}>
-                <h2>{frontmatter.title}</h2>
-                <p>Posted: {frontmatter.date}</p>
+    const articles = data.allMdx.nodes.map(({ id, frontmatter, excerpt }) => {
+        const { categories, title, slug, date } = frontmatter
+        const categoriesList = categories && categories.map((category) => <span key={category} className="category pill pill--grey">{category}</span>)
+        return <article key={id} className="card card-full card-linked">
+            <Link to={slug}>
+                <h2>{title}</h2>
+                {date ? <span className="date"><FontAwesomeIcon icon={faCalendar} />{date}</span> : null}
+                {categoriesList}
                 <p>{excerpt}</p>
             </Link>
         </article>
+    }
     )
+
 
     const heroContent = (
         <>
@@ -56,9 +64,10 @@ export const query = graphql`
                     title
                     date(fromNow: true)
                     slug
+                    categories
                   }
                 id
-                excerpt(pruneLength: 40)
+                excerpt(pruneLength: 100)
             }
         }
     }

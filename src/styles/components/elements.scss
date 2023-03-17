@@ -55,6 +55,7 @@
         grid-area: image;
     }
 
+    h2,
     h3 {
         font-size: 24px;
         margin-bottom: 14px;
@@ -112,6 +113,20 @@
     }
 }
 
+.archive {
+    .date {
+        color: $grey-dark;
+        font-size: 1em;
+        font-style: italic;
+
+        svg {
+            width: 14px;
+            height: auto;
+            margin: 0 5px 0 0;
+        }
+    }
+}
+
 .pill {
     display: inline-block;
     background: $black;
@@ -141,10 +156,21 @@
     color: $black;
 }
 
+.pill--blue {
+    background: $blue;
+    color: white;
+}
+
+.pill--purple {
+    background: $purple-darker;
+    color: white;
+}
+
 .grey-icon {
     color: $grey-dark;
 }
 
+button,
 .button {
     font-family: $font-family-accent;
     font-weight: 600;
@@ -153,6 +179,7 @@
     color: $black;
     padding: 10px 20px;
     border-radius: $corners;
+    border: 2px solid black;
     box-shadow: 0 2px 0 rgba(0, 0, 0, 1);
     margin: 0 5px 5px 0;
     text-decoration: none;
@@ -166,6 +193,14 @@
         background: $yellow-lighter;
         box-shadow: 0 4px 0 rgba(0, 0, 0, 1);
         transform: translate(0, -2px);
+    }
+
+    // disabled button
+    &:disabled {
+        background: $grey-light;
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 1);
+        transform: none;
+        cursor: not-allowed;
     }
 }
 

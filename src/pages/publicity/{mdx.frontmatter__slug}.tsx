@@ -31,7 +31,7 @@ const PublicityPost = ({ data, children }: PublicityPostProps) => {
 
   const categoriesList = categories && categories.map((category, index) => {
     return (
-      <span key={`category-${index}`}>{category}</span>
+      <span key={`category-${index}`} className="category pill pill--purple">{category}</span>
     )
   })
 

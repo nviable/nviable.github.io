@@ -1,3 +1,5 @@
+import { faCalendar } from '@fortawesome/free-regular-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { graphql, Link } from 'gatsby'
 import React from 'react'
 import Layout from '../../components/Layout'
@@ -24,7 +26,7 @@ const ResearchPage = ({ data }: ResearchPageProps) => {
         <article key={id} className="card card-full card-linked">
             <Link to={frontmatter.slug}>
                 <h2>{frontmatter.title}</h2>
-                <p>Published: {frontmatter.date}</p>
+                {frontmatter.date ? <span className="date"><FontAwesomeIcon icon={faCalendar} /> {frontmatter.date}</span> : null}
                 <p>{excerpt}</p>
             </Link>
         </article>
