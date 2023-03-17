@@ -1,0 +1,12 @@
+---
+title: "Leveraging Edges and Optical Flow on Faces for Deepfake Detection"
+slug: "leveraging-edges-and-optical-flow-on-faces-for-deepfake-detection"
+authors: ["Akash Chintha", "Aisharya Rao", "Saniat Javid Sohrawardi", "Kartavya Manojbhai Bhatt", "Matthew Wright", "Raymond Ptucha"]
+date: "2020-11-01 00:00:00"
+categories: ["paper"]
+topics: ["deepfakes", "face", "optical flow", "edge detection"]
+conferences: ["IEEE International Joint Conference on Biometrics (IJCB)"]
+bibtex: "@inproceedings{chintha2020leveraging,\ntitle={Leveraging edges and optical flow on faces for deepfake detection},\nauthor={Chintha, Akash and Rao, Aishwarya and Sohrawardi, Saniat and Bhatt, Kartavya and Wright, Matthew and Ptucha, Raymond},\nbooktitle={2020 IEEE international joint conference on biometrics (IJCB)},\npages={1--10},\nyear={2020},\norganization={IEEE}\n}"
+project: "defake"
+---
+Deepfakes can be used maliciously to sway public opinion, defame an individual, or commit fraud. Hence, it is vital for journalists and social media platforms, as well as the general public, to be able to detect deepfakes. Existing deepfake detection methods, while highly accurate on datasets they have been trained on, falter in open-world scenarios due to different deepfake generations algorithms, video formats, and compression levels. In this paper, we seek to address this by building on the XceptionNet-based deepfake detection technique that utilizes convolutional latent representations with recurrent structures. In particular, we explore how to leverage a combination of visual frames, edge maps, and dense optical flow maps together as inputs to this architecture. We evaluate these techniques using the FaceForensics++ and DFDC-mini datasets. We also perform extensive studies to evaluate the robustness of our network against adversarial post-processing as well as the generalization capabilities to out-of-domain datasets and manipulation strategies. Our methods, which we call XceptionNet*, achieve 100% accuracy on the popular Face-Forensics-s+ dataset and set new benchmark standards on the difficult DFDC-mini dataset. The XceptionNet* models are shown to exhibit superior performance on cross-domain testing and demonstrate surprising resilience to adversarial manipulations.

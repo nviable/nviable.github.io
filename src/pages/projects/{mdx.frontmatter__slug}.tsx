@@ -1,9 +1,9 @@
-import { graphql } from 'gatsby'
+import { graphql, navigate } from 'gatsby'
 import React from 'react'
 import Layout from '../../components/Layout'
 import { SEO } from '../../components/Seo'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faLink } from '@fortawesome/free-solid-svg-icons'
+import { faBackward, faLink } from '@fortawesome/free-solid-svg-icons'
 
 interface ProjectPostProps {
     data: {
@@ -14,14 +14,39 @@ interface ProjectPostProps {
                 link?: string
             }
         }
+        allMdx: {
+            edges: {
+                node: {
+                    id: string
+                    frontmatter: {
+                        title: string
+                        slug: string
+                    }
+                }
+            }[]
+        }
     }
     children: React.ReactNode
 }
 
+interface EdgeProps {
+    node: {
+        id: string
+        frontmatter: {
+            title: string
+            slug: string
+        }
+    }
+}[]
+
 const ProjectPost = ({ data, children }: ProjectPostProps) => {
     const { title, date, link } = data.mdx.frontmatter
+
     const heroContent = (
         <>
+            <button className="button button--purple button--small back-button" onClick={() => navigate('/projects')}>
+                <FontAwesomeIcon icon={faBackward} />Back to Projects
+            </button>
             <h1>{title}</h1>
             <div className="post-meta">
                 <span className="caption">Start Date</span>
@@ -29,6 +54,15 @@ const ProjectPost = ({ data, children }: ProjectPostProps) => {
             </div>
         </>
     )
+
+    const relatedPosts = data.allMdx.edges.map(({ node }: EdgeProps) => {
+        return (
+            <li key={node.id}>
+                <a href={`/research/${node.frontmatter.slug}`}>{node.frontmatter.title}</a>
+            </li>
+        )
+    })
+
     return (
         <Layout heroContent={heroContent} className="projects post">
             {children}
@@ -37,6 +71,12 @@ const ProjectPost = ({ data, children }: ProjectPostProps) => {
                     <FontAwesomeIcon icon={faLink} />Link
                 </a> : null
             }
+            <div className="related-posts">
+                <h2>Related Papers</h2>
+                <ul>
+                    {relatedPosts}
+                </ul>
+            </div>
         </Layout>
     )
 }
@@ -48,6 +88,19 @@ export const query = graphql`
                 title
                 date(fromNow: true)
                 link
+            }
+        }
+        allMdx(
+            filter: {fields: {source: {eq: "research"}}, frontmatter: {project: {eq: "defake"}}}
+          ) {
+            edges {
+              node {
+                id
+                frontmatter {
+                  title
+                  slug
+                }
+              }
             }
         }
     }

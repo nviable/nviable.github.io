@@ -13,6 +13,8 @@ interface ResearchPageProps {
                     title: string
                     slug: string
                     date: string
+                    categories: string[]
+                    project: string
                 }
                 id: string
                 excerpt: string
@@ -22,15 +24,20 @@ interface ResearchPageProps {
 }
 
 const ResearchPage = ({ data }: ResearchPageProps) => {
-    const researchPosts = data.allMdx.nodes.map(({ id, frontmatter, excerpt }) =>
-        <article key={id} className="card card-full card-linked">
-            <Link to={frontmatter.slug}>
-                <h2>{frontmatter.title}</h2>
-                {frontmatter.date ? <span className="date"><FontAwesomeIcon icon={faCalendar} /> {frontmatter.date}</span> : null}
+    const researchPosts = data.allMdx.nodes.map(({ id, frontmatter, excerpt }) => {
+        const { categories, title, slug, date, project } = frontmatter
+
+        const categoriesList = categories && categories.map((category) => <span key={category} className="category pill pill--grey">{category}</span>)
+        return <article key={id} className="card card-full card-linked">
+            <Link to={slug}>
+                <h2>{title}</h2>
+                {date ? <span className="date"><FontAwesomeIcon icon={faCalendar} /> {date}</span> : null}
+                {categoriesList}
+                {project ? <span className="project pill pill--purple">{project}</span> : null}
                 <p>{excerpt}</p>
             </Link>
         </article>
-    )
+    })
     const heroContent = (
         <>
             <h1>Research</h1>
@@ -56,6 +63,8 @@ export const query = graphql`
                     title
                     date(formatString: "YYYY")
                     slug
+                    categories
+                    project
                 }
                 id
                 excerpt(pruneLength: 100)
