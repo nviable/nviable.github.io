@@ -3,6 +3,7 @@ import React from 'react'
 import SVGIcon from './SVGIcons'
 import { faArrowAltCircleDown } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { MDXProvider } from '@mdx-js/react'
 
 interface CardProps {
     title: string
@@ -11,6 +12,7 @@ interface CardProps {
     icon?: string
     expand?: boolean
     extraClass?: string
+    excerpt?: string | null
 }
 
 // Card element accepts a title, children, optional link, optional icon, and optional expansion boolean
@@ -19,7 +21,7 @@ interface CardProps {
 // If the card is expandable, it will show an expand bar at the bottom
 // If the card is not expandable, it will not show an expand bar
 
-const Card = ({ title, link, expand, icon, children, extraClass }: CardProps) => {
+const Card = ({ title, link, expand, icon, children, extraClass, excerpt }: CardProps) => {
     const [expanded, setExpanded] = React.useState(false)
 
     const toggleExpand = () => {
@@ -43,15 +45,24 @@ const Card = ({ title, link, expand, icon, children, extraClass }: CardProps) =>
     if (extraClass) cardClasses.push(extraClass)
     if (icon && extraClass !== 'card-half') cardClasses.push('has-icon')
 
+    let innerContent = children
+    if (expand) {
+        if (!expanded && excerpt) {
+            innerContent = excerpt
+        } else if (!expanded) {
+            innerContent = React.Children.map(children, (child, index) => {
+                if (index === 0) return child
+                return null
+            })
+        }
+    }
+
     const content = (
         <div className={cardClasses.join(" ")}>
             {icon && extraClass !== 'card-half' && <SVGIcon icon={icon} />}
             <div className="card-content">
                 <h3>{title}</h3>
-                {expand && !expanded ? React.Children.map(children, (child, index) => {
-                    if (index === 0) return child
-                    return null
-                }) : children}
+                {innerContent}
             </div>
             {expand && expandBar}
             {link && <div className="bottom-bar"><Link to={link}>Read More</Link></div>}

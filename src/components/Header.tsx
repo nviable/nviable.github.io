@@ -1,12 +1,17 @@
 import React from 'react'
 import { Link } from 'gatsby'
 import SVGIcon from './SVGIcons'
+import { useMediaQuery } from 'react-responsive'
+import { faBars, faClose } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 const Header = () => {
     // if the header scrolls off the top of the page, it should have a background color
     // if the header is at the top of the page, it should not have a background color
     const [scrolled, setScrolled] = React.useState(false)
+    const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
 
+    // handle scroll events
     const handleScroll = () => {
         const offset = window.scrollY
         if (offset > 60) {
@@ -20,6 +25,20 @@ const Header = () => {
         window.addEventListener('scroll', handleScroll)
     })
 
+    // show/hide the mobile menu
+    const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+
+    const toggleMobileMenu = () => {
+        setMobileMenuOpen(!mobileMenuOpen)
+    }
+
+    const mobileMenuTooggleButton = (
+        <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+            <FontAwesomeIcon icon={(mobileMenuOpen) ? faClose : faBars} />
+            {`${mobileMenuOpen ? "Close" : "Open"} Navigation`}
+        </button>
+    )
+
     let headerClasses = 'header'
     if (scrolled) {
         headerClasses = 'header scrolled'
@@ -29,7 +48,7 @@ const Header = () => {
         <header className={headerClasses}>
             <div className="container">
                 <Link to='/' ><SVGIcon icon="favicon" /></Link>
-                <nav className="nav">
+                <nav className={`nav ${isMobile && !mobileMenuOpen && "collapsed"}`}>
                     <ul>
                         <li>
                             <Link to="/">Home</Link>
@@ -48,6 +67,7 @@ const Header = () => {
                         </li>
                     </ul>
                 </nav>
+                {isMobile && mobileMenuTooggleButton}
             </div>
         </header>
     )

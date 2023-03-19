@@ -9,14 +9,15 @@ interface SeoProps {
 }
 
 export const SEO = ({ title, description, pathname, children }: SeoProps) => {
-    const { title: defaultTitle, description: defaultDescription, image, siteUrl, twitterUsername } = useSiteMetadata()
+    const { title: defaultTitle, description: defaultDescription, image, siteUrl, twitterUsername, icon } = useSiteMetadata()
 
     const seo = {
         title: title || defaultTitle,
         description: description || defaultDescription,
         image: `${siteUrl}${image}`,
         url: `${siteUrl}${pathname || ``}`,
-        twitterUsername,
+        twitterUsername: twitterUsername,
+        icon: icon
     }
 
     return (
@@ -30,8 +31,21 @@ export const SEO = ({ title, description, pathname, children }: SeoProps) => {
             <meta name="twitter:description" content={seo.description} />
             <meta name="twitter:image" content={seo.image} />
             <meta name="twitter:creator" content={seo.twitterUsername} />
-            <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>👤</text></svg>" />
+            <meta property="og:type" content="website" />
+            <meta property="og:title" content={seo.title} />
+            <meta property="og:url" content={seo.url} />
+            <meta property="og:description" content={seo.description} />
+            <meta property="og:image" content={seo.image} />
+            <meta property="og:site_name" content={seo.title} />
+            <meta property="og:locale" content="en_US" />
+            <meta name="robots" content="index, follow" />
+            <meta name="googlebot" content="index, follow" />
+            <meta name="google" content="nositelinkssearchbox" />
+            <meta name="google" content="notranslate" />
+            <meta name="google" content="nocache" />
+            <link rel="icon" href={seo.icon} />
             {children}
         </>
     )
 }
+

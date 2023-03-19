@@ -1,3 +1,4 @@
+import { MDXProvider } from '@mdx-js/react'
 import { graphql } from 'gatsby'
 import { StaticImage } from 'gatsby-plugin-image'
 import React from 'react'
@@ -20,8 +21,6 @@ interface IndexPageProps {
           link: string
           slug: string
           richContent: {
-            abovefold: string
-            belowfold: string
             coding: string[]
             design: string[]
             research: string[]
@@ -43,34 +42,30 @@ const IndexPage = ({ data }: IndexPageProps) => {
     if (richContent) {
       for (const [key, value] of Object.entries(richContent)) {
         if (value) {
-          if (key === 'abovefold') {
-            cardContent.push(<p key={`card-excerpt-${id}`}>{value}</p>)
-          }
-          else if (key === 'belowfold') {
-            cardContent.push(<p key={`card-extended-${id}`}>{value}</p>)
-          }
-          else {
-            const list = Array.isArray(value) && value.map((item, index) => {
-              return <span className="pill" key={`pill-${key}-${index}`}>{item}</span>
-            })
-            if (value) {
-              cardContent.push(
-                <div key={key} className="skill-container">
-                  <h4>{key}</h4>
-                  <div className="pill-container">{list}</div>
-                </div>
-              )
-            }
+
+          const list = Array.isArray(value) && value.map((item, index) => {
+            return <span className="pill" key={`pill-${key}-${index}`}>{item}</span>
+          })
+          if (value) {
+            cardContent.push(
+              <div key={key} className="skill-container">
+                <h4>{key}</h4>
+                <div className="pill-container">{list}</div>
+              </div>
+            )
           }
         }
       }
     }
     if (body) {
-      cardContent.push(<p key={`card-excerpt-${id}`}>{excerpt}</p>)
+      cardContent.push(
+        // <p key={`card-excerpt-${id}`}>{body}</p>
+        <MDXProvider key={`card-excerpt-${id}`}>{body}</MDXProvider>
+      )
     }
     const cardClasses = (title == 'research' || title == 'projects') ? 'card-half' : 'card-full'
 
-    return <Card key={`card-${title}-${id}`} title={title} link={link} expand={expand} icon={icon} extraClass={cardClasses}>
+    return <Card key={`card-${title}-${id}`} title={title} link={link} expand={expand} icon={icon} extraClass={cardClasses} excerpt={(title === "experience") ? excerpt : null}>
       {cardContent}
     </Card>
   })
@@ -111,8 +106,6 @@ export const query = graphql`{
     nodes {
       frontmatter {
         richContent {
-          abovefold
-          belowfold
           coding
           frameworks
           tools
@@ -125,6 +118,7 @@ export const query = graphql`{
         link
         icon
       }
+      id
       body
       excerpt(pruneLength: 200)
     }

@@ -6,6 +6,7 @@ interface SiteMetadata {
   twitterUsername: string
   image: string
   siteUrl: string
+  icon?: string
 }
 
 export const useSiteMetadata = (): SiteMetadata => {
@@ -20,7 +21,24 @@ export const useSiteMetadata = (): SiteMetadata => {
             siteUrl
           }
         }
+        allFile(
+          limit: 1
+          filter: {
+              name: { eq: "favicon" }
+              ext: { eq: ".svg" }
+              sourceInstanceName: { eq: "images" }
+              relativeDirectory: { eq: "" }
+          }
+        ) {
+            nodes {
+                publicURL
+            }
+        }
       }
+      
     `)
-  return data.site.siteMetadata
+  return {
+    ...data.site.siteMetadata,
+    icon: data.allFile.nodes[0].publicURL
+  }
 }

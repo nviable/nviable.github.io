@@ -69,8 +69,38 @@ header {
                 }
             }
         }
+
+        &.collapsed {
+            display: none;
+        }
     }
 
+    @media screen and (max-width: 768px) {
+        .container {
+            flex-direction: column;
+        }
+
+        .svg-icon {
+            margin: 10px 0 0 0;
+        }
+
+        .nav {
+            background-color: $purple;
+            border-radius: $corners;
+
+            ul {
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+                margin: 0;
+            }
+
+            a {
+                margin: 0;
+                padding: 10px 40px;
+            }
+        }
+    }
 }
 
 // Footer
