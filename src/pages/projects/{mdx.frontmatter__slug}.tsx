@@ -12,6 +12,7 @@ interface ProjectPostProps {
                 title: string
                 date: string
                 link?: string
+                related?: string
             }
         }
         allMdx: {
@@ -21,6 +22,7 @@ interface ProjectPostProps {
                     frontmatter: {
                         title: string
                         slug: string
+                        project?: string
                     }
                 }
             }[]
@@ -35,6 +37,7 @@ interface EdgeProps {
         frontmatter: {
             title: string
             slug: string
+            project?: string
         }
     }
 }[]
@@ -56,12 +59,15 @@ const ProjectPost = ({ data, children }: ProjectPostProps) => {
     )
 
     const relatedPosts = data.allMdx.edges.map(({ node }: EdgeProps) => {
-        return (
-            <li key={node.id}>
-                <a href={`/research/${node.frontmatter.slug}`}>{node.frontmatter.title}</a>
-            </li>
-        )
-    })
+        if (node.frontmatter.project === data.mdx.frontmatter.related) {
+            return (
+                <li key={node.id}>
+                    <a href={`/research/${node.frontmatter.slug}`}>{node.frontmatter.title}</a>
+                </li>
+            )
+        }
+        return null
+    }).filter((item) => item !== null)
 
     return (
         <Layout heroContent={heroContent} className="projects post">
@@ -71,12 +77,15 @@ const ProjectPost = ({ data, children }: ProjectPostProps) => {
                     <FontAwesomeIcon icon={faLink} />Link
                 </a> : null
             }
-            <div className="related-posts">
-                <h2>Related Papers</h2>
-                <ul>
-                    {relatedPosts}
-                </ul>
-            </div>
+            {
+                (relatedPosts.length > 0) ? <div className="related-posts">
+                    <h2>Related Papers</h2>
+                    <ul>
+                        {relatedPosts}
+                    </ul>
+                </div> : null
+            }
+
         </Layout>
     )
 }
@@ -88,10 +97,11 @@ export const query = graphql`
                 title
                 date(fromNow: true)
                 link
+                related
             }
         }
         allMdx(
-            filter: {fields: {source: {eq: "research"}}, frontmatter: {project: {eq: "defake"}}}
+            filter: {fields: {source: {eq: "research"}}}
           ) {
             edges {
               node {
@@ -99,6 +109,7 @@ export const query = graphql`
                 frontmatter {
                   title
                   slug
+                  project
                 }
               }
             }

@@ -40,6 +40,15 @@ const config: GatsbyConfig = {
     },
     "gatsby-plugin-image", "gatsby-plugin-sitemap", "gatsby-plugin-sharp", "gatsby-transformer-sharp",
     {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        // The unique name for each instance
+        name: `pages`,
+        // Path to the directory
+        path: `./src/pages/`,
+      },
+    },
+    {
       resolve: 'gatsby-source-filesystem',
       options: {
         "name": "images",

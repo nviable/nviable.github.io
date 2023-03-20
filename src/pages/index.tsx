@@ -60,7 +60,7 @@ const IndexPage = ({ data }: IndexPageProps) => {
     if (body) {
       cardContent.push(
         // <p key={`card-excerpt-${id}`}>{body}</p>
-        <MDXProvider key={`card-excerpt-${id}`}>{body}</MDXProvider>
+        <MDXProvider key={`card-excerpt-${id}`}>{excerpt}</MDXProvider>
       )
     }
     const cardClasses = (title == 'research' || title == 'projects') ? 'card-half' : 'card-full'

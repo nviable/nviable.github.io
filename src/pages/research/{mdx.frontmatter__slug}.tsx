@@ -1,6 +1,7 @@
 import { faFileText, faCopy, faThumbsUp } from '@fortawesome/free-regular-svg-icons'
+import { faBackward } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { graphql } from 'gatsby'
+import { graphql, navigate } from 'gatsby'
 import React, { useEffect } from 'react'
 import Layout from '../../components/Layout'
 import { SEO } from '../../components/Seo'
@@ -66,6 +67,9 @@ const ResearchPost = ({ data, children }: ResearchPostProps) => {
 
     const heroContent = (
         <>
+            <button className="button button--purple button--small back-button" onClick={() => navigate('/research')}>
+                <FontAwesomeIcon icon={faBackward} />Back to Research
+            </button>
             <h1>{title}</h1>
             <div className="post-meta">
                 <span className="caption">Published:</span>

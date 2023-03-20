@@ -1,9 +1,10 @@
 import React from 'react'
 import Layout from '../../components/Layout'
-import { graphql } from 'gatsby'
+import { graphql, navigate } from 'gatsby'
 import { SEO } from '../../components/Seo'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileText } from '@fortawesome/free-regular-svg-icons'
+import { faBackward } from '@fortawesome/free-solid-svg-icons'
 
 interface PublicityPostProps {
   data: {
@@ -37,6 +38,9 @@ const PublicityPost = ({ data, children }: PublicityPostProps) => {
 
   const heroContent = (
     <>
+      <button className="button button--purple button--small back-button" onClick={() => navigate('/publicity')}>
+        <FontAwesomeIcon icon={faBackward} />Back to Publicity
+      </button>
       <h1>{title}</h1>
       <div className="date">{date || null}</div>
       <div className="authors">{authorsList || null}</div>

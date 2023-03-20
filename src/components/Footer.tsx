@@ -35,7 +35,7 @@ const Footer = () => {
             allMdx(
                 filter: {
                     fields: {source: {eq: "blocks"}}, 
-                    frontmatter: {order: {eq: -1}}
+                    frontmatter: {slug: {eq: "footer"}}
                 }) {
                 nodes {
                     id

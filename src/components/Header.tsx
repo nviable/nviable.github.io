@@ -33,7 +33,7 @@ const Header = () => {
     }
 
     const mobileMenuTooggleButton = (
-        <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+        <button className="mobile-menu-toggle button--purple" onClick={toggleMobileMenu}>
             <FontAwesomeIcon icon={(mobileMenuOpen) ? faClose : faBars} />
             {`${mobileMenuOpen ? "Close" : "Open"} Navigation`}
         </button>
@@ -47,7 +47,10 @@ const Header = () => {
     return (
         <header className={headerClasses}>
             <div className="container">
-                <Link to='/' ><SVGIcon icon="favicon" /></Link>
+                <div className="top-header">
+                    <Link to='/' ><SVGIcon icon="favicon" /></Link>
+                    {isMobile && mobileMenuTooggleButton}
+                </div>
                 <nav className={`nav ${isMobile && !mobileMenuOpen && "collapsed"}`}>
                     <ul>
                         <li>
@@ -67,7 +70,6 @@ const Header = () => {
                         </li>
                     </ul>
                 </nav>
-                {isMobile && mobileMenuTooggleButton}
             </div>
         </header>
     )

@@ -57,7 +57,7 @@ export const query = graphql`
                     slug
                   }
                 id
-                excerpt(pruneLength: 100)
+                excerpt(pruneLength: 180)
             }
         }
     }

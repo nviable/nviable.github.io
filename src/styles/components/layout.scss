@@ -80,6 +80,13 @@ header {
             flex-direction: column;
         }
 
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
         .svg-icon {
             margin: 10px 0 0 0;
         }
@@ -87,6 +94,7 @@ header {
         .nav {
             background-color: $purple;
             border-radius: $corners;
+            align-self: flex-end;
 
             ul {
                 flex-direction: column;
@@ -98,6 +106,14 @@ header {
             a {
                 margin: 0;
                 padding: 10px 40px;
+
+                &:after {
+                    display: none;
+                }
+
+                &[aria-current="page"] {
+                    color: $yellow;
+                }
             }
         }
     }
@@ -257,7 +273,7 @@ footer {
     position: relative;
     margin-top: -60px;
     margin-bottom: -40px;
-    z-index: 2;
+    z-index: 3;
 
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -363,5 +379,11 @@ footer {
             box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
             transform: scale(1.02);
         }
+    }
+}
+
+main {
+    .container {
+        z-index: 3;
     }
 }

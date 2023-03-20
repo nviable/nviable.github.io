@@ -1,6 +1,7 @@
 import { faCalendar } from '@fortawesome/free-regular-svg-icons'
+import { faBackward } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { graphql, Link } from 'gatsby'
+import { graphql, Link, navigate } from 'gatsby'
 import React from 'react'
 import Layout from '../../components/Layout'
 import { SEO } from '../../components/Seo'
@@ -34,6 +35,9 @@ const BlogPage = ({ data }: BlogPageProps) => {
 
     const heroContent = (
         <>
+            <button className="button button--purple button--small back-button" onClick={() => navigate('/publicity')}>
+                <FontAwesomeIcon icon={faBackward} />Back to Posts
+            </button>
             <h1>Blog</h1>
         </>
     )
