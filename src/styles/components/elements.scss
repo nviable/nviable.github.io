@@ -251,3 +251,34 @@ button,
     font-weight: bold;
     margin: 0 20px 0 0;
 }
+
+.floating-sidebar {
+    position: fixed;
+    top: calc(50% - 100px);
+    right: -40px;
+    background: white;
+    border-radius: $corners 0 0 $corners;
+    color: black;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px;
+    transition: all 0.3s ease-in-out;
+    font-family: $font-family-accent;
+
+    &:hover {
+        right: 0;
+    }
+
+    .floating-sidebar__inner {
+        display: flex;
+        flex-direction: column;
+    }
+
+    a {
+        color: black;
+        text-decoration: none;
+        padding: 10px 20px 5px;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.1)
+        }
+    }
+}

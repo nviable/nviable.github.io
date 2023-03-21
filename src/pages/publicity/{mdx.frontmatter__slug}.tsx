@@ -26,7 +26,7 @@ const PublicityPost = ({ data, children }: PublicityPostProps) => {
 
   const authorsList = authors && authors.map((author, index) => {
     return (
-      <span key={`author-${index}`}>{author}</span>
+      <span key={`author-${index}`} className="pill pill--purple">{author}</span>
     )
   })
 
@@ -41,10 +41,16 @@ const PublicityPost = ({ data, children }: PublicityPostProps) => {
       <button className="button button--purple button--small back-button" onClick={() => navigate('/publicity')}>
         <FontAwesomeIcon icon={faBackward} />Back to Publicity
       </button>
+
       <h1>{title}</h1>
-      <div className="date">{date || null}</div>
-      <div className="authors">{authorsList || null}</div>
-      <div className="categories">{categoriesList || null}</div>
+      <div className="post-meta">
+        <span className="caption">Published:</span>
+        <div className="date">{date || null}</div>
+        <span className="caption">Authors:</span>
+        <div className="authors">{authorsList || null}</div>
+        <span className="caption">Category:</span>
+        <div className="categories">{categoriesList || null}</div>
+      </div>
     </>
   )
   return (
@@ -64,7 +70,7 @@ query ($id: String) {
           title
           authors
           categories
-          date
+          date(fromNow: true)
           link
         }
     }

@@ -7,6 +7,7 @@ import Layout from '../components/Layout'
 import { SEO } from '../components/Seo'
 import SVGIcon from '../components/SVGIcons'
 
+
 interface IndexPageProps {
   data: {
     allMdx: {
