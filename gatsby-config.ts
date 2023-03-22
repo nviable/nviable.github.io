@@ -28,13 +28,13 @@ const config: GatsbyConfig = {
       resolve: "gatsby-plugin-google-gtag",
       options: {
         trackingIds: [
-          "G-XXXXXXXXXX", // Google Analytics / GA
+          "G-X5R1KNK6HY", // Google Analytics / GA
         ],
         gtagConfig: {
           cookie_expires: 0,
         },
         pluinConfig: {
-          head: true,
+          head: false,
         },
       },
     },
