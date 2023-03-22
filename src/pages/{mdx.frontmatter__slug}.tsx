@@ -47,7 +47,7 @@ const PageTemplate = ({ data, children }: PageProps) => {
 
 
     return (
-        <Layout heroContent={heroContent} className="blog post">
+        <Layout heroContent={heroContent} className="page post">
             <div className="floating-sidebar">
                 <div className="floating-sidebar__inner">
                 </div>
