@@ -27,7 +27,7 @@ const PageTemplate = ({ data, children }: PageProps) => {
     )
 
     useEffect(() => {
-        if (!isMobile) {
+        if (window && !isMobile) {
             const headings = document.getElementsByTagName('h2')
             const linksArray = Array.from(headings).map((heading) => {
                 const url = heading.getElementsByClassName('anchor')[0].getAttribute('href') || ''
