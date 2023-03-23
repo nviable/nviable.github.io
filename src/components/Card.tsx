@@ -61,7 +61,7 @@ const Card = ({ title, link, expand, icon, children, extraClass, excerpt }: Card
         <div className={cardClasses.join(" ")}>
             {icon && extraClass !== 'card-half' && <SVGIcon icon={icon} />}
             <div className="card-content">
-                {title ? `<h3>${title}</h3>` : null}
+                <h3>${title}</h3>
                 {innerContent}
             </div>
             {expand && expandBar}
