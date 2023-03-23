@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { MDXProvider } from '@mdx-js/react'
 
 interface CardProps {
-    title: string
+    title?: string
     children: React.ReactNode
     link?: string
     icon?: string
@@ -61,7 +61,7 @@ const Card = ({ title, link, expand, icon, children, extraClass, excerpt }: Card
         <div className={cardClasses.join(" ")}>
             {icon && extraClass !== 'card-half' && <SVGIcon icon={icon} />}
             <div className="card-content">
-                <h3>{title}</h3>
+                {title ? `<h3>${title}</h3>` : null}
                 {innerContent}
             </div>
             {expand && expandBar}
