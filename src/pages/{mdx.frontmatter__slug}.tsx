@@ -3,6 +3,8 @@ import React, { useEffect } from 'react'
 import { useMediaQuery } from 'react-responsive'
 import Layout from '../components/Layout'
 import { SEO } from '../components/Seo'
+import { MDXProvider } from '@mdx-js/react'
+import Card from '../components/Card'
 
 interface PageProps {
     data: {
@@ -16,9 +18,11 @@ interface PageProps {
     children: React.ReactNode
 }
 
+const shortcodes = { Card }
+
 const PageTemplate = ({ data, children }: PageProps) => {
     const { title, date } = data.mdx.frontmatter
-    const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
+    // const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
 
     const heroContent = (
         <>
@@ -27,32 +31,32 @@ const PageTemplate = ({ data, children }: PageProps) => {
     )
 
     useEffect(() => {
-        if (window && !isMobile) {
-            const headings = document.getElementsByTagName('h2')
-            const linksArray = Array.from(headings).map((heading) => {
-                const url = heading.getElementsByClassName('anchor')[0].getAttribute('href') || ''
-                const link = document.createElement('a')
-                link.setAttribute('href', url)
-                link.innerText = heading.innerText
-                return link
-            })
-            const sidebar = document.getElementsByClassName('floating-sidebar__inner')[0]
-            linksArray.forEach((link) => {
-                sidebar.appendChild(link)
-            })
-        }
+        // if (window && !isMobile) {
+        //     const headings = document.getElementsByTagName('h2')
+        //     const linksArray = Array.from(headings).map((heading) => {
+        //         const url = heading.getElementsByClassName('anchor')[0].getAttribute('href') || ''
+        //         const link = document.createElement('a')
+        //         link.setAttribute('href', url)
+        //         link.innerText = heading.innerText
+        //         return link
+        //     })
+        //     const sidebar = document.getElementsByClassName('floating-sidebar__inner')[0]
+        //     linksArray.forEach((link) => {
+        //         sidebar.appendChild(link)
+        //     })
+        // }
     }, [])
 
 
 
 
     return (
-        <Layout heroContent={heroContent} className="page post">
+        <Layout heroContent={heroContent} className="page card-page">
             <div className="floating-sidebar">
                 <div className="floating-sidebar__inner">
                 </div>
             </div>
-            {children}
+            <MDXProvider components={shortcodes}>{children}</MDXProvider>
         </Layout>
     )
 }

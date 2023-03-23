@@ -33,7 +33,7 @@ const Layout = ({ heroContent, children, className }: LayoutProps) => {
                     </div>
                 </section>
                 <section className="content">
-                    <div className="container">
+                    <div className="container main-container">
                         {children}
                     </div>
                 </section>
