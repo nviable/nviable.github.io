@@ -232,6 +232,15 @@ button,
     }
 }
 
+.button--grey {
+    background: $grey-dark;
+    color: $grey-light;
+
+    &:hover {
+        background: $grey-dark;
+    }
+}
+
 .button--small {
     padding: 6px 10px;
     font-size: 0.8em;
@@ -280,5 +289,36 @@ button,
         &:hover {
             background: rgba(0, 0, 0, 0.1)
         }
+    }
+}
+
+.contact-form {
+    display: grid;
+    grid: none;
+    grid-row-gap: 14px;
+    justify-content: center;
+
+    label {
+        font-size: 0;
+    }
+
+    input,
+    textarea {
+        padding: 10px;
+        border-radius: $corners;
+        border: 1px solid transparent;
+        background-color: $grey-darker;
+        font-family: $font-family-accent;
+        font-size: 14px;
+        transition: all 0.3s ease-in-out;
+
+        &:focus {
+            outline: none;
+            border-color: $grey;
+        }
+    }
+
+    button {
+        margin: 0;
     }
 }

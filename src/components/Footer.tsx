@@ -11,9 +11,10 @@ import {
     faInstagram
 } from '@fortawesome/free-brands-svg-icons'
 import {
-    faBookmark
+    faBookmark, faEnvelope
 } from '@fortawesome/free-regular-svg-icons'
 
+import ContactForm from './ContactForm'
 
 interface dataProps {
     allMdx: {
@@ -91,9 +92,23 @@ const Footer = () => {
         )
     })
 
+    const [formIsOpen, setFormIsOpen] = React.useState(false)
+    const [formSuccessMessage, setFormSuccessMessage] = React.useState('')
+
+    const toggleForm = () => {
+        setFormIsOpen(!formIsOpen)
+    }
+
+    const onSuccess = () => {
+        setFormIsOpen(false)
+        setFormSuccessMessage('Message Sent!')
+    }
+
     return (
         <footer>
             <div className="container">
+                {!formIsOpen && <button className="button button--grey" onClick={toggleForm}><FontAwesomeIcon icon={faEnvelope} />Contact Me</button>}
+                {formIsOpen && <ContactForm onSuccess={onSuccess} />}
                 <ul className="social-links">
                     {socialLinks}
                 </ul>
