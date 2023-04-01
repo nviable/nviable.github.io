@@ -107,7 +107,7 @@ const Footer = () => {
     return (
         <footer>
             <div className="container">
-                {!formIsOpen && <button className="button button--grey" onClick={toggleForm}><FontAwesomeIcon icon={faEnvelope} />Contact Me</button>}
+                {!formIsOpen && <button className="contact-toggle button button--grey" onClick={toggleForm}><FontAwesomeIcon icon={faEnvelope} />Contact Me</button>}
                 {formIsOpen && <ContactForm onSuccess={onSuccess} />}
                 <ul className="social-links">
                     {socialLinks}

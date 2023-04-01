@@ -5,7 +5,11 @@ interface ContactFormProps {
 }
 
 const ContactForm = (props: ContactFormProps) => {
-    const [state, setState] = React.useState({})
+    const [state, setState] = React.useState({
+        name: '',
+        email: '',
+        message: '',
+    })
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [errors, setErrors] = React.useState({} as any)
 
@@ -56,9 +60,9 @@ const ContactForm = (props: ContactFormProps) => {
                     Don't fill this out: <input name="bot-field" onChange={handleChange} />
                 </label>
             </p>
-            <label>Name: <input type="text" name="name" value="" placeholder='Your Name' onChange={handleChange} /></label>
-            <label>Email: <input type="email" name="email" value="" placeholder='Your Email' onChange={handleChange} /></label>
-            <label>Message: <textarea name="message" onChange={handleChange} /></label>
+            <label>Name: <input type="text" name="name" placeholder='Your Name' onChange={handleChange} value={state.name} /></label>
+            <label>Email: <input type="email" name="email" placeholder='Your Email' onChange={handleChange} value={state.email} /></label>
+            <label>Message: <textarea name="message" onChange={handleChange} value={state.message} /></label>
             <button type="submit" disabled={isSubmitting}>Send</button>
             {errors && <p className="error">{errors.message}</p>}
         </form>
