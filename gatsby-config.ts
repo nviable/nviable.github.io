@@ -98,14 +98,6 @@ const config: GatsbyConfig = {
       __key: "publicity"
     },
     {
-      resolve: 'gatsby-source-filesystem',
-      options: {
-        "name": "news",
-        "path": "./src/content/news/",
-      },
-      __key: "news"
-    },
-    {
       resolve: "gatsby-plugin-mdx",
       options: {
         extensions: [".mdx", ".md"],
