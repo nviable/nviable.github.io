@@ -19,6 +19,7 @@ const ContactForm = (props: ContactFormProps) => {
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [errors, setErrors] = React.useState({} as any)
     const [submitted, setSubmitted] = React.useState(false)
+    // const captchaRef = React.useRef<ReCAPTCHA>(null)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
         setState({ ...state, [e.target.name]: e.target.value })
@@ -56,7 +57,10 @@ const ContactForm = (props: ContactFormProps) => {
             <h2>Thanks for your message!</h2>
         </div>
     ) : (
-        <form className="contact-form" name="contact" method="POST" data-netlify="true">
+        <form className="contact-form" name="contact" method="POST"
+            data-netlify="true"
+        // data-netlify-recaptcha="true"
+        >
             <input type="hidden" name="form-name" value="contact" />
             <h2>Contact Me</h2>
             <div>
@@ -80,7 +84,7 @@ const ContactForm = (props: ContactFormProps) => {
                     value={state.message} onChange={handleChange}
                 />
             </div>
-            <ReCAPTCHA sitekey={process.env.GATSBY_RECAPTCHA_KEY || ''} />
+            {/* <ReCAPTCHA sitekey={process.env.GATSBY_RECAPTCHA_KEY || ''} ref={captchaRef} /> */}
             {errors.message && <p className="error">{errors.message}</p>}
             <button type="submit" disabled={isSubmitting}>Send</button>
         </form>
