@@ -18,6 +18,7 @@ const ContactForm = (props: ContactFormProps) => {
     })
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [errors, setErrors] = React.useState({} as any)
+    const [submitted, setSubmitted] = React.useState(false)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
         setState({ ...state, [e.target.name]: e.target.value })
@@ -42,9 +43,7 @@ const ContactForm = (props: ContactFormProps) => {
                     email: '',
                     message: '',
                 })
-                if (props.onSuccess) {
-                    props.onSuccess()
-                }
+                setSubmitted(true)
             })
             .catch(err => {
                 setIsSubmitting(false)
@@ -52,7 +51,11 @@ const ContactForm = (props: ContactFormProps) => {
             })
     }
 
-    return (
+    return submitted ? (
+        <div>
+            <h2>Thanks for your message!</h2>
+        </div>
+    ) : (
         <form className="contact-form" name="contact" method="POST" data-netlify="true">
             <input type="hidden" name="form-name" value="contact" />
             <h2>Contact Me</h2>
@@ -79,7 +82,7 @@ const ContactForm = (props: ContactFormProps) => {
             </div>
             <ReCAPTCHA sitekey={process.env.GATSBY_RECAPTCHA_KEY || ''} />
             {errors.message && <p className="error">{errors.message}</p>}
-            <button type="submit">Send</button>
+            <button type="submit" disabled={isSubmitting}>Send</button>
         </form>
     )
 }
