@@ -1,4 +1,5 @@
 import React from 'react'
+import ReCAPTCHA from 'react-google-recaptcha';
 
 interface ContactFormProps {
     onSuccess?: () => void
@@ -77,6 +78,7 @@ const ContactForm = (props: ContactFormProps) => {
                 <label>Message:</label>
                 <textarea name="message" placeholder='Your Message' />
             </div>
+            <ReCAPTCHA sitekey={process.env.GATSBY_RECAPTCHA_KEY} />
             <button type="submit">Send</button>
         </form>
     )
