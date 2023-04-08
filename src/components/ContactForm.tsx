@@ -2,9 +2,9 @@ import React from 'react'
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios'
 import * as qs from 'query-string'
+import { navigate } from 'gatsby';
 
 interface ContactFormProps {
-    onSuccess?: () => void
     location: {
         pathname: string
     }
@@ -25,19 +25,33 @@ const ContactForm = (props: ContactFormProps) => {
         setState({ ...state, [e.target.name]: e.target.value })
     }
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const onSuccess = () => {
+        setState({
+            name: '',
+            email: '',
+            message: '',
+        })
+    }
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsSubmitting(true)
         setErrors({})
-        axios({
-            method: 'POST',
-            url: props.location.pathname,
-            data: qs.default.stringify({
+        // const recaptchaValue = captchaRef.current?.getValue() || ''
+        // if (!recaptchaValue) {
+        //     setErrors({ message: 'Please verify that you are not a robot.' })
+        //     setIsSubmitting(false)
+        //     return
+        // }
+        fetch("/", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: qs.default.stringify({
                 'form-name': 'contact',
                 ...state,
             }),
         })
-            .then(res => {
+            .then((res) => {
                 setIsSubmitting(false)
                 setState({
                     name: '',
@@ -46,11 +60,12 @@ const ContactForm = (props: ContactFormProps) => {
                 })
                 setSubmitted(true)
             })
-            .catch(err => {
+            .catch((err) => {
                 setIsSubmitting(false)
                 setErrors(err.response.data.errors)
-            })
-    }
+            });
+    };
+
 
     return submitted ? (
         <div>
@@ -58,7 +73,7 @@ const ContactForm = (props: ContactFormProps) => {
         </div>
     ) : (
         <form className="contact-form" name="contact" method="POST"
-            data-netlify="true"
+            data-netlify="true" onSubmit={handleSubmit}
         // data-netlify-recaptcha="true"
         >
             <input type="hidden" name="form-name" value="contact" />
