@@ -31,7 +31,7 @@ const ContactForm = (props: ContactFormProps) => {
         axios({
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            url: props.location.pathname,
+            url: '/',
             data: qs.default.stringify({
                 'form-name': 'contact',
                 ...state,
