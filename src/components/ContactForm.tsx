@@ -37,6 +37,7 @@ const ContactForm = (props: ContactFormProps) => {
                 ...state,
             }),
         }).then(res => {
+            console.log(res)
             setIsSubmitting(false)
             setState({
                 name: '',
@@ -58,7 +59,7 @@ const ContactForm = (props: ContactFormProps) => {
         </div>
     ) : (
         <form className="contact-form" name="contact" method="POST"
-            data-netlify="true"
+            data-netlify="true" onSubmit={handleSubmit}
         // data-netlify-recaptcha="true"
         >
             <input type="hidden" name="form-name" value="contact" />
