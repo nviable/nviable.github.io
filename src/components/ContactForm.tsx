@@ -25,18 +25,24 @@ const ContactForm = (props: ContactFormProps) => {
         setState({ ...state, [e.target.name]: e.target.value })
     }
 
-    const onSuccess = () => {
+    const onSuccess = (response: string) => {
+        console.log('success', response)
         setState({
             name: '',
             email: '',
             message: '',
         })
+        setIsSubmitting(false)
+        setSubmitted(true)
     }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsSubmitting(true)
         setErrors({})
+
+        const myForm: HTMLFormElement = e.currentTarget
+        const formData = new FormData(myForm);
         // const recaptchaValue = captchaRef.current?.getValue() || ''
         // if (!recaptchaValue) {
         //     setErrors({ message: 'Please verify that you are not a robot.' })
@@ -46,19 +52,10 @@ const ContactForm = (props: ContactFormProps) => {
         fetch("/", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: qs.default.stringify({
-                'form-name': 'contact',
-                ...state,
-            }),
+            body: new URLSearchParams(formData as any).toString()
         })
             .then((res) => {
-                setIsSubmitting(false)
-                setState({
-                    name: '',
-                    email: '',
-                    message: '',
-                })
-                setSubmitted(true)
+                onSuccess(res.statusText)
             })
             .catch((err) => {
                 setIsSubmitting(false)
