@@ -2,9 +2,9 @@ import React from 'react'
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios'
 import * as qs from 'query-string'
-import { navigate } from 'gatsby';
 
 interface ContactFormProps {
+    onSuccess?: () => void
     location: {
         pathname: string
     }
@@ -25,42 +25,30 @@ const ContactForm = (props: ContactFormProps) => {
         setState({ ...state, [e.target.name]: e.target.value })
     }
 
-    const onSuccess = (response: string) => {
-        console.log('success', response)
-        setState({
-            name: '',
-            email: '',
-            message: '',
-        })
-        setIsSubmitting(false)
-        setSubmitted(true)
-    }
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setIsSubmitting(true)
-        setErrors({})
-
-        const myForm: HTMLFormElement = e.currentTarget
-        const formData = new FormData(myForm);
-        // const recaptchaValue = captchaRef.current?.getValue() || ''
-        // if (!recaptchaValue) {
-        //     setErrors({ message: 'Please verify that you are not a robot.' })
-        //     setIsSubmitting(false)
-        //     return
-        // }
-        fetch("/", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams(formData as any).toString()
-        })
-            .then((res) => {
-                onSuccess(res.statusText)
+        axios({
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            url: props.location.pathname,
+            data: qs.default.stringify({
+                'form-name': 'contact',
+                ...state,
+            }),
+        }).then(res => {
+            setIsSubmitting(false)
+            setState({
+                name: '',
+                email: '',
+                message: '',
             })
-            .catch((err) => {
+            setSubmitted(true)
+        })
+            .catch(err => {
                 setIsSubmitting(false)
                 setErrors(err.response.data.errors)
-            });
+            })
     };
 
 
@@ -70,7 +58,7 @@ const ContactForm = (props: ContactFormProps) => {
         </div>
     ) : (
         <form className="contact-form" name="contact" method="POST"
-            data-netlify="true" onSubmit={handleSubmit}
+            data-netlify="true"
         // data-netlify-recaptcha="true"
         >
             <input type="hidden" name="form-name" value="contact" />
