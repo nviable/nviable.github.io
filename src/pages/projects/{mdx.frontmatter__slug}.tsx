@@ -101,7 +101,7 @@ export const query = graphql`
             }
         }
         allMdx(
-            filter: {fields: {source: {eq: "research"}}}
+            filter: {fields: {source: {eq: "articles"}}, frontmatter: {categories: {in: ["paper", "poster", "journal"]}}},
           ) {
             edges {
               node {

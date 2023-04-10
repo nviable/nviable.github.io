@@ -56,21 +56,22 @@ const PublicityPage = ({ data }: PublicityPageProps) => {
 export const query = graphql`
     query {
         allMdx(
-            filter: {fields: {source: {eq: "publicity"}}}
-            sort: {frontmatter: {date: DESC}}
-          ) {
-            nodes {
-                frontmatter {
-                    title
-                    date(fromNow: true)
-                    slug
-                    categories
-                  }
-                id
-                excerpt(pruneLength: 100)
+          filter: {fields: {source: {eq: "articles"}}, frontmatter: {categories: {in: ["news", "podcast"]}}}
+          sort: {frontmatter: {date: DESC}}
+        ) {
+          nodes {
+            frontmatter {
+              title
+              date(formatString: "YYYY")
+              slug
+              categories
+              project
             }
+            id
+            excerpt(pruneLength: 100)
+          }
         }
-    }
+      }
 `
 
 export const Head = () => {

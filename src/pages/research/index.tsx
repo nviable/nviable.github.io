@@ -55,22 +55,22 @@ const ResearchPage = ({ data }: ResearchPageProps) => {
 export const query = graphql`
     query {
         allMdx(
-            filter: {fields: {source: {eq: "research"}}}
-            sort: {frontmatter: {date: DESC}}
-          ) {
-            nodes {
-                frontmatter {
-                    title
-                    date(formatString: "YYYY")
-                    slug
-                    categories
-                    project
-                }
-                id
-                excerpt(pruneLength: 100)
+          filter: {fields: {source: {eq: "articles"}}, frontmatter: {categories: {in: ["paper", "poster", "journal"]}}}
+          sort: {frontmatter: {date: DESC}}
+        ) {
+          nodes {
+            frontmatter {
+              title
+              date(formatString: "YYYY")
+              slug
+              categories
+              project
             }
+            id
+            excerpt(pruneLength: 100)
+          }
         }
-    }
+      }
 `
 
 export const Head = () => {

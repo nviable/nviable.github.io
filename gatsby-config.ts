@@ -68,10 +68,10 @@ const config: GatsbyConfig = {
     {
       resolve: 'gatsby-source-filesystem',
       options: {
-        "name": "research",
-        "path": "./src/content/research/",
+        "name": "articles",
+        "path": "./src/content/articles/",
       },
-      __key: "research"
+      __key: "articles"
     },
     {
       resolve: 'gatsby-source-filesystem',
@@ -88,14 +88,6 @@ const config: GatsbyConfig = {
         "path": "./src/content/blocks/",
       },
       __key: "blocks"
-    },
-    {
-      resolve: 'gatsby-source-filesystem',
-      options: {
-        "name": "publicity",
-        "path": "./src/content/publicity/",
-      },
-      __key: "publicity"
     },
     {
       resolve: "gatsby-plugin-mdx",
