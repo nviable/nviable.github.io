@@ -60,14 +60,6 @@ const config: GatsbyConfig = {
     {
       resolve: 'gatsby-source-filesystem',
       options: {
-        "name": "blog",
-        "path": "./src/content/blog/",
-      },
-      __key: "blog"
-    },
-    {
-      resolve: 'gatsby-source-filesystem',
-      options: {
         "name": "articles",
         "path": "./src/content/articles/",
       },
