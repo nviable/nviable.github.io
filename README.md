@@ -34,3 +34,10 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Notes
+
+- Content management: https://contentlayer.dev/docs/environments/nextjs-dcf8e39e (Tutorial: https://www.neorepo.com/blog/how-to-build-a-technical-blog-with-nextjs-and-contentlayer)
+- CMS Backup option: https://firecms.co/ or https://www.sanity.io/ or https://www.contentful.com/ or https://tina.io/
+- Form management: https://formium.io/ or (https://vercel.com/guides/deploying-react-forms-using-formspree-with-vercel) 
+- Fancy effects: https://www.framer.com/motion/ or https://www.react-spring.io/ (https://github.com/dlarroder/dalelarroder/blob/main/components/renderCanvas.js)
