@@ -14,7 +14,7 @@ export async function getPostData(blogId: string): Promise<{
 }> {
     //Lazy load the mdx file for the project
     try {
-        const file = await import("@/blogs/" + blogId + ".mdx");
+        const file = await import("@/data/blogs/" + blogId + ".mdx");
 
         if (file?.metadata) return file.metadata;
         else {
@@ -40,7 +40,7 @@ export async function getPostData(blogId: string): Promise<{
 export function getPostNames(): string[] {
     try {
         //Read the /blog folder at root dir
-        const fileList: string[] = readdirSync("./blogs/");
+        const fileList: string[] = readdirSync("./data/blogs/");
         //Return an array of filenames at this dir
         if (fileList.length > 0) {
             return fileList.map((file) => {
@@ -67,7 +67,7 @@ export async function getPostsData(): Promise<
 > {
     try {
         //Read the /blog folder at root dir
-        const fileList: string[] = readdirSync("./blogs/");
+        const fileList: string[] = readdirSync("./data/blogs/");
 
         //Load each file
         if (fileList.length > 0) {

@@ -35,7 +35,7 @@ type BlogPageProps = {
 
 export default async function BlogPage({ params }: BlogPageProps) {
     const BlogMarkdown = dynamic(
-        () => import("@/blogs/" + params.blogId + ".mdx"),
+        () => import("@/data/blogs/" + params.blogId + ".mdx"),
     );
 
     return (

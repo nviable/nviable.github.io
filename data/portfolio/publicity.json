@@ -1,0 +1,34 @@
+[
+    {
+        "slug": "article-1",
+        "title": "Article 1",
+        "date": "2020-01-01",
+        "description": "This is the content of article 1",
+        "author": [
+            "Author 1"
+        ],
+        "tags": [
+            "tag1",
+            "tag2"
+        ],
+        "project": "project-1",
+        "category": "category1",
+        "url": "https://www.google.com"
+    },
+    {
+        "slug": "article-2",
+        "title": "Article 2",
+        "date": "2020-01-02",
+        "description": "This is the content of article 2",
+        "author": [
+            "Author 2"
+        ],
+        "tags": [
+            "tag1",
+            "tag3"
+        ],
+        "project": "project-2",
+        "category": "category2",
+        "url": "https://www.google.com"
+    }
+]
