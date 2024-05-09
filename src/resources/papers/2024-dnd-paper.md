@@ -1,0 +1,7 @@
+---
+title: "Dungeons /& Deepfakes: Understanding: Using Scenario-based role-play to study journalists' behavior towards using AI-based verification tools for video content"
+year: "2024"
+authors: "Saniat Javid Sohrawardi, Y. Kelly Wu, Andrea Hickerson, Matthew Wright"
+---
+The evolving landscape of manipulated media, including the threat of deepfakes, has made information verification a daunting challenge for journalists. Technologists have developed tools to detect deepfakes, but these tools can sometimes yield inaccurate results, raising concerns about inadvertently disseminating manipulated content as authentic news. This study examines the impact of unreliable deepfake detection tools on information verification. We conducted role-playing exercises with 24 US journalists, immersing them in complex breaking-news scenarios where determining authenticity was challenging. Through these exercises, we explored questions regarding journalists' investigative processes, use of a deepfake detection tool, and decisions on when and what to publish. Our findings reveal that journalists are diligent in verifying information, but sometimes rely too heavily on results from deepfake detection tools. We argue for more cautious release of such tools, accompanied by proper training for users to mitigate the risk of unintentionally propagating manipulated content as real news.
+[Link to paper](https://programs.sigchi.org/chi/2024/my-schedule/content/146663)

@@ -1,0 +1,7 @@
+---
+title: "A First Look into Targeted Clickbait and its Countermeasures: The Power of Storytelling"
+year: "2024"
+authors: "Ankit Shrestha, Audrey Flood, Saniat Javid Sohrawardi, Matthew Wright, Mahdi Nasrullah Al-Ameen"
+---
+Clickbait headlines work through superlatives and intensifiers, creating information gaps to increase the relevance of their associated links that direct users to time-wasting and sometimes even malicious websites. This approach can be amplified using targeted clickbait that takes publicly available information from social media to align clickbait to users' preferences and beliefs. In this work, we first conducted preliminary studies to understand the influence of targeted clickbait on users' clicking behavior. Based on our findings, we involved 24 users in the participatory design of story-based warnings against targeted clickbait. Our analysis of user-created warnings led to four design variations, which we evaluated through an online survey over Amazon Mechanical Turk. Our findings show the significance of integrating information with persuasive narratives to create effective warnings against targeted clickbait. Overall, our studies provide valuable insights into understanding users' perceptions and behaviors towards targeted clickbait, and the efficacy of story-based interventions.
+[Link to paper](https://programs.sigchi.org/chi/2024/my-schedule/content/146835)
