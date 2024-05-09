@@ -2,6 +2,7 @@ import { getPortfolioData, getPortfolioItemData, getPortfolioItems } from '@/app
 import React from 'react';
 import PublicationsComponent from './PublicationsComponent';
 import { PortfolioData, PublicationsData } from '@/app/customTypes';
+import Layout from '@/app/layout';
 
 /**
  * return all possible slug values in an array like [{slug: 'first_blog'}, {slug: 'second_blog'}]
