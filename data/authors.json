@@ -11,20 +11,22 @@
         "researchgate": "https://www.researchgate.net/profile/John_Sohrawardi",
         "website": "https://nviable.com",
         "bio": "John Sohrawardi is a PhD student in the Golisano College of Computing and Information Sciences at the Rochester Institute of Technology. His research interests include human-computer interaction, accessibility, and assistive technology. He is a member of the Accessible Computing Lab at RIT, where he works on projects related to accessibility and usability. He is also a member of the RIT Center for Accessibility and Inclusion Research, where he works on projects related to accessibility and inclusion in higher education. He is a recipient of the NSF Graduate Research Fellowship and the RIT Provost's Scholarship.",
-        "image": "https://nviable.com/assets/images/john-sohrawardi.jpg"
+        "image": "https://nviable.com/assets/images/john-sohrawardi.jpg",
+        "semantic_scholar_id": "2300644"
     },
     {
-        "name": "Jon Doe",
-        "email": "jon@doe.com",
-        "orcid": "0000-0000-0000-0000",
-        "affiliation": "University of Rochester",
-        "google_scholar": "https://scholar.google.com/citations?user=8Q6Z9QoAAAAJ&hl=en",
-        "github": "https://github.com/jondoe",
-        "linkedin": "https://www.linkedin.com/in/jon-doe/",
-        "twitter": "https://twitter.com/jondoe",
-        "researchgate": "https://www.researchgate.net/profile/Jon_Doe",
-        "website": "https://jondoe.com",
-        "bio": "Jon Doe is a PhD student in the Department of Computer Science at the University of Rochester. His research interests include artificial intelligence, machine learning, and data mining. He is a member of the Machine Learning Lab at UR, where he works on projects related to machine learning and data mining. He is also a member of the UR Center for Data Science, where he works on projects related to data science and big data. He is a recipient of the UR Graduate Research Fellowship and the UR Provost's Scholarship.",
-        "image": "https://jondoe.com/assets/images/jon-doe.jpg"
+        "name": "Y. K. Wu",
+        "email": "",
+        "orcid": "",
+        "affiliation": "Rochester Institute of Technology",
+        "google_scholar": "https://scholar.google.com/citations?user=v0TSsBQAAAAJ&hl=en&oi=sra",
+        "github": "https://github.com/kellywuuu",
+        "linkedin": "",
+        "twitter": "",
+        "researchgate": "",
+        "website": "https://kellywuuu.github.io/",
+        "bio": "",
+        "image": "",
+        "semantic_scholar_id": "2301263017"
     }
 ]
