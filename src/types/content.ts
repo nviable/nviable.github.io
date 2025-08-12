@@ -18,8 +18,10 @@ export interface Publication {
   authors: string[]
   date: string
   venue: string
+  year: number
   category: 'conference' | 'journal' | 'workshop' | 'poster'
   url?: string
+  pdfUrl?: string
   bibtex?: string
   project?: string
   tags: string[]

@@ -11,14 +11,8 @@
             "Journalism",
             "Law Enforcement"
         ],
-        "publications": [
-            "paper-1",
-            "paper-2"
-        ],
-        "publicity": [
-            "news-1",
-            "news-2"
-        ],
+        "publications": [],
+        "publicity": [],
         "code": [
             "code-1",
             "code-2"

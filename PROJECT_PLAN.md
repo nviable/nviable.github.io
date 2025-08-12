@@ -79,9 +79,13 @@ nviable.github.io/ (existing workspace)
 - [x] Install and configure Chakra UI
 - [x] Set up React Router
 - [x] Create basic project structure
-- [ ] Set up Sanity.io project
-- [ ] Configure Sanity Studio
-- [ ] Create content schemas (Publication, Project, MediaAppearance, Author)
+- [x] Set up Sanity.io project
+- [x] Configure Sanity Studio
+- [ ] Create content schemas
+  - [x] Publication
+  - [ ] Project
+  - [x] MediaAppearance
+  - [ ] Author (optional)
 
 ### Phase 2: Core Components & Layout (Week 2)
 
@@ -96,10 +100,11 @@ nviable.github.io/ (existing workspace)
 
 - [ ] Migrate existing JSON data to Sanity.io
 - [ ] Create Home page with new structure
-- [ ] Implement Research archive page
+- [x] Implement Research archive page (basic list, chronological)
+- [x] Implement Media archive page (list, chronological)
 - [ ] Create individual project detail pages
 - [x] Set up dynamic routing for projects
-- [ ] Implement content fetching from Sanity.io
+- [x] Implement content fetching from Sanity.io (publications, media)
 
 ### Phase 4: Polish & Testing (Week 4)
 
@@ -129,13 +134,13 @@ nviable.github.io/ (existing workspace)
 
 ## Sanity.io Setup Requirements
 
-- [ ] Create Sanity.io account
-- [ ] Initialize new project
-- [ ] Install Sanity CLI
+- [x] Create Sanity.io account
+- [x] Initialize new project
+- [x] Install Sanity CLI
 - [ ] Configure content schemas
-- [ ] Set up Sanity Studio
-- [ ] Configure CORS for frontend
-- [ ] Set up environment variables
+- [x] Set up Sanity Studio
+- [x] Configure CORS for frontend (<http://localhost:5173>)
+- [x] Set up environment variables (.env.local for VITE_*)
 
 ## Cloudflare Pages Setup Requirements
 
@@ -191,9 +196,8 @@ nviable.github.io/ (existing workspace)
 
 ## Next Steps
 
-1. Initialize Sanity project locally and in the `sanity/` folder
-2. Implement schemas for Publication, Project, MediaAppearance, Author
-3. Seed Sanity with publications from `data/portfolio/publications.json`
-4. Create `src/lib/sanity.ts` client and wire fetch on Research page
-5. Build Home page sections (Hero, Featured Research, Skills, Media, Contact)
-6. Set up Cloudflare Pages project and GitHub integration (staging)
+1. Add remaining schema: Project; link publications/media → projects
+2. Seed Projects from sources (existing JSON or script) and verify in Studio
+3. Enhance Research page (project grid and filters; paper cards polish)
+4. Begin Home page sections (Hero, Featured Research with 1 featured + 2 small, Skills, Latest Media x2, Compact Contact)
+5. Decide dataset visibility for production (public read vs private+proxy) and set CORS for Pages domain
