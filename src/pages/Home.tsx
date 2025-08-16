@@ -1,4 +1,4 @@
-import { Box, Heading, Text, VStack, SimpleGrid, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Button, useToast, List, ListItem } from '@chakra-ui/react'
+import { Box, Heading, Text, VStack, SimpleGrid, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Button, List, ListItem } from '@chakra-ui/react'
 import ProjectCard from '../components/content/ProjectCard'
 import PublicationItem from '../components/content/PublicationItem'
 import MediaItem from '../components/content/MediaItem'
@@ -10,7 +10,6 @@ const Home = () => {
   const [projects, setProjects] = useState<Project[]>([])
   const [publications, setPublications] = useState<Publication[]>([])
   const [media, setMedia] = useState<MediaAppearance[]>([])
-  const toast = useToast()
 
   useEffect(() => {
     const loadData = async () => {
