@@ -1,15 +1,9 @@
 export interface Author {
   _id: string
   name: string
-  email: string
-  bio: string
-  avatar?: string
-  social: {
-    github?: string
-    linkedin?: string
-    twitter?: string
-    website?: string
-  }
+  email?: string
+  affiliation?: string
+  orcid?: string
 }
 
 export interface Publication {
@@ -18,12 +12,14 @@ export interface Publication {
   authors: string[]
   date: string
   venue: string
-  year: number
   category: 'conference' | 'journal' | 'workshop' | 'poster'
   url?: string
-  pdfUrl?: string
   bibtex?: string
-  project?: string
+  project?: {
+    _id: string
+    title: string
+    slug: string
+  }
   tags: string[]
   abstract?: string
 }
@@ -31,18 +27,24 @@ export interface Publication {
 export interface Project {
   _id: string
   title: string
-  slug: string
-  description: string
-  longDescription?: string
-  featured: boolean
-  date: string
-  tags: string[]
-  image?: string
+  slug: {
+    _type: 'slug'
+    current: string
+  }
+  shortDescription: string
+  body?: string
   url?: string
-  publications?: string[]
-  mediaAppearances?: string[]
-  code?: string
-  awards?: string[]
+  tags: string[]
+  startDate?: string
+  endDate?: string
+  image?: {
+    asset: {
+      url: string
+    }
+    alt?: string
+  }
+  publications?: Publication[]
+  mediaAppearances?: MediaAppearance[]
 }
 
 export interface MediaAppearance {
@@ -50,21 +52,29 @@ export interface MediaAppearance {
   title: string
   date: string
   outlet: string
-  description: string
-  url: string
-  project?: string
+  description?: string
+  url?: string
+  project?: {
+    _id: string
+    title: string
+    slug: string
+  }
   category: 'news' | 'interview' | 'podcast' | 'video' | 'article'
-  image?: string
+  image?: {
+    asset: {
+      url: string
+    }
+    alt?: string
+  }
 }
 
 export interface Talk {
   _id: string
   title: string
-  speaker: string
   date: string
-  location: string
-  project?: string
+  venue: string
   description?: string
+  url?: string
   slides?: string
   video?: string
 }

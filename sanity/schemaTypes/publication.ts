@@ -58,6 +58,12 @@ export default defineType({
             type: 'array',
             of: [{ type: 'string' }],
         }),
+        defineField({
+            name: 'project',
+            title: 'Related Project',
+            type: 'reference',
+            to: [{ type: 'project' }],
+        }),
     ],
     preview: {
         select: {

@@ -1,14 +1,19 @@
-import { Box, Heading, Text } from '@chakra-ui/react'
+import { Box, Container, Heading, Text } from '@chakra-ui/react'
+import Breadcrumbs from '../components/Breadcrumbs'
 
-const About = () => {
+export default function About() {
   return (
-    <Box>
-      <Heading as="h1" size="xl" mb={6}>
-        About Me
-      </Heading>
-      <Text>About page coming soon...</Text>
-    </Box>
+    <Container maxW="container.xl" py={8}>
+      <Breadcrumbs items={[{ label: 'About' }]} />
+
+      <Box>
+        <Heading as="h1" size="xl" mb={6}>
+          About Me
+        </Heading>
+        <Text fontSize="lg" color="gray.600">
+          About page coming soon...
+        </Text>
+      </Box>
+    </Container>
   )
 }
-
-export default About

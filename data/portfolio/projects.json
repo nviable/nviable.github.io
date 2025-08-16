@@ -2,7 +2,8 @@
     {
         "title": "DeFake Project",
         "slug": "defake-project",
-        "description": "DeFake is a project aimed at developing deepfake detection solutions for journalists, forensic experts, and law enforcement agencies by focusing on usability, explainability, and robustness.",
+        "shortDescription": "DeFake is a project aimed at developing deepfake detection solutions for journalists, forensic experts, and law enforcement agencies by focusing on usability, explainability, and robustness.",
+        "body": "",
         "url": "https://defake.app/",
         "tags": [
             "Deepfake",
@@ -13,36 +14,47 @@
         ],
         "publications": [],
         "publicity": [],
-        "code": [
-            "code-1",
-            "code-2"
-        ],
-        "date": "2021-01-01",
-        "imgsrc": "https://defake.app/assets/img/defake-logo.png"
+        "code": [],
+        "startDate": "2021-01-01",
+        "endDate": "",
+        "imgsrc": ""
     },
     {
-        "title": "Deepfake Detection Challenge",
-        "slug": "deepfake-detection-challenge",
-        "description": "The Deepfake Detection Challenge (DFDC) is a competition to develop new technologies for detecting deepfakes and manipulated media.",
-        "url": "https://www.kaggle.com/c/deepfake-detection-challenge",
+        "title": "Dungeons & Deepfakes",
+        "slug": "dungeons-and-deepfakes",
+        "shortDescription": "A novel scenario-based role-playing training simulation to teach deepfake detection skills to journalists and media professionals.",
+        "body": "",
+        "url": "https://defake.app/about/projects/dungeons-and-deepfakes/",
+        "tags": [
+            "Deepfake",
+            "Training",
+            "Simulation",
+            "Journalism"
+        ],
+        "publications": [],
+        "publicity": [],
+        "code": [],
+        "startDate": "2024-07-01",
+        "endDate": "",
+        "imgsrc": ""
+    },
+    {
+        "title": "Varuna Piroject",
+        "slug": "varuna-project",
+        "shortDescription": "Varuna is a tool that uses AI to detect deepfakes and manipulated media.",
+        "body": "",
+        "url": "https://varuna.app/",
         "tags": [
             "Deepfake",
             "Detection",
-            "Competition"
+            "Forensics",
+            "Journalism"
         ],
-        "publications": [
-            "paper-3",
-            "paper-4"
-        ],
-        "publicity": [
-            "news-3",
-            "news-4"
-        ],
-        "code": [
-            "code-3",
-            "code-4"
-        ],
-        "date": "2020-01-01",
-        "imgsrc": "https://storage.googleapis.com/kaggle-competitions/kaggle/13153/logos/header.png"
+        "publications": [],
+        "publicity": [],
+        "code": [],
+        "startDate": "2024-07-01",
+        "endDate": "",
+        "imgsrc": ""
     }
 ]

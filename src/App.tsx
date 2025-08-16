@@ -1,4 +1,4 @@
-import { ChakraProvider, Box } from '@chakra-ui/react'
+import { ChakraProvider } from '@chakra-ui/react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import theme from './styles/theme'
 import Layout from './layouts/Layout'

@@ -20,7 +20,7 @@ export default defineType({
             name: 'date',
             title: 'Date',
             type: 'datetime',
-            options: { dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm', calendarTodayLabel: 'Today' },
+            options: { dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' },
         }),
         defineField({
             name: 'description',
@@ -33,6 +33,12 @@ export default defineType({
             title: 'URL',
             type: 'url',
             validation: (Rule) => Rule.uri({ allowRelative: false }),
+        }),
+        defineField({
+            name: 'project',
+            title: 'Related Project',
+            type: 'reference',
+            to: [{ type: 'project' }],
         }),
         defineField({
             name: 'category',
