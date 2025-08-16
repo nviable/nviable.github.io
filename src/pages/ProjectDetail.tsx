@@ -1,47 +1,51 @@
-import { useState, useEffect } from 'react'
-import {
-  Box,
-  Container,
-  Heading,
-  Text,
-  VStack,
-  HStack,
-  Badge,
-  Link,
-  Divider,
-  SimpleGrid,
-  Card,
-  CardBody,
-  CardHeader,
-  Skeleton,
-  Stack,
-} from '@chakra-ui/react'
+import { Box, Heading, Text, VStack, SimpleGrid, Container, Link } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchProjectBySlug } from '../lib/sanity'
 import type { Project } from '../types/content'
 import Breadcrumbs from '../components/Breadcrumbs'
+import { LoadingSkeleton, ErrorBoundary } from '../components/ui'
+import { PublicationItem, MediaItem } from '../components/content'
 
 export default function ProjectDetail() {
   const { projectSlug } = useParams()
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function loadProject() {
+    const loadProject = async () => {
       if (!projectSlug) return
 
       try {
+        setLoading(true)
         const data = await fetchProjectBySlug(projectSlug)
         setProject(data)
-      } catch (error) {
-        console.error('Error loading project:', error)
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : 'Failed to load project')
       } finally {
         setLoading(false)
       }
     }
-
     loadProject()
   }, [projectSlug])
+
+  const handleRetry = () => {
+    setError(null)
+    setLoading(true)
+    const loadData = async () => {
+      if (!projectSlug) return
+      try {
+        const data = await fetchProjectBySlug(projectSlug)
+        setProject(data)
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : 'Failed to load project')
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }
 
   if (loading) {
     return (
@@ -50,18 +54,7 @@ export default function ProjectDetail() {
           { label: 'Research', path: '/research' },
           { label: 'Loading...' }
         ]} />
-        <VStack spacing={6} align="stretch">
-          <Skeleton height="48px" />
-          <Skeleton height="24px" />
-          <Skeleton height="120px" />
-          <Divider />
-          <Skeleton height="32px" />
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} height="120px" />
-            ))}
-          </SimpleGrid>
-        </VStack>
+        <LoadingSkeleton type="list" count={3} />
       </Container>
     )
   }
@@ -88,146 +81,98 @@ export default function ProjectDetail() {
       <VStack spacing={8} align="stretch">
         {/* Project Header */}
         <Box>
-          <Heading as="h1" size="xl" mb={4} color="brand.purple.600">
+          <Heading as="h1" size="xl" mb={4}>
             {project.title}
           </Heading>
 
-          <HStack spacing={4} mb={4} flexWrap="wrap">
+          <VStack align="start" spacing={3}>
             {project.startDate && (
-              <HStack spacing={2}>
-                <Text fontSize="sm" color="gray.600">
-                  📅 {new Date(project.startDate).getFullYear()}
-                  {project.endDate && ` - ${new Date(project.endDate).getFullYear()}`}
-                </Text>
-              </HStack>
+              <Text color="gray.600">
+                📅 {new Date(project.startDate).toLocaleDateString()}
+                {project.endDate && ` - ${new Date(project.endDate).toLocaleDateString()}`}
+              </Text>
             )}
+
             {project.url && (
-              <Link href={project.url} isExternal color="brand.yellow.600" _hover={{ color: 'brand.yellow.700' }}>
-                Visit Project ↗
+              <Link
+                href={project.url}
+                isExternal
+                color="brand.yellow.600"
+                _hover={{ color: 'brand.yellow.700' }}
+              >
+                ↗ Visit Project
               </Link>
             )}
-          </HStack>
-
-          <Text fontSize="lg" mb={4}>
-            {project.shortDescription}
-          </Text>
-
-          {project.tags && project.tags.length > 0 && (
-            <HStack spacing={2} flexWrap="wrap">
-              {project.tags.map((tag) => (
-                <Badge key={tag} colorScheme="purple" variant="subtle">
-                  {tag}
-                </Badge>
-              ))}
-            </HStack>
-          )}
+          </VStack>
         </Box>
 
-        {/* Project Body */}
+        {/* Project Description */}
+        {project.shortDescription && (
+          <Box>
+            <Heading as="h2" size="lg" mb={4}>
+              Overview
+            </Heading>
+            <Text fontSize="lg" color="gray.700">
+              {project.shortDescription}
+            </Text>
+          </Box>
+        )}
+
+        {/* Project Body Content */}
         {project.body && (
           <Box>
             <Heading as="h2" size="lg" mb={4}>
-              About This Project
+              Details
             </Heading>
-            <Text>{project.body}</Text>
+            <Text color="gray.700" whiteSpace="pre-wrap">
+              {project.body}
+            </Text>
           </Box>
         )}
 
-        <Divider />
-
-        {/* Associated Publications */}
+        {/* Related Publications */}
         {project.publications && project.publications.length > 0 && (
           <Box>
             <Heading as="h2" size="lg" mb={6}>
-              Research Publications ({project.publications.length})
+              Research Publications
             </Heading>
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
               {project.publications.map((pub) => (
-                <Card key={pub._id} variant="outline">
-                  <CardHeader pb={2}>
-                    <Heading size="md" mb={2}>
-                      {pub.url ? (
-                        <Link href={pub.url} isExternal color="brand.purple.600" _hover={{ color: 'brand.purple.700' }}>
-                          {pub.title} ↗
-                        </Link>
-                      ) : (
-                        pub.title
-                      )}
-                    </Heading>
-                    <Text fontSize="sm" color="gray.600">
-                      {pub.authors?.join(', ')} • {pub.venue} • {pub.date}
-                    </Text>
-                  </CardHeader>
-                  <CardBody pt={0}>
-                    {pub.abstract && (
-                      <Text fontSize="sm" noOfLines={3} color="gray.700">
-                        {pub.abstract}
-                      </Text>
-                    )}
-                    {pub.tags && pub.tags.length > 0 && (
-                      <Stack direction="row" flexWrap="wrap" gap={1} mt={2}>
-                        {pub.tags.map((tag) => (
-                          <Badge key={tag} size="sm" colorScheme="blue" variant="subtle">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </Stack>
-                    )}
-                  </CardBody>
-                </Card>
+                <PublicationItem
+                  key={pub._id}
+                  publication={pub}
+                  variant="compact"
+                  showTags={true}
+                />
               ))}
             </SimpleGrid>
           </Box>
         )}
 
-        {/* Associated Media Appearances */}
+        {/* Related Media Coverage */}
         {project.mediaAppearances && project.mediaAppearances.length > 0 && (
           <Box>
             <Heading as="h2" size="lg" mb={6}>
-              Media Coverage ({project.mediaAppearances.length})
+              Media Coverage
             </Heading>
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
               {project.mediaAppearances.map((media) => (
-                <Card key={media._id} variant="outline">
-                  <CardHeader pb={2}>
-                    <Heading size="md" mb={2}>
-                      {media.url ? (
-                        <Link href={media.url} isExternal color="brand.purple.600" _hover={{ color: 'brand.purple.700' }}>
-                          {media.title} ↗
-                        </Link>
-                      ) : (
-                        media.title
-                      )}
-                    </Heading>
-                    <Text fontSize="sm" color="gray.600">
-                      {media.outlet} • {new Date(media.date).toLocaleDateString()}
-                    </Text>
-                  </CardHeader>
-                  <CardBody pt={0}>
-                    {media.description && (
-                      <Text fontSize="sm" noOfLines={3} color="gray.700">
-                        {media.description}
-                      </Text>
-                    )}
-                    <Badge colorScheme="green" variant="subtle" mt={2}>
-                      {media.category}
-                    </Badge>
-                  </CardBody>
-                </Card>
+                <MediaItem
+                  key={media._id}
+                  media={media}
+                  variant="compact"
+                  showCategory={true}
+                />
               ))}
             </SimpleGrid>
           </Box>
         )}
 
-        {/* No associated content message */}
-        {(!project.publications || project.publications.length === 0) &&
-          (!project.mediaAppearances || project.mediaAppearances.length === 0) && (
-            <Box textAlign="center" py={8}>
-              <Text color="gray.500">
-                No publications or media coverage associated with this project yet.
-              </Text>
-            </Box>
-          )}
+        <ErrorBoundary
+          error={error}
+          onRetry={handleRetry}
+          showRetry={true}
+        />
       </VStack>
     </Container>
   )

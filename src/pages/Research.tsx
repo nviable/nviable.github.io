@@ -1,9 +1,10 @@
-import { Box, Heading, Text, VStack, Link, Badge, SimpleGrid, Card, CardBody, CardHeader, Skeleton, Stack, Container } from '@chakra-ui/react'
+import { Box, Heading, Text, VStack, SimpleGrid, Container } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { fetchPublications, fetchProjects } from '../lib/sanity'
 import type { Publication, Project } from '../types/content'
-import { Link as RouterLink } from 'react-router-dom'
 import Breadcrumbs from '../components/Breadcrumbs'
+import { LoadingSkeleton, ErrorBoundary } from '../components/ui'
+import { ProjectCard, PublicationItem } from '../components/content'
 
 const Research = () => {
   const [publications, setPublications] = useState<Publication[]>([])
@@ -30,6 +31,27 @@ const Research = () => {
     load()
   }, [])
 
+  const handleRetry = () => {
+    setError(null)
+    setLoading(true)
+    // Re-run the load function
+    const loadData = async () => {
+      try {
+        const [publicationsData, projectsData] = await Promise.all([
+          fetchPublications(),
+          fetchProjects()
+        ])
+        setPublications(publicationsData)
+        setProjects(projectsData)
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : 'Failed to load research data')
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }
+
   return (
     <Container maxW="container.xl" py={8}>
       <Breadcrumbs items={[{ label: 'Research' }]} />
@@ -51,73 +73,13 @@ const Research = () => {
           <Heading as="h2" size="lg" mb={6}>
             Research Projects
           </Heading>
+
           {loading ? (
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} variant="outline">
-                  <CardHeader>
-                    <Skeleton height="24px" mb={2} />
-                    <Skeleton height="16px" />
-                  </CardHeader>
-                  <CardBody>
-                    <Skeleton height="60px" />
-                  </CardBody>
-                </Card>
-              ))}
-            </SimpleGrid>
+            <LoadingSkeleton type="grid" count={3} />
           ) : (
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
               {projects.map((project) => (
-                <Card
-                  key={project._id}
-                  variant="outline"
-                  _hover={{ shadow: 'md', transform: 'translateY(-2px)' }}
-                  transition="all 0.2s"
-                >
-                  <CardHeader>
-                    <Heading size="md" mb={2}>
-                      <Link
-                        as={RouterLink}
-                        to={`/research/${project.slug.current}`}
-                        color="brand.purple.600"
-                        _hover={{ color: 'brand.purple.700' }}
-                      >
-                        {project.title}
-                      </Link>
-                    </Heading>
-                    {project.startDate && (
-                      <Text fontSize="sm" color="gray.600">
-                        {new Date(project.startDate).getFullYear()}
-                        {project.endDate && ` - ${new Date(project.endDate).getFullYear()}`}
-                      </Text>
-                    )}
-                  </CardHeader>
-                  <CardBody pt={0}>
-                    <Text mb={4} noOfLines={3}>
-                      {project.shortDescription}
-                    </Text>
-                    <Stack direction="row" flexWrap="wrap" gap={2}>
-                      {project.tags?.map((tag) => (
-                        <Badge key={tag} colorScheme="purple" variant="subtle">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </Stack>
-                    {project.url && (
-                      <Link
-                        href={project.url}
-                        isExternal
-                        color="brand.yellow.600"
-                        fontSize="sm"
-                        mt={4}
-                        display="inline-block"
-                        _hover={{ color: 'brand.yellow.700' }}
-                      >
-                        External Link →
-                      </Link>
-                    )}
-                  </CardBody>
-                </Card>
+                <ProjectCard key={project._id} project={project} />
               ))}
             </SimpleGrid>
           )}
@@ -132,45 +94,24 @@ const Research = () => {
             Papers listed chronologically.
           </Text>
 
-          {error && (
-            <Text color="red.600" mb={4}>
-              {error}
-            </Text>
-          )}
+          <ErrorBoundary
+            error={error}
+            onRetry={handleRetry}
+            showRetry={true}
+          />
 
-          <VStack align="stretch" spacing={4}>
-            {publications.map((p) => (
-              <Box key={p._id} p={4} border="2px solid" borderColor="black" boxShadow="4px 4px 0px 0px" bg="white">
-                <Heading as="h3" size="md">
-                  {p.title}
-                </Heading>
-                <Text fontSize="sm" color="gray.600" mt={1}>
-                  {p.authors?.join(', ')} {p.date ? `(${p.date})` : ''}
-                </Text>
-                <Text fontSize="sm" color="gray.700" mt={1}>
-                  {p.venue}
-                </Text>
-                <VStack align="start" spacing={2} mt={3}>
-                  <Box>
-                    {p.url && (
-                      <Link href={p.url} isExternal color="brand.purple.700" mr={4}>
-                        View
-                      </Link>
-                    )}
-                  </Box>
-                  {Array.isArray(p.tags) && p.tags.length > 0 && (
-                    <Box>
-                      {p.tags.map((t) => (
-                        <Badge key={t} mr={2}>
-                          {t}
-                        </Badge>
-                      ))}
-                    </Box>
-                  )}
-                </VStack>
-              </Box>
-            ))}
-          </VStack>
+          {!loading && !error && (
+            <VStack align="stretch" spacing={4}>
+              {publications.map((publication) => (
+                <PublicationItem
+                  key={publication._id}
+                  publication={publication}
+                  variant="compact"
+                  showTags={true}
+                />
+              ))}
+            </VStack>
+          )}
         </Box>
       </VStack>
     </Container>
