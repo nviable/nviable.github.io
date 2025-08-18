@@ -4,6 +4,7 @@ import { fetchPublications, fetchProjects } from '../lib/sanity'
 import type { Publication, Project } from '../types/content'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { LoadingSkeleton, ErrorBoundary } from '../components/ui'
+import { motion } from 'framer-motion'
 import { ProjectCard, PublicationItem } from '../components/content'
 
 const Research = () => {
@@ -78,8 +79,15 @@ const Research = () => {
             <LoadingSkeleton type="grid" count={3} />
           ) : (
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-              {projects.map((project) => (
-                <ProjectCard key={project._id} project={project} />
+              {projects.map((project, idx) => (
+                <motion.div
+                  key={project._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                >
+                  <ProjectCard project={project} />
+                </motion.div>
               ))}
             </SimpleGrid>
           )}
@@ -102,13 +110,19 @@ const Research = () => {
 
           {!loading && !error && (
             <VStack align="stretch" spacing={4}>
-              {publications.map((publication) => (
-                <PublicationItem
+              {publications.map((publication, idx) => (
+                <motion.div
                   key={publication._id}
-                  publication={publication}
-                  variant="compact"
-                  showTags={true}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                >
+                  <PublicationItem
+                    publication={publication}
+                    variant="compact"
+                    showTags={true}
+                  />
+                </motion.div>
               ))}
             </VStack>
           )}

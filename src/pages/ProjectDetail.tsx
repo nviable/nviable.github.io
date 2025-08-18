@@ -6,6 +6,7 @@ import type { Project } from '../types/content'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { LoadingSkeleton, ErrorBoundary } from '../components/ui'
 import { PublicationItem, MediaItem } from '../components/content'
+import { motion } from 'framer-motion'
 
 export default function ProjectDetail() {
   const { projectSlug } = useParams()
@@ -137,13 +138,19 @@ export default function ProjectDetail() {
               Research Publications
             </Heading>
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-              {project.publications.map((pub) => (
-                <PublicationItem
+              {project.publications.map((pub, idx) => (
+                <motion.div
                   key={pub._id}
-                  publication={pub}
-                  variant="compact"
-                  showTags={true}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                >
+                  <PublicationItem
+                    publication={pub}
+                    variant="compact"
+                    showTags={true}
+                  />
+                </motion.div>
               ))}
             </SimpleGrid>
           </Box>
@@ -156,13 +163,19 @@ export default function ProjectDetail() {
               Media Coverage
             </Heading>
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-              {project.mediaAppearances.map((media) => (
-                <MediaItem
+              {project.mediaAppearances.map((media, idx) => (
+                <motion.div
                   key={media._id}
-                  media={media}
-                  variant="compact"
-                  showCategory={true}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                >
+                  <MediaItem
+                    media={media}
+                    variant="compact"
+                    showCategory={true}
+                  />
+                </motion.div>
               ))}
             </SimpleGrid>
           </Box>

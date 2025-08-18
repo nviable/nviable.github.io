@@ -5,6 +5,7 @@ import type { MediaAppearance } from '../types/content'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { LoadingSkeleton, ErrorBoundary } from '../components/ui'
 import { MediaItem } from '../components/content'
+import { motion } from 'framer-motion'
 
 export default function MediaArchive() {
   const [mediaAppearances, setMediaAppearances] = useState<MediaAppearance[]>([])
@@ -73,13 +74,19 @@ export default function MediaArchive() {
 
         {!loading && !error && (
           <VStack align="stretch" spacing={4}>
-            {mediaAppearances.map((media) => (
-              <MediaItem
+            {mediaAppearances.map((media, idx) => (
+              <motion.div
                 key={media._id}
-                media={media}
-                variant="compact"
-                showCategory={true}
-              />
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <MediaItem
+                  media={media}
+                  variant="compact"
+                  showCategory={true}
+                />
+              </motion.div>
             ))}
           </VStack>
         )}

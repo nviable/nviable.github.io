@@ -14,8 +14,8 @@ const LoadingSkeleton = ({
     columns = { base: 1, md: 2, lg: 3 },
     spacing = 6
 }: LoadingSkeletonProps) => {
-    const renderCardSkeleton = () => (
-        <Card key="skeleton" variant="outline">
+    const renderCardSkeleton = (key: number) => (
+        <Card key={`skeleton-${key}`} variant="outline">
             <CardHeader>
                 <Skeleton height="24px" mb={2} />
                 <Skeleton height="16px" />
@@ -40,13 +40,13 @@ const LoadingSkeleton = ({
 
     const renderGridSkeleton = () => (
         <SimpleGrid columns={columns} spacing={spacing}>
-            {[...Array(count)].map(() => renderCardSkeleton())}
+            {[...Array(count)].map((_, i) => renderCardSkeleton(i))}
         </SimpleGrid>
     )
 
     switch (type) {
         case 'card':
-            return renderCardSkeleton()
+            return renderCardSkeleton(0)
         case 'list':
             return renderListSkeleton()
         case 'grid':
