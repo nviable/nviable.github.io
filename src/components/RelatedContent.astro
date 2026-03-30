@@ -1,0 +1,214 @@
+---
+/**
+ * RelatedContent Component
+ * 
+ * Displays related projects and publications for cross-referencing content.
+ * Fetches actual content data from slugs and renders compact cards.
+ * 
+ * @component
+ * 
+ * @example
+ * ```astro
+ * <RelatedContent 
+ *   relatedProjects={['project-slug-1', 'project-slug-2']}
+ *   relatedPublications={['publication-slug-1']}
+ * />
+ * ```
+ */
+
+import { getCollection } from 'astro:content';
+
+interface Props {
+  /** Array of project slugs to display */
+  relatedProjects?: string[];
+  
+  /** Array of publication entry IDs to display */
+  relatedPublications?: string[];
+  
+  /** Section title (default: "Related") */
+  title?: string;
+}
+
+const { 
+  relatedProjects = [], 
+  relatedPublications = [],
+  title = "Related"
+} = Astro.props;
+
+// Fetch all collections once
+const allProjects = await getCollection('projects');
+const allPublications = await getCollection('publications');
+
+// Filter to get related items
+const projects = relatedProjects
+  .map(slug => allProjects.find(p => p.id === slug))
+  .filter((p): p is NonNullable<typeof p> => p !== undefined);
+
+const publications = relatedPublications
+  .map((id) => allPublications.find((p) => p.id === id))
+  .filter((p): p is NonNullable<typeof p> => p !== undefined);
+
+const hasRelated = projects.length > 0 || publications.length > 0;
+---
+
+{hasRelated && (
+  <aside class="related-content">
+    <h2 class="related-title">{title}</h2>
+    
+    <div class="related-grid">
+      {projects.length > 0 && (
+        <div class="related-section">
+          <h3 class="related-section-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Case Studies
+          </h3>
+          <ul class="related-list">
+            {projects.map((project) => (
+              <li>
+                <a href={`/projects/${project.id}`} class="related-item">
+                  <span class="related-item-meta">{project.data.role} · {project.data.year}</span>
+                  <span class="related-item-title">{project.data.title}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      {publications.length > 0 && (
+        <div class="related-section">
+          <h3 class="related-section-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            Publications
+          </h3>
+          <ul class="related-list">
+            {publications.map((pub) => (
+              <li>
+                {pub.data.url ? (
+                  <a
+                    href={pub.data.url}
+                    class="related-item"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span class="related-item-meta">{pub.data.year} · {pub.data.venue}</span>
+                    <span class="related-item-title">{pub.data.title}</span>
+                  </a>
+                ) : (
+                  <div class="related-item related-item--static">
+                    <span class="related-item-meta">{pub.data.year} · {pub.data.venue}</span>
+                    <span class="related-item-title">{pub.data.title}</span>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  </aside>
+)}
+
+<style>
+  .related-content {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .related-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  .related-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .related-section-title svg {
+    opacity: 0.7;
+  }
+
+  .related-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .related-item {
+    display: block;
+    padding: 1rem 1.25rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .related-item:hover {
+    border-color: var(--color-text-muted);
+    background: var(--color-bg-elevated);
+  }
+
+  .related-item--static {
+    cursor: default;
+  }
+
+  .related-item--static:hover {
+    border-color: var(--color-border);
+    background: var(--color-bg-secondary);
+  }
+
+  .related-item-meta {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.25rem;
+  }
+
+  .related-item-title {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--color-text);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 640px) {
+    .related-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .related-item {
+      padding: 0.875rem 1rem;
+    }
+  }
+</style>

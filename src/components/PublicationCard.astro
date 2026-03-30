@@ -1,0 +1,67 @@
+---
+/**
+ * Publication list card: title, authors, venue/year, research-area tags, external link when URL exists.
+ */
+import BaseCard from './BaseCard.astro';
+import ForwardLink from './ForwardLink.astro';
+
+interface Props {
+  title: string;
+  authors: string;
+  venue: string;
+  year: number;
+  url?: string;
+  tags?: string[];
+  statusNote?: string;
+  maxAuthorsLength?: number;
+}
+
+const {
+  title,
+  authors,
+  venue,
+  year,
+  url,
+  tags = [],
+  statusNote,
+  maxAuthorsLength = 220,
+} = Astro.props;
+
+function truncate(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength).trim() + '…';
+}
+
+const truncatedAuthors = truncate(authors, maxAuthorsLength);
+const meta = `${year} · ${venue}`;
+---
+
+<BaseCard href={url} external={Boolean(url)} class="publication-card">
+  <Fragment slot="meta">{meta}</Fragment>
+  <Fragment slot="title">{title}</Fragment>
+  <Fragment slot="description">{truncatedAuthors}</Fragment>
+  {
+    tags.length > 0 && (
+      <div slot="tags" class="tags-list">
+        {tags.map((tag) => (
+          <span class="tag">{tag}</span>
+        ))}
+      </div>
+    )
+  }
+  {url && <ForwardLink text="Open publication" variant="muted" />}
+  {!url && statusNote && <p class="status-note">{statusNote}</p>}
+</BaseCard>
+
+<style>
+  .publication-card :global(.card-description) {
+    font-size: 0.875rem;
+  }
+
+  .status-note {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+</style>

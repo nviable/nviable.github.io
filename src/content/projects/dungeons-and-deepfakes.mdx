@@ -1,0 +1,56 @@
+---
+title: "Dungeons & Deepfakes — Scenario-based study & training platform"
+role: "Principal investigator; lead designer & developer (platform)"
+year: 2025
+duration: "2022–2025"
+teamSize: 5
+outcomeSummary: "Role-play methodology and web platform for studying and training journalistic deepfake verification under deadline pressure — CHI 2024 paper, RIT Graduate Showcase 1st place (oral); platform includes AI-assisted scenario generation (MaGe) and structured feedback."
+overview: "Dungeons & Deepfakes adapts tabletop role-play to HCI research: journalists work through realistic verification scenarios with AI tools, revealing automation bias, confirmation bias, and cross-cultural differences in trust. A follow-on learning platform adds simulation-based training with generated scenarios, timelines, verdict-drift views, and quizzes. This file is starter copy — tighten claims and add links to your live demo and papers."
+problem: "Lab studies and surveys miss how reporters actually behave when a story is due and tools promise fast answers. We needed a repeatable, ethical way to observe tool use under pressure and later to train verification skills without only lecturing about model limits."
+constraints:
+  - "Participants in multiple countries (e.g. US and Bangladesh) with different newsroom norms"
+  - "Scenarios must feel realistic without using harmful real-world footage inappropriately"
+  - "Platform must support both research sessions and pedagogical reuse"
+approach: "Designed a scenario-based role-play protocol (CHI 2024) with 34 journalists, then built a learning web app with MaGe for AI-assisted pedagogical scenario material, interactive scenario flow, post-scenario analytics (verdict drift, action timelines), and competency checks. Iterate with journalism and HCI collaborators; align IRB and consent with your institution’s rules."
+keyDecisions:
+  - decision: "Use structured role-play instead of only think-aloud on static videos"
+    reasoning: "Deadlines, roles, and narrative framing change how people weigh model outputs; role-play surfaces those dynamics."
+    alternatives:
+      - "Standard usability tasks on a fixed clip set"
+      - "Fully open-ended newsroom shadowing only"
+  - decision: "Separate research study tooling from the training product line but shared design language"
+    reasoning: "Lets you publish clean study results while still shipping a teachable system — adjust if your architecture merged them."
+    alternatives:
+      - "One codebase for both with feature flags only"
+      - "Two unrelated codebases with no shared components"
+techStack:
+  - "Python"
+  - "Flask"
+  - "React"
+  - "Figma"
+  - "LLM-assisted content generation (MaGe)"
+impact:
+  metrics:
+    - label: "Study scale (placeholder)"
+      value: "34 journalists (US & Bangladesh) — confirm in your paper"
+    - label: "Recognition (placeholder)"
+      value: "1st place oral presentation, RIT Graduate Showcase 2022"
+  qualitative: "Findings informed how the broader DeFake toolset explains uncertainty and supports human judgment. Swap in your own summary of bias findings and training outcomes."
+learnings:
+  - "Scenario fidelity and facilitator guidance matter as much as the software"
+  - "Cross-cultural replication surfaced trust and workflow differences worth designing for explicitly"
+  - "Replace with lessons you want on the public site"
+featured: true
+status: ongoing
+order: 2
+relatedProjects:
+  - defake-app
+relatedPublications:
+  - dungeons-deepfakes-chi2024
+  - dissertation-phd-2025
+  - verification-ai-newsroom-promise2025
+---
+
+## Draft notes (delete or replace)
+
+Project pages: [Dungeons & Deepfakes on DeFake](https://defake.app/about/projects/dungeons-deepfakes). Add demo URL, IRB-safe description, and media kit links when available.
