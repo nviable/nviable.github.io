@@ -4,7 +4,7 @@
  * 
  * Foundation component providing consistent styling and structure for all card types.
  * This component should not be used directly - instead use specialized cards like
- * ArticleCard, ProjectCard, DecisionCard, or TalkCard for specific content types.
+ * ArticleCard, ProjectCard, PublicationCard, or TalkCard for specific content types.
  * 
  * Features:
  * - Consistent hover effects and transitions
@@ -33,24 +33,45 @@
  */
 
 interface Props {
-  /** Target URL for the card link (required) */
-  href: string;
+  /** Target URL for the card; when omitted, renders a static card (no link) */
+  href?: string;
+
+  /** Open link in a new tab (use for external URLs) */
+  external?: boolean;
   
   /** Additional CSS classes to apply to the card */
   class?: string;
 }
 
-const { href, class: className } = Astro.props;
+const { href, external = false, class: className } = Astro.props;
+const linkRel = external ? 'noopener noreferrer' : undefined;
+const linkTarget = external ? '_blank' : undefined;
 ---
 
-<a href={href} class:list={['base-card', className]}>
-  <slot name="badge" />
-  <span class="card-meta"><slot name="meta" /></span>
-  <span class="card-title"><slot name="title" /></span>
-  <span class="card-description"><slot name="description" /></span>
-  <slot name="tags" />
-  <slot />
-</a>
+{href ? (
+  <a
+    href={href}
+    class:list={['base-card', className]}
+    target={linkTarget}
+    rel={linkRel}
+  >
+    <slot name="badge" />
+    <span class="card-meta"><slot name="meta" /></span>
+    <span class="card-title"><slot name="title" /></span>
+    <span class="card-description"><slot name="description" /></span>
+    <slot name="tags" />
+    <slot />
+  </a>
+) : (
+  <div class:list={['base-card', 'base-card--static', className]}>
+    <slot name="badge" />
+    <span class="card-meta"><slot name="meta" /></span>
+    <span class="card-title"><slot name="title" /></span>
+    <span class="card-description"><slot name="description" /></span>
+    <slot name="tags" />
+    <slot />
+  </div>
+)}
 
 <style>
   .base-card {
@@ -67,6 +88,15 @@ const { href, class: className } = Astro.props;
   .base-card:hover {
     border-color: var(--color-text-muted);
     background: var(--color-bg-elevated);
+  }
+
+  .base-card--static {
+    cursor: default;
+  }
+
+  .base-card--static:hover {
+    border-color: var(--color-border);
+    background: var(--color-bg-secondary);
   }
 
   .card-meta {

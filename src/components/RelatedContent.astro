@@ -2,7 +2,7 @@
 /**
  * RelatedContent Component
  * 
- * Displays related projects and decisions for cross-referencing content.
+ * Displays related projects and publications for cross-referencing content.
  * Fetches actual content data from slugs and renders compact cards.
  * 
  * @component
@@ -11,7 +11,7 @@
  * ```astro
  * <RelatedContent 
  *   relatedProjects={['project-slug-1', 'project-slug-2']}
- *   relatedDecisions={['decision-slug-1']}
+ *   relatedPublications={['publication-slug-1']}
  * />
  * ```
  */
@@ -22,8 +22,8 @@ interface Props {
   /** Array of project slugs to display */
   relatedProjects?: string[];
   
-  /** Array of decision slugs to display */
-  relatedDecisions?: string[];
+  /** Array of publication entry IDs to display */
+  relatedPublications?: string[];
   
   /** Section title (default: "Related") */
   title?: string;
@@ -31,34 +31,24 @@ interface Props {
 
 const { 
   relatedProjects = [], 
-  relatedDecisions = [],
+  relatedPublications = [],
   title = "Related"
 } = Astro.props;
 
 // Fetch all collections once
 const allProjects = await getCollection('projects');
-const allDecisions = await getCollection('decisions');
+const allPublications = await getCollection('publications');
 
 // Filter to get related items
 const projects = relatedProjects
   .map(slug => allProjects.find(p => p.id === slug))
   .filter((p): p is NonNullable<typeof p> => p !== undefined);
 
-const decisions = relatedDecisions
-  .map(slug => allDecisions.find(d => d.id === slug))
-  .filter((d): d is NonNullable<typeof d> => d !== undefined);
+const publications = relatedPublications
+  .map((id) => allPublications.find((p) => p.id === id))
+  .filter((p): p is NonNullable<typeof p> => p !== undefined);
 
-const hasRelated = projects.length > 0 || decisions.length > 0;
-
-/**
- * Formats a date to "Month Year" format
- */
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short'
-  }).format(date);
-}
+const hasRelated = projects.length > 0 || publications.length > 0;
 ---
 
 {hasRelated && (
@@ -87,23 +77,34 @@ function formatDate(date: Date): string {
         </div>
       )}
       
-      {decisions.length > 0 && (
+      {publications.length > 0 && (
         <div class="related-section">
           <h3 class="related-section-title">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
             </svg>
-            Decisions
+            Publications
           </h3>
           <ul class="related-list">
-            {decisions.map((decision) => (
+            {publications.map((pub) => (
               <li>
-                <a href={`/decisions/${decision.id}`} class="related-item">
-                  <span class="related-item-meta">{formatDate(decision.data.date)}</span>
-                  <span class="related-item-title">{decision.data.title}</span>
-                </a>
+                {pub.data.url ? (
+                  <a
+                    href={pub.data.url}
+                    class="related-item"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span class="related-item-meta">{pub.data.year} · {pub.data.venue}</span>
+                    <span class="related-item-title">{pub.data.title}</span>
+                  </a>
+                ) : (
+                  <div class="related-item related-item--static">
+                    <span class="related-item-meta">{pub.data.year} · {pub.data.venue}</span>
+                    <span class="related-item-title">{pub.data.title}</span>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -171,6 +172,15 @@ function formatDate(date: Date): string {
   .related-item:hover {
     border-color: var(--color-text-muted);
     background: var(--color-bg-elevated);
+  }
+
+  .related-item--static {
+    cursor: default;
+  }
+
+  .related-item--static:hover {
+    border-color: var(--color-border);
+    background: var(--color-bg-secondary);
   }
 
   .related-item-meta {

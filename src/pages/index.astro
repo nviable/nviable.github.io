@@ -4,25 +4,25 @@
  * 
  * Case-study-first portfolio homepage that immediately showcases real impact and outcomes
  * rather than generic taglines. Features a hero section with featured project snapshots,
- * recent decisions, testimonials, and clear calls-to-action.
+ * recent publications, testimonials, and clear calls-to-action.
  * 
  * Design Philosophy:
  * - Lead with tangible results and case studies
  * - Document decision-making process transparently
  * - Demonstrate value through real project outcomes
- * - Provide multiple entry points (projects, decisions, journey)
+ * - Provide multiple entry points (projects, publications, journey)
  * 
  * Sections:
  * 1. Hero - Value statement with featured case study snapshots
  * 2. Introduction - Brief personal introduction with journey link
- * 3. Recent Decisions - Latest architectural/technical decisions
+ * 3. Recent publications - Latest research outputs
  * 4. Testimonials - Social proof from colleagues and clients
  * 5. Thinking - Problems and topics of interest
  * 6. CTA - Call-to-action for work opportunities
  * 
  * Features:
  * - Featured projects showcase (top 2-3)
- * - Recent decisions preview (top 2)
+ * - Recent publications preview (top 3)
  * - Testimonials integration
  * - Structured data for SEO (WebSite and Person)
  * - Responsive grid layout
@@ -62,15 +62,15 @@ const featuredProjects = allProjects
 const caseSnapshots = featuredProjects.slice(0, 3);
 
 /**
- * Queries recent decisions for preview section
- * 
- * Retrieves all decisions, sorts by date (newest first), and limits to
- * top 2 for the homepage preview.
+ * Recent publications for homepage preview (newest by year, then order).
  */
-const allDecisions = await getCollection('decisions');
-const recentDecisions = allDecisions
-  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
-  .slice(0, 2);
+const allPublications = await getCollection('publications');
+const recentPublications = allPublications
+  .sort((a, b) => {
+    if (b.data.year !== a.data.year) return b.data.year - a.data.year;
+    return (a.data.order ?? 999) - (b.data.order ?? 999);
+  })
+  .slice(0, 3);
 ---
 
 <BaseLayout>
@@ -94,7 +94,7 @@ const recentDecisions = allDecisions
         <div class="hero-left">
           <h1 class="hero-title">
             I don't just ship projects.<br/>
-            <span class="hero-title-emphasis">I document decisions, trade-offs, and outcomes.</span>
+            <span class="hero-title-emphasis">HCI, media forensics, and tools people trust under pressure.</span>
           </h1>
           <p class="hero-sub">
             A portfolio built around case studies — not screenshots.
@@ -104,7 +104,7 @@ const recentDecisions = allDecisions
           </p>
           <div class="hero-cta">
             <a href="/projects" class="btn-primary">Explore Case Studies</a>
-            <a href="/decisions" class="btn-secondary">How I Make Decisions</a>
+            <a href="/publications" class="btn-secondary">Publications</a>
           </div>
         </div>
 
@@ -134,29 +134,39 @@ const recentDecisions = allDecisions
       <ForwardLink href="/journey" text="Read my journey" variant="muted" />
     </section>
 
-    <!-- Recent Decisions -->
-    <section class="recent-decisions">
+    <!-- Recent publications -->
+    <section class="recent-publications">
       <div class="section-header">
-        <h2>Recent Decisions</h2>
-        <ForwardLink href="/decisions" text="View all" variant="muted" />
+        <h2>Recent publications</h2>
+        <ForwardLink href="/publications" text="View all" variant="muted" />
       </div>
-      
-      {recentDecisions.length > 0 ? (
-        <div class="decisions-list">
-          {recentDecisions.map((decision) => {
-            const date = new Date(decision.data.date);
-            const formattedDate = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-            return (
-              <article class="decision-item">
-                <span class="decision-date">{formattedDate}</span>
-                <h3 class="decision-title">{decision.data.title}</h3>
-                <p class="decision-context">{decision.data.context}</p>
-              </article>
-            );
-          })}
+
+      {recentPublications.length > 0 ? (
+        <div class="publications-preview-list">
+          {recentPublications.map((pub) => (
+            <article class="publication-preview-item">
+              <span class="publication-preview-meta">
+                {pub.data.year}
+                {pub.data.tags && pub.data.tags.length > 0 && (
+                  <> · {pub.data.tags.slice(0, 3).join(' · ')}</>
+                )}
+              </span>
+              <h3 class="publication-preview-title">
+                {pub.data.url ? (
+                  <a href={pub.data.url} target="_blank" rel="noopener noreferrer">
+                    {pub.data.title}
+                  </a>
+                ) : (
+                  pub.data.title
+                )}
+              </h3>
+              <p class="publication-preview-authors">{pub.data.authors}</p>
+              <p class="publication-preview-venue">{pub.data.venue}</p>
+            </article>
+          ))}
         </div>
       ) : (
-        <p class="no-decisions">No decisions documented yet.</p>
+        <p class="no-publications">No publications listed yet.</p>
       )}
     </section>
 
@@ -340,7 +350,7 @@ const recentDecisions = allDecisions
       color: var(--color-text);
     }
 
-    .recent-decisions {
+    .recent-publications {
       margin-bottom: 5rem;
     }
 
@@ -357,23 +367,23 @@ const recentDecisions = allDecisions
       letter-spacing: -0.01em;
     }
 
-    .decisions-list {
+    .publications-preview-list {
       display: flex;
       flex-direction: column;
       gap: 0;
       border-top: 1px solid var(--color-border);
     }
 
-    .decision-item {
+    .publication-preview-item {
       padding: 1.5rem 0;
       border-bottom: 1px solid var(--color-border);
     }
 
-    .decision-item:last-child {
+    .publication-preview-item:last-child {
       border-bottom: none;
     }
 
-    .decision-date {
+    .publication-preview-meta {
       display: block;
       font-size: 0.75rem;
       font-weight: 500;
@@ -383,21 +393,38 @@ const recentDecisions = allDecisions
       margin-bottom: 0.5rem;
     }
 
-    .decision-title {
+    .publication-preview-title {
       font-size: 1.125rem;
       font-weight: 600;
       line-height: 1.3;
       color: var(--color-text);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
     }
 
-    .decision-context {
-      font-size: 0.9375rem;
-      line-height: 1.6;
+    .publication-preview-title a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .publication-preview-title a:hover {
+      color: var(--color-accent);
+    }
+
+    .publication-preview-authors,
+    .publication-preview-venue {
+      font-size: 0.875rem;
+      line-height: 1.5;
       color: var(--color-text-secondary);
+      margin: 0;
     }
 
-    .no-decisions {
+    .publication-preview-venue {
+      margin-top: 0.25rem;
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+    }
+
+    .no-publications {
       color: var(--color-text-muted);
       font-style: italic;
       padding: 1.5rem 0;

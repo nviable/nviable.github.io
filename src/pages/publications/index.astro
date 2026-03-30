@@ -1,0 +1,71 @@
+---
+/**
+ * Publications index — single list sorted by year (newest first); document kind shown as a tag.
+ * Route: /publications
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SEO from '../../components/SEO.astro';
+import PublicationCard from '../../components/PublicationCard.astro';
+import PageStats from '../../components/PageStats.astro';
+import { getCollection } from 'astro:content';
+import { pagesConfig } from '../../pages.config';
+
+const KIND_TAG: Record<
+  'bookChapter' | 'journal' | 'conference' | 'dissertation',
+  string
+> = {
+  bookChapter: 'Book chapter',
+  journal: 'Journal article',
+  conference: 'Conference',
+  dissertation: 'Dissertation',
+};
+
+const allPublications = await getCollection('publications');
+
+const sorted = [...allPublications].sort((a, b) => {
+  if (b.data.year !== a.data.year) {
+    return b.data.year - a.data.year;
+  }
+  return (a.data.order ?? 999) - (b.data.order ?? 999);
+});
+
+const total = sorted.length;
+---
+
+<BaseLayout>
+  <SEO
+    slot="head"
+    title={pagesConfig.publications.title}
+    description={pagesConfig.publications.description}
+    type="website"
+  />
+
+  <main class="page-container">
+    <header class="page-header">
+      <h1 class="page-title">{pagesConfig.publications.heading}</h1>
+      <p class="page-intro">{pagesConfig.publications.intro}</p>
+      <PageStats text={`${total} publication${total === 1 ? '' : 's'}`} />
+    </header>
+
+    {total > 0 ? (
+      <div class="card-list card-list--compact">
+        {sorted.map((entry) => (
+          <PublicationCard
+            title={entry.data.title}
+            authors={entry.data.authors}
+            venue={entry.data.venue}
+            year={entry.data.year}
+            url={entry.data.url}
+            tags={[
+              KIND_TAG[entry.data.kind],
+              ...(entry.data.tags ?? []),
+            ]}
+            statusNote={entry.data.statusNote}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="empty-state">No publications listed yet.</p>
+    )}
+  </main>
+</BaseLayout>

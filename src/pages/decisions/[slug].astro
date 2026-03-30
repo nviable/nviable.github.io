@@ -28,33 +28,31 @@ import SEO from '../../components/SEO.astro';
 import ScrollToTop from '../../components/ScrollToTop.astro';
 import BackLink from '../../components/BackLink.astro';
 import RelatedContent from '../../components/RelatedContent.astro';
-import { getCollection, render } from 'astro:content';
-import type { GetStaticPaths } from 'astro';
+import { getCollection, getEntry, render } from 'astro:content';
 
 /**
  * Generates static paths for all decision entries
- * 
+ *
  * Queries the decisions content collection and creates a route for each entry
  * using the entry ID as the slug parameter.
- * 
- * @returns Array of path objects with params and props
  */
-export const getStaticPaths: GetStaticPaths = async () => {
+export async function getStaticPaths() {
   const decisions = await getCollection('decisions');
-  return decisions.map((decision) => ({
-    params: { slug: decision.id },
-    props: { decision },
+  return decisions.map((d) => ({
+    params: { slug: d.id },
   }));
-};
-
-type DecisionEntry = Awaited<ReturnType<typeof getCollection<'decisions'>>>[number];
-
-interface Props {
-  /** The decision entry from the content collection */
-  decision: DecisionEntry;
 }
 
-const { decision } = Astro.props;
+const slug = Astro.params.slug;
+if (!slug) {
+  return Astro.redirect('/404');
+}
+
+const decision = await getEntry('decisions', slug);
+if (!decision) {
+  return Astro.redirect('/404');
+}
+
 const { Content } = await render(decision);
 
 /**
@@ -150,9 +148,9 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
         </section>
       )}
 
-      <RelatedContent 
-        relatedProjects={decision.data.relatedProjects} 
-        relatedDecisions={decision.data.relatedDecisions} 
+      <RelatedContent
+        relatedProjects={decision.data.relatedProjects}
+        relatedPublications={decision.data.relatedPublications}
       />
 
       <BackLink href="/decisions" text="All decisions" />
