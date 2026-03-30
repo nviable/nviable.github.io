@@ -37,7 +37,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SEO from '../components/SEO.astro';
 import StructuredData from '../components/StructuredData.astro';
 import ForwardLink from '../components/ForwardLink.astro';
-import Testimonials from '../components/Testimonials.astro';
+// import Testimonials from '../components/Testimonials.astro';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../config';
 
@@ -103,7 +103,7 @@ const recentPublications = allPublications
             {siteConfig.author.name} · {siteConfig.author.title}
           </p>
           <div class="hero-cta">
-            <a href="/projects" class="btn-primary">Explore Case Studies</a>
+            <a href="/projects" class="btn-primary">Explore Projects</a>
             <a href="/publications" class="btn-secondary">Publications</a>
           </div>
         </div>
@@ -124,7 +124,7 @@ const recentPublications = allPublications
     </section>
 
     <!-- Introduction -->
-    <section class="introduction">
+    <!-- <section class="introduction">
       <p>
         I'm {siteConfig.author.name}, {siteConfig.author.title.toLowerCase()} focused on building systems that move real business metrics.
       </p>
@@ -132,7 +132,7 @@ const recentPublications = allPublications
         Every major decision is documented—because great engineers don't just build things, they explain why.
       </p>
       <ForwardLink href="/journey" text="Read my journey" variant="muted" />
-    </section>
+    </section> -->
 
     <!-- Recent publications -->
     <section class="recent-publications">
@@ -171,24 +171,24 @@ const recentPublications = allPublications
     </section>
 
     <!-- Testimonials -->
-    <Testimonials limit={3} />
+    <!-- <Testimonials limit={3} /> -->
 
     <!-- What I Think About -->
-    <section class="thinking">
+    <!-- <section class="thinking">
       <h2>Problems I Enjoy Solving</h2>
       <p class="thinking-list">
         How to scale systems without scaling complexity · When to choose consistency over availability · Making legacy codebases maintainable · Designing APIs that last · Building teams that ship · Turning technical debt into technical investment · Documenting decisions so future-you understands past-you
       </p>
-    </section>
+    </section> -->
 
     <!-- CTA -->
     <section class="cta">
       <h2>Let's Work Together</h2>
       <p>
-        Looking for technical leadership, architectural guidance, or someone who documents their thinking? Let's talk.
+        Looking for someone with deep expertise in building usable, trustworthy digital media forensics tools? Let's talk.
       </p>
       <div class="cta-buttons">
-        <a href="/projects" class="btn-primary">View My Work</a>
+        <a href="/publications" class="btn-primary">View My Publications</a>
         <a href="/contact" class="btn-secondary">Get in Touch</a>
       </div>
     </section>

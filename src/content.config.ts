@@ -7,7 +7,6 @@
  * Collections:
  * - projects: Case studies with structured narrative format
  * - publications: Research publications (external links; optional detail pages later)
- * - decisions: Optional decision / ADR-style records
  * - journey: Career timeline entries
  * - writing: Blog posts and articles
  * - uses: Tools, stack, and environment documentation
@@ -98,7 +97,9 @@ const projectsCollection = defineCollection({
     featured: z.boolean().default(false),
     
     /** Project status */
-    status: z.enum(['completed', 'ongoing', 'archived']).default('completed'),
+    status: z
+      .enum(['completed', 'ongoing', 'archived', 'inactive'])
+      .default('completed'),
     
     /** Custom sort order (lower numbers first) */
     order: z.number().optional(),
@@ -131,32 +132,6 @@ const publicationsCollection = defineCollection({
     statusNote: z.string().optional(),
     /** Sort order within the same year and kind (lower first) */
     order: z.number().optional(),
-  }),
-});
-
-/**
- * Decisions Collection
- *
- * Architectural / technical decision records (optional section).
- */
-const decisionsCollection = defineCollection({
-  loader: glob({ pattern: '**/*.mdx', base: './src/content/decisions' }),
-  schema: z.object({
-    title: z.string(),
-    date: z.coerce.date(),
-    context: z.string(),
-    decision: z.string(),
-    alternatives: z.array(
-      z.object({
-        option: z.string(),
-        pros: z.array(z.string()).optional(),
-        cons: z.array(z.string()).optional(),
-      })
-    ),
-    reasoning: z.string(),
-    tags: z.array(z.string()).optional(),
-    relatedProjects: z.array(z.string()).optional(),
-    relatedPublications: z.array(z.string()).optional(),
   }),
 });
 
@@ -355,7 +330,6 @@ const testimonialsCollection = defineCollection({
 export const collections = {
   projects: projectsCollection,
   publications: publicationsCollection,
-  decisions: decisionsCollection,
   journey: journeyCollection,
   writing: writingCollection,
   uses: usesCollection,

@@ -98,6 +98,7 @@ const statusConfig = {
   completed: { label: 'Completed', class: 'status--completed' },
   ongoing: { label: 'Ongoing', class: 'status--ongoing' },
   archived: { label: 'Archived', class: 'status--archived' },
+  inactive: { label: 'Inactive', class: 'status--inactive' },
 };
 const statusInfo = statusConfig[status || 'completed'];
 
@@ -317,6 +318,11 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
     .status--archived {
       background: rgba(115, 115, 115, 0.15);
       color: var(--color-text-muted);
+    }
+
+    .status--inactive {
+      background: rgba(234, 179, 8, 0.12);
+      color: #ca8a04;
     }
 
     .case-study-header h1 {

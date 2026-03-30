@@ -116,6 +116,12 @@ export const siteConfig = {
     
     /** Bluesky profile URL */
     bluesky: getEnv('SOCIAL_BLUESKY', ''),
+
+    /** ORCID profile URL */
+    orcid: getEnv('SOCIAL_ORCID', ''),
+
+    /** Scholar profile URL */
+    scholar: getEnv('SOCIAL_SCHOLAR', ''),
   },
   
   /**
@@ -127,10 +133,6 @@ export const siteConfig = {
   nav: [
     { label: 'Projects', href: '/projects' },
     { label: 'Publications', href: '/publications' },
-    { label: 'Journey', href: '/journey' },
-    { label: 'Writing', href: '/writing' },
-    { label: 'Speaking', href: '/speaking' },
-    { label: 'Uses', href: '/uses' },
     { label: 'Contact', href: '/contact' },
   ],
 } as const;

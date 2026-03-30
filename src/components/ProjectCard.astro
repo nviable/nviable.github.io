@@ -49,7 +49,7 @@ interface Props {
   featured?: boolean;
   
   /** Project status (default: 'completed') */
-  status?: 'completed' | 'ongoing' | 'archived';
+  status?: 'completed' | 'ongoing' | 'archived' | 'inactive';
 }
 
 const { title, slug, outcomeSummary, role, year, techStack = [], featured = false, status = 'completed' } = Astro.props;
@@ -63,6 +63,7 @@ const statusConfig = {
   completed: { label: 'Completed', class: 'status--completed' },
   ongoing: { label: 'Ongoing', class: 'status--ongoing' },
   archived: { label: 'Archived', class: 'status--archived' },
+  inactive: { label: 'Inactive', class: 'status--inactive' },
 };
 const statusInfo = statusConfig[status];
 ---
@@ -148,6 +149,11 @@ const statusInfo = statusConfig[status];
   .status--archived {
     background: rgba(115, 115, 115, 0.15);
     color: var(--color-text-muted);
+  }
+
+  .status--inactive {
+    background: rgba(234, 179, 8, 0.12);
+    color: #ca8a04;
   }
 
   .tag-more {

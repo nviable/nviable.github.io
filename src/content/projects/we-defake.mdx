@@ -1,0 +1,49 @@
+---
+title: "We.DeFake — Federated community for collaborative forensics"
+role: "Lead (research platform)"
+year: 2026
+duration: "2021–2025"
+teamSize: 4
+outcomeSummary: "ActivityPub-based social layer (Pleroma/Soapbox) for researchers, journalists, and fact-checkers to share verification context and collaborate on manipulated-media cases — draft wording; add adoption stats when available."
+overview: "We.DeFake explores whether federated, open social infrastructure can support trustworthy collaboration around sensitive media: smaller silos, community norms, and tooling hooks into DeFake workflows instead of only centralized platforms. Starter portfolio text — revise for what you are comfortable claiming publicly."
+problem: "Investigations span organizations and time zones, but mainstream social products are poor fits for forensic evidence handling, chain-of-custody norms, and expert-only discussion."
+constraints:
+  - "Federation adds moderation, identity, and abuse-surface complexity"
+  - "Must interoperate with existing DeFake apps without forcing a single host"
+  - "Community size may stay small — design for depth over viral growth"
+approach: "Deploy and customize Pleroma/Soapbox with workflows that encourage structured posts (claims, sources, tool outputs) and cross-link to DeFake analysis where appropriate. Iterate with pilot communities of researchers and journalists."
+keyDecisions:
+  - decision: "Use ActivityPub / Pleroma rather than a bespoke real-time only stack"
+    reasoning: "Standards-based federation lets institutions run their own nodes and interoperate; reduces lock-in."
+    alternatives:
+      - "Closed Slack/Discord-style workspace only"
+      - "Greenfield custom social graph"
+  - decision: "Position We.DeFake as expert-adjacent, not a consumer social network"
+    reasoning: "Keeps expectations and moderation scope aligned with forensic use."
+    alternatives:
+      - "Open registration for general public"
+techStack:
+  - "Pleroma"
+  - "Soapbox"
+  - "ActivityPub"
+  - "Elixir"
+  - "Docker"
+impact:
+  metrics:
+    - label: "Deployment (placeholder)"
+      value: "we.defake.app — add MAU or pilot org count if publishable"
+  qualitative: "Complements DeFake.app with a place to coordinate human interpretation and peer review of suspicious media. Replace with your narrative."
+learnings:
+  - "Federated communities need clear governance and onboarding for forensic norms"
+  - "Technical federation does not automatically create trust — social design matters"
+  - "Personalize or delete these points"
+featured: false
+status: inactive
+order: 4
+relatedProjects:
+  - defake-app
+---
+
+## Draft notes (delete or replace)
+
+Community URL: [we.defake.app](https://we.defake.app). Add code of conduct, moderation model, and integration diagrams when you want them on the portfolio.

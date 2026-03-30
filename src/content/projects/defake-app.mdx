@@ -1,0 +1,62 @@
+---
+title: "DeFake.app — Deepfake detection for expert workflows"
+role: "Lead researcher & founder"
+year: 2026
+duration: "2018–present (ongoing)"
+teamSize: 18
+outcomeSummary: "Interdisciplinary initiative (Knight + NSF + DoD + Omidyar funding) shipping usable detection and forensics tools co-designed with journalists, analysts, and law enforcement — replace with your metrics when ready."
+overview: "The DeFake Project builds interpretable, workflow-aligned interfaces on top of ML detection (video, audio, identity signals) so experts can verify synthetic and manipulated media without blind trust in model scores. This case study summarizes the flagship web application and research platform; refine every section with your own numbers and quotes."
+problem: "Off-the-shelf deepfake detectors are black boxes. Journalists, intelligence analysts, and investigators need explainable cues, provenance context, and interfaces that match how they already work under time pressure — not a single probability bar."
+constraints:
+  - "Stakeholders span newsrooms, government, and academia with different threat models"
+  - "Models and attack surfaces evolve faster than traditional release cycles"
+  - "Human-in-the-loop judgment must stay central to avoid automation bias"
+  - "Funding and compliance requirements across multiple sponsors"
+approach: "Mixed-methods research (interviews, diary studies, workshops, usability tests) drives requirements and iteration. High-fidelity Figma prototypes are tested before engineering commits. The stack combines Flask/React services with PyTorch/Keras models, Dockerized components, and design patterns that surface evidence (intra-frame, inter-frame, audio, speaker identity) in a forensic-style UI rather than a single verdict."
+keyDecisions:
+  - decision: "Prioritize explainable, multi-signal UI over a single authenticity score"
+    reasoning: "Expert users need to justify conclusions to editors and courts; layered evidence reduces harmful over-trust in one number."
+    alternatives:
+      - "Minimal UI wrapping a single classifier output"
+      - "Fully automated moderation pipeline"
+  - decision: "Co-design with journalists and analysts from the first prototype"
+    reasoning: "Workflow fit and trust are as important as raw AUROC; field studies surfaced needs no lab study would catch."
+    alternatives:
+      - "Ship a demo first and collect feedback post-launch"
+      - "Rely only on academic peer review for validation"
+techStack:
+  - "Python"
+  - "Flask"
+  - "React"
+  - "PyTorch"
+  - "Keras"
+  - "Figma"
+  - "Docker"
+impact:
+  metrics:
+    - label: "Scale (placeholder)"
+      value: "~18 researchers, 4 universities — update"
+    - label: "Recognition (placeholder)"
+      value: "Knight AI & the News Open Challenge winner — verify wording"
+  qualitative: "Sub-projects include the analytic interface, Varuna (ontology-driven forensics platform), Dungeons & Deepfakes (training/simulation), and We.DeFake (federated ActivityPub community). Replace this paragraph with outcomes you are comfortable publishing."
+learnings:
+  - "Usable security for media integrity means designing for doubt, calibration, and audit trails — not just accuracy"
+  - "Cross-institution roadmaps need explicit stakeholder alignment and shared definitions of done"
+  - "Replace with your own takeaways after you edit this draft"
+featured: true
+status: ongoing
+order: 1
+relatedPublications:
+  - dissertation-phd-2025
+  - open-world-deepfakes-ccs2019
+  - journalists-needs-cj-soups2020
+  - recurrent-convolutional-jstsp2020
+  - intelligence-analysts-chi2025
+  - verification-ai-newsroom-promise2025
+  - visual-media-forensics-ontology-chi2026
+  - edges-optical-flow-ijcb2020
+---
+
+## Draft notes (delete or replace)
+
+Link out: [defake.app](https://defake.app/about) and project subpages. Add screenshots, evaluation results, and partner acknowledgments when you are ready.
