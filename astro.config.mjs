@@ -89,13 +89,23 @@ export default defineConfig({
       // Site configuration
       SITE_URL: envField.string({ context: 'client', access: 'public', default: 'https://example.com' }),
       SITE_LANGUAGE: envField.string({ context: 'client', access: 'public', default: 'en' }),
-      SITE_TITLE: envField.string({ context: 'client', access: 'public', default: 'Professional Portfolio' }),
-      SITE_DESCRIPTION: envField.string({ context: 'client', access: 'public', default: 'Engineering leader specializing in system architecture, technical decision-making, and delivering measurable business impact.' }),
+      SITE_TITLE: envField.string({ context: 'client', access: 'public', default: 'John Sohrawardi — Portfolio Website' }),
+      SITE_DESCRIPTION: envField.string({
+        context: 'client',
+        access: 'public',
+        default:
+          'Human–computer interaction and digital media forensics researcher focused on building usable, trustworthy deepfake detection tools for journalists, intelligence analysts, and law enforcement. Founder and lead of the DeFake Project — an interdisciplinary initiative across four universities. Over 7 years of HCI and ML research experience; 4 years of UX and product-facing industry work.',
+      }),
       
       // Author information
-      SITE_AUTHOR_NAME: envField.string({ context: 'client', access: 'public', default: 'Your Name' }),
-      SITE_AUTHOR_TITLE: envField.string({ context: 'client', access: 'public', default: 'Senior Software Engineer' }),
-      SITE_AUTHOR_BIO: envField.string({ context: 'client', access: 'public', default: 'Engineering leader focused on solving complex technical challenges through thoughtful architecture and pragmatic trade-off analysis.' }),
+      SITE_AUTHOR_NAME: envField.string({ context: 'client', access: 'public', default: 'John Sohrawardi' }),
+      SITE_AUTHOR_TITLE: envField.string({ context: 'client', access: 'public', default: 'Postdoctoral Researcher · HCI & Digital Media Forensics' }),
+      SITE_AUTHOR_BIO: envField.string({
+        context: 'client',
+        access: 'public',
+        default:
+          'Human–computer interaction and digital media forensics researcher focused on building usable, trustworthy deepfake detection tools for journalists, intelligence analysts, and law enforcement. Founder and lead of the DeFake Project — an interdisciplinary initiative across four universities. Over 7 years of HCI and ML research experience; 4 years of UX and product-facing industry work.',
+      }),
       SITE_AUTHOR_EMAIL: envField.string({ context: 'client', access: 'public', default: 'hello@example.com' }),
       SITE_AUTHOR_LOCATION: envField.string({ context: 'client', access: 'public', default: '' }),
       
@@ -105,6 +115,8 @@ export default defineConfig({
       SOCIAL_TWITTER: envField.string({ context: 'client', access: 'public', default: '' }),
       SOCIAL_MASTODON: envField.string({ context: 'client', access: 'public', default: '' }),
       SOCIAL_BLUESKY: envField.string({ context: 'client', access: 'public', default: '' }),
+      SOCIAL_ORCID: envField.string({ context: 'client', access: 'public', default: '' }),
+      SOCIAL_SCHOLAR: envField.string({ context: 'client', access: 'public', default: '' }),
     },
   },
   

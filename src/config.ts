@@ -63,14 +63,17 @@ export const siteConfig = {
    * 
    * Used as fallback when page-specific title is not provided.
    */
-  title: getEnv('SITE_TITLE', 'Professional Portfolio'),
+  title: getEnv('SITE_TITLE', 'John Sohrawardi — Portfolio Website'),
   
   /**
    * Site description
    * 
    * Default meta description for SEO and social sharing.
    */
-  description: getEnv('SITE_DESCRIPTION', 'Engineering leader specializing in system architecture, technical decision-making, and delivering measurable business impact.'),
+  description: getEnv(
+    'SITE_DESCRIPTION',
+    'Human–computer interaction and digital media forensics researcher focused on building usable, trustworthy deepfake detection tools for journalists, intelligence analysts, and law enforcement. Founder and lead of the DeFake Project — an interdisciplinary initiative across four universities. Over 7 years of HCI and ML research experience; 4 years of UX and product-facing industry work.'
+  ),
   
   /**
    * Author information
@@ -83,10 +86,13 @@ export const siteConfig = {
     name: getEnv('SITE_AUTHOR_NAME', 'Your Name'),
     
     /** Professional title or role */
-    title: getEnv('SITE_AUTHOR_TITLE', 'Senior Software Engineer'),
+    title: getEnv('SITE_AUTHOR_TITLE', 'Postdoctoral Researcher · HCI & Digital Media Forensics'),
     
     /** Short biography or professional summary */
-    bio: getEnv('SITE_AUTHOR_BIO', 'Engineering leader focused on solving complex technical challenges through thoughtful architecture and pragmatic trade-off analysis.'),
+    bio: getEnv(
+      'SITE_AUTHOR_BIO',
+      'Human–computer interaction and digital media forensics researcher focused on building usable, trustworthy deepfake detection tools for journalists, intelligence analysts, and law enforcement. Founder and lead of the DeFake Project — an interdisciplinary initiative across four universities. Over 7 years of HCI and ML research experience; 4 years of UX and product-facing industry work.'
+    ),
     
     /** Contact email address */
     email: getEnv('SITE_AUTHOR_EMAIL', 'hello@example.com'),

@@ -1,35 +1,7 @@
 ---
 /**
- * Home Page
- * 
- * Case-study-first portfolio homepage that immediately showcases real impact and outcomes
- * rather than generic taglines. Features a hero section with featured project snapshots,
- * recent publications, testimonials, and clear calls-to-action.
- * 
- * Design Philosophy:
- * - Lead with tangible results and case studies
- * - Document decision-making process transparently
- * - Demonstrate value through real project outcomes
- * - Provide multiple entry points (projects, publications, journey)
- * 
- * Sections:
- * 1. Hero - Value statement with featured case study snapshots
- * 2. Introduction - Brief personal introduction with journey link
- * 3. Recent publications - Latest research outputs
- * 4. Testimonials - Social proof from colleagues and clients
- * 5. Thinking - Problems and topics of interest
- * 6. CTA - Call-to-action for work opportunities
- * 
- * Features:
- * - Featured projects showcase (top 2-3)
- * - Recent publications preview (top 3)
- * - Testimonials integration
- * - Structured data for SEO (WebSite and Person)
- * - Responsive grid layout
- * - Multiple CTAs for different user intents
- * 
+ * Home Page — researcher-focused: HCI, digital media forensics, DeFake / verification research.
  * Route: /
- * 
  * @page
  */
 
@@ -74,9 +46,9 @@ const recentPublications = allPublications
 ---
 
 <BaseLayout>
-  <SEO 
+  <SEO
     slot="head"
-    title={`${siteConfig.author.name} - ${siteConfig.author.title}`}
+    title={siteConfig.title}
     description={siteConfig.description}
     type="website"
     noSuffix
@@ -87,33 +59,33 @@ const recentPublications = allPublications
   <StructuredData type="Person" />
 
   <main class="home-page">
-    <!-- CASE-FIRST HERO -->
     <section class="hero">
       <div class="hero-grid">
-        <!-- Left: Value Statement -->
         <div class="hero-left">
           <h1 class="hero-title">
-            I don't just ship projects.<br/>
-            <span class="hero-title-emphasis">HCI, media forensics, and tools people trust under pressure.</span>
+            <span class="hero-title-small">Research at the intersection of</span><br/>
+            <span class="hero-title-emphasis">human factors, usability, and AI‑assisted media verification.</span>
           </h1>
           <p class="hero-sub">
-            A portfolio built around case studies — not screenshots.
+            I study how journalists, analysts, and investigators work with <strong>deepfakes and manipulated media</strong>—and how to build <strong>explainable, trustworthy tools</strong> that support human judgment instead of replacing it.
           </p>
           <p class="hero-meta">
             {siteConfig.author.name} · {siteConfig.author.title}
           </p>
+          <p class="hero-affiliation">
+            ESL Global Cybersecurity Institute, Rochester Institute of Technology
+          </p>
           <div class="hero-cta">
-            <a href="/projects" class="btn-primary">Explore Projects</a>
+            <a href="/projects" class="btn-primary">Research projects</a>
             <a href="/publications" class="btn-secondary">Publications</a>
           </div>
         </div>
 
-        <!-- Right: Case Snapshots -->
         <div class="hero-right">
           <div class="case-snapshots">
             {caseSnapshots.map((project) => (
               <a href={`/projects/${project.id}`} class="case-snapshot">
-                <span class="case-label">Case · {project.data.role}</span>
+                <span class="case-label">Research · {project.data.role}</span>
                 <span class="case-title">{project.data.title}</span>
                 <span class="case-outcome">{project.data.outcomeSummary}</span>
               </a>
@@ -123,16 +95,27 @@ const recentPublications = allPublications
       </div>
     </section>
 
-    <!-- Introduction -->
-    <!-- <section class="introduction">
-      <p>
-        I'm {siteConfig.author.name}, {siteConfig.author.title.toLowerCase()} focused on building systems that move real business metrics.
-      </p>
-      <p>
-        Every major decision is documented—because great engineers don't just build things, they explain why.
-      </p>
-      <ForwardLink href="/journey" text="Read my journey" variant="muted" />
-    </section> -->
+    <section class="research-focus" aria-labelledby="research-focus-heading">
+      <div class="research-focus-inner">
+        <h2 id="research-focus-heading" class="research-focus-heading">Focus</h2>
+        <p class="research-focus-body">
+          {siteConfig.author.bio}
+        </p>
+        <p class="research-focus-themes">
+          Usable deepfake detection · Digital media forensics (vision, audio, metadata, identity) · Mixed-methods HCI with expert practitioners · Explainable AI and automation bias · Simulation-based training for verification
+        </p>
+        <figure class="research-focus-photo">
+          <img
+            src="/images/john.jpg"
+            alt={`Portrait of ${siteConfig.author.name}`}
+            width="800"
+            height="1000"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+      </div>
+    </section>
 
     <!-- Recent publications -->
     <section class="recent-publications">
@@ -181,15 +164,14 @@ const recentPublications = allPublications
       </p>
     </section> -->
 
-    <!-- CTA -->
     <section class="cta">
-      <h2>Let's Work Together</h2>
+      <h2>Collaborate or get in touch</h2>
       <p>
-        Looking for someone with deep expertise in building usable, trustworthy digital media forensics tools? Let's talk.
+        Open to research partnerships, invited talks, and conversations about usable verification tools, synthetic media, and human-centered security. Reach out if our work aligns.
       </p>
       <div class="cta-buttons">
-        <a href="/publications" class="btn-primary">View My Publications</a>
-        <a href="/contact" class="btn-secondary">Get in Touch</a>
+        <a href="/publications" class="btn-primary">Publications</a>
+        <a href="/contact" class="btn-secondary">Contact</a>
       </div>
     </section>
   </main>
@@ -231,6 +213,10 @@ const recentPublications = allPublications
       color: var(--color-text-secondary);
     }
 
+    .hero-title-small {
+      font-size: 1.125rem;
+    }
+
     .hero-sub {
       font-size: 1.125rem;
       color: var(--color-text-secondary);
@@ -241,8 +227,74 @@ const recentPublications = allPublications
     .hero-meta {
       font-size: 0.875rem;
       color: var(--color-text-muted);
-      margin-bottom: 2rem;
+      margin-bottom: 0.35rem;
       letter-spacing: 0.01em;
+    }
+
+    .hero-affiliation {
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+      margin: 0 0 2rem;
+      line-height: 1.45;
+    }
+
+    .research-focus {
+      margin-bottom: 4rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .research-focus-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(200px, 300px);
+      column-gap: 2.75rem;
+      row-gap: 0;
+      align-items: start;
+    }
+
+    .research-focus-heading {
+      grid-column: 1;
+      grid-row: 1;
+      font-size: 1.125rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 1rem;
+      color: var(--color-text);
+    }
+
+    .research-focus-body {
+      grid-column: 1;
+      grid-row: 2;
+      font-size: 1.0625rem;
+      line-height: 1.75;
+      color: var(--color-text-secondary);
+      margin: 0 0 1.25rem;
+    }
+
+    .research-focus-themes {
+      grid-column: 1;
+      grid-row: 3;
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    .research-focus-photo {
+      grid-column: 2;
+      grid-row: 1 / 4;
+      margin: 0;
+      align-self: start;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-secondary);
+    }
+
+    .research-focus-photo img {
+      display: block;
+      width: 100%;
+      height: auto;
     }
 
     .hero-cta {
@@ -530,6 +582,36 @@ const recentPublications = allPublications
       .cta-buttons .btn-primary,
       .cta-buttons .btn-secondary {
         width: 100%;
+      }
+
+      .research-focus-inner {
+        grid-template-columns: 1fr;
+        row-gap: 1rem;
+      }
+
+      .research-focus-heading {
+        grid-column: 1;
+        grid-row: 1;
+        margin-bottom: 0.5rem;
+      }
+
+      .research-focus-photo {
+        grid-column: 1;
+        grid-row: 2;
+        max-width: min(280px, 85vw);
+        width: 100%;
+        justify-self: center;
+        margin: 0.25rem 0 0.25rem;
+      }
+
+      .research-focus-body {
+        grid-column: 1;
+        grid-row: 3;
+      }
+
+      .research-focus-themes {
+        grid-column: 1;
+        grid-row: 4;
       }
     }
   </style>

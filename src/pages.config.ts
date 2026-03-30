@@ -55,17 +55,19 @@ export const pagesConfig = {
    */
   home: {
     title: 'Home',
-    description: 'Engineering leader specializing in system architecture, technical decision-making, and delivering measurable business impact.',
+    description:
+      'HCI and digital media forensics research: usable deepfake detection, expert workflows, and the DeFake Project.',
   },
   
   /**
    * Projects listing page (/projects)
    */
   projects: {
-    title: 'Projects - Case Studies',
-    description: 'Detailed case studies showcasing problem-solving approach, technical decisions, and measurable impact across various engineering projects.',
-    heading: 'Projects',
-    intro: 'Case studies that demonstrate how I approach complex problems, make technical decisions, and deliver measurable impact. Each project tells the story of the challenge, the constraints, the decisions made, and the outcomes achieved.',
+    title: 'Research projects',
+    description:
+      'Research programs and systems for usable media verification, deepfake detection, and training—documented as case studies with methods, tools, and outcomes.',
+    heading: 'Research projects',
+    intro: 'Programs I lead or co-lead at the intersection of HCI, digital media forensics, and machine learning—including the DeFake initiative and related platforms. Each entry summarizes the problem, approach, and impact; details are in the case study.',
   },
   
   /**
