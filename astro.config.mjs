@@ -32,6 +32,13 @@ import sitemap from '@astrojs/sitemap';
  */
 const { SITE_URL } = loadEnv(process.env.NODE_ENV || 'production', process.cwd(), '');
 
+/** File watching is unreliable on native Windows and when WSL runs against a repo on a Windows drive (/mnt/...). */
+function viteWatchNeedsPolling() {
+  if (process.platform === 'win32') return true;
+  if (process.platform === 'linux' && process.cwd().startsWith('/mnt/')) return true;
+  return false;
+}
+
 /**
  * Astro configuration object
  * 
@@ -160,5 +167,12 @@ export default defineConfig({
       theme: 'github-dark',
       wrap: true
     }
-  }
+  },
+
+  // Polling when watchers miss saves (Windows, or WSL + project under /mnt/c|d|...).
+  vite: {
+    server: {
+      watch: viteWatchNeedsPolling() ? { usePolling: true, interval: 150 } : {},
+    },
+  },
 });
