@@ -52,6 +52,21 @@ const isActive = (href: string) => {
 ---
 
 <nav class="site-nav" aria-label="Main navigation">
+  <a
+    href="/"
+    class="nav-brand"
+    aria-label={`${siteConfig.title} — Home`}
+  >
+    <img
+      class="nav-logo"
+      src="/logo.svg"
+      alt=""
+      width="51"
+      height="57"
+      loading="eager"
+      decoding="async"
+    />
+  </a>
   <div class="nav-scroll">
     <ul class="nav-list">
       {navItems.map((item) => (
@@ -104,14 +119,39 @@ const isActive = (href: string) => {
   .site-nav {
     display: flex;
     align-items: center;
+    gap: 0.75rem;
     border-bottom: 1px solid var(--color-border);
     background: var(--color-bg);
-    padding: var(--space-md) 0;
+    padding: var(--space-sm) 0;
     margin-bottom: var(--space-md);
+  }
+
+  .nav-brand {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+    line-height: 0;
+    text-decoration: none;
+    border-radius: 6px;
+    outline-offset: 3px;
+  }
+
+  .nav-brand:focus-visible {
+    outline: 2px solid var(--color-accent);
+  }
+
+  .nav-logo {
+    display: block;
+    height: 3rem;
+    width: auto;
   }
 
   .nav-scroll {
     flex: 1;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -180,6 +220,14 @@ const isActive = (href: string) => {
   }
 
   @media (max-width: 768px) {
+    .nav-brand {
+      margin-left: 0.5rem;
+    }
+
+    .nav-logo {
+      height: 1.75rem;
+    }
+
     .nav-list {
       justify-content: flex-start;
       gap: 1.5rem;
@@ -198,5 +246,12 @@ const isActive = (href: string) => {
       left: -16px;
       width: 16px;
     }
+  }
+</style>
+
+<style is:global>
+  /* logo.svg uses white fills; keep visible on light theme */
+  html[data-theme='light'] .site-nav .nav-logo {
+    filter: brightness(0);
   }
 </style>
