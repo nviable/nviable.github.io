@@ -24,6 +24,8 @@ import { loadEnv } from 'vite';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
+import cloudflare from "@astrojs/cloudflare";
+
 /**
  * Load environment variables from .env file
  * 
@@ -54,7 +56,7 @@ export default defineConfig({
    * and hosting flexibility. All pages are pre-rendered.
    */
   output: 'static',
-  
+
   /**
    * Astro integrations
    * 
@@ -65,7 +67,7 @@ export default defineConfig({
     mdx(),
     sitemap(),
   ],
-  
+
   /**
    * Site URL
    * 
@@ -79,7 +81,7 @@ export default defineConfig({
    * Set SITE_URL in your .env file (e.g., https://example.com)
    */
   site: SITE_URL || 'https://example.com',
-  
+
   /**
    * Environment variables schema (Astro v5+)
    * 
@@ -126,7 +128,7 @@ export default defineConfig({
       SOCIAL_SCHOLAR: envField.string({ context: 'client', access: 'public', default: '' }),
     },
   },
-  
+
   /**
    * Image optimization configuration
    * 
@@ -152,7 +154,7 @@ export default defineConfig({
     // Remote image patterns (currently empty - add patterns as needed)
     remotePatterns: [],
   },
-  
+
   /**
    * Markdown configuration
    * 
@@ -175,4 +177,6 @@ export default defineConfig({
       watch: viteWatchNeedsPolling() ? { usePolling: true, interval: 150 } : {},
     },
   },
+
+  adapter: cloudflare()
 });
