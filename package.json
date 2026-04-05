@@ -29,7 +29,7 @@
     "@astrojs/cloudflare": "12",
     "@astrojs/mdx": "^4.0.0",
     "@astrojs/sitemap": "^3.6.1",
-    "astro": "^5.16.7",
+    "astro": "^5.18.1",
     "sharp": "^0.34.5"
   },
   "devDependencies": {
