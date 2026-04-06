@@ -1,123 +1,88 @@
-# Case — A Case-Study-First Portfolio Theme for Astro
+# nviable.github.io
 
 [![Built with Astro](https://astro.badg.es/v2/built-with-astro/tiny.svg)](https://astro.build)
+[![Astro](https://img.shields.io/badge/Astro-BC52EE?logo=astro&logoColor=white)](https://astro.build)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/workers/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-A case-study-first portfolio theme for Astro. Designed for professionals who want to showcase their thinking, decisions, and real impact—not just screenshots and tech stacks.
-
-## Why Case?
-
-Most portfolio themes focus on listing projects with screenshots and bullet points. Case takes a different approach: it treats every project as a case study with a structured narrative—problem, constraints, approach, key decisions, and measurable outcomes.
-
-This lets you demonstrate not just what you built, but how you think. Hiring managers and clients see your decision-making process, trade-offs you considered, and the real impact of your work. You stand out by showing depth, not just breadth.
-
-## Demo
 
 <div align="center">
 
-[![View Demo](https://img.shields.io/badge/View_Demo-→-0077FF?style=for-the-badge&logo=astro&logoColor=white)](https://case.erland.me)
-
-<table>
-  <tr>
-    <td width="50%">
-      <img src="./screenshots/light-mode.webp" loading="lazy" alt="Light Mode">
-      <p align="center"><em>Light Mode</em></p>
-    </td>
-    <td width="50%">
-      <img src="./screenshots/dark-mode.webp" loading="lazy" alt="Dark Mode">
-      <p align="center"><em>Dark Mode</em></p>
-    </td>
-  </tr>
-</table>
+[![Visit site](https://img.shields.io/badge/Visit_site-→-BC52EE?style=for-the-badge&logo=astro&logoColor=white)](https://nviable.me)
+[![View source](https://img.shields.io/badge/View_source-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nviable/nviable.github.io)
 
 </div>
 
-## Features
+Personal research site built with [Astro](https://astro.build). It highlights work at the intersection of human–computer interaction, usability, and AI-assisted media verification—research projects, publications, and contact—in a case-study-style layout (based on the [Case](https://github.com/erlandv/case) theme).
 
-### Case Studies Over Screenshots
+**Live site:** [https://nviable.me](https://nviable.me)
 
-Document your engineering thinking with structured project narratives.
+## Prerequisites
 
-- **Problem → Solution framework**: Context, constraints, approach, and measurable impact
-- **Decision documentation**: Trade-offs, alternatives, and reasoning behind key choices
-- **Quantified outcomes**: Performance improvements, team impact, and business results
-- **Strategic highlighting**: Feature your strongest work on the homepage
+- **Node.js** — current LTS (e.g. 20.x or 22.x) and npm
+- **Git** — to clone the repository
 
-### Built-in Decision Records
+## Local development
 
-Document architectural decisions with full context and alternatives.
-
-- Problem statement and background context
-- Options considered with trade-off analysis
-- Chosen approach with reasoning
-- Outcomes and learnings
-- Tag-based organization and filtering
-
-### Content Types for Technical Portfolios
-
-Purpose-built collections for engineering professionals.
-
-- **Projects** — Deep-dive case studies with structured narratives
-- **Decisions** — ADR-style technical decision logs
-- **Journey** — Career milestones, transitions, and key learnings
-- **Writing** — Technical articles with auto-generated TOC
-- **Speaking** — Talks, podcasts, and workshop materials
-- **Tools** — Tech stack and development environment
-- **Testimonials** — Peer and client recommendations
-
-## Quick Start
-
-### 1. Create a new project
+### 1. Clone and install dependencies
 
 ```bash
-npm create astro@latest -- --template erlandv/case
+git clone https://github.com/nviable/nviable.github.io.git
+cd nviable.github.io
+npm install
 ```
 
-### 2. Configure your site
+### 2. Environment variables
+
+Create a local `.env` from the example file and edit values for your machine and identity:
 
 ```bash
 cp .env.example .env
-# Edit .env with your information
 ```
 
-### 3. Start development
+At minimum, set **`SITE_URL`** to the URL you care about for metadata:
+
+- For day-to-day local work, `http://localhost:4321` is fine.
+- For production builds and deployment, use your public URL (e.g. `https://nviable.me`).
+
+Other variables (`SITE_TITLE`, `SITE_AUTHOR_*`, `SOCIAL_*`, etc.) drive the global config in `src/config.ts`. Leave a social URL empty to hide that link in the UI.
+
+### 3. Start the dev server
 
 ```bash
 npm run dev
 ```
 
-Your site is now running at [http://localhost:4321](http://localhost:4321)
+Open [http://localhost:4321](http://localhost:4321). The dev server reloads when you change files.
 
-## Documentation
+**File watching on Windows / WSL:** If you keep the repo on a Windows drive inside WSL (paths under `/mnt/...`), saves might not trigger reloads. This project enables Vite polling in that situation in `astro.config.mjs`; if you still see stale pages, move the clone to the Linux filesystem (e.g. under `/home/...`).
 
-Full documentation is available in the [`docs/`](./docs/) folder:
+## Useful scripts
 
-### Getting Started
-- [Installation](./docs/01-getting-started/installation.md) — Prerequisites and setup
-- [Quick Start](./docs/01-getting-started/quick-start.md) — See results in 5 minutes
-- [Project Structure](./docs/01-getting-started/project-structure.md) — Understand the codebase
+| Command | Purpose |
+|--------|---------|
+| `npm run dev` | Development server (same as `npm start`) |
+| `npm run build` | Typecheck (`astro check`) and production build to `dist/` |
+| `npm run preview` | Build, then run locally with [Wrangler](https://developers.cloudflare.com/workers/wrangler/) (Cloudflare adapter) |
+| `npm run deploy` | Build and deploy to Cloudflare (requires Wrangler login and project setup) |
+| `npm run cf-typegen` | Regenerate Wrangler-related types |
 
-### Configuration
-- [Configuration](./docs/02-configuration/configuration.md) — Environment variables, navigation, favicons
+For a static preview of the build without Cloudflare, you can serve `dist/` with any static file server after `npm run build`.
 
-### Content
-- [Content Guide](./docs/03-content/content-guide.md) — All content types and schemas
-- [Templates](./docs/03-content/templates.md) — Copy-paste templates for quick content creation
-- [Images](./docs/03-content/images.md) — Image handling and optimization
-- [Content Strategy](./docs/03-content/content-strategy.md) — Best practices for featured content
+## Project layout (short)
 
-### Customization
-- [Styling](./docs/04-customization/styling.md) — Colors, typography, spacing, breakpoints
-- [Components](./docs/04-customization/components.md) — Modifying and creating components
-- [Advanced](./docs/04-customization/advanced.md) — Layouts, new content collections
+- **`src/pages/`** — Routes (e.g. home, projects, publications, contact)
+- **`src/content/`** — MDX content collections (projects, publications, and other collections used by the theme)
+- **`src/components/`** — Astro components
+- **`src/config.ts`** — Site title, nav, author, and social links (values from `.env`)
+- **`astro.config.mjs`** — Astro, MDX, sitemap, image, and Cloudflare adapter settings
 
-### Deployment
-- [Deployment](./docs/05-deployment/deployment.md) — Build and deploy to various platforms
-- [Post-Deployment](./docs/05-deployment/post-deployment.md) — Verification checklist
+Navigation items are defined in `src/config.ts` (`siteConfig.nav`).
 
-### Reference
-- [Troubleshooting](./docs/06-reference/troubleshooting.md) — Common issues and solutions
+## Theme documentation
+
+The repository still includes the Case theme docs under [`docs/`](./docs/) (content schemas, styling, deployment ideas). Use them when you add or change collection front matter, components, or layout.
 
 ## License
 
-Case Theme is free for personal and commercial use under the [MIT License](./LICENSE). Attribution is not required, but a link back to this repository is always appreciated if you find the theme useful.
+Theme and site materials are covered by the [MIT License](./LICENSE) unless noted otherwise.
