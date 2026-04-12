@@ -1,6 +1,6 @@
 ---
 /**
- * Publication list card: title, authors, venue/year, research-area tags, external link when URL exists.
+ * Publication list card: title, authors, venue/year (venue tier e.g. A* in meta), tags, link when URL exists.
  */
 import BaseCard from './BaseCard.astro';
 import ForwardLink from './ForwardLink.astro';
@@ -10,6 +10,7 @@ interface Props {
   authors: string;
   venue: string;
   year: number;
+  quality?: 'A*' | 'A' | 'B' | 'C' | undefined;
   url?: string;
   tags?: string[];
   statusNote?: string;
@@ -21,6 +22,7 @@ const {
   authors,
   venue,
   year,
+  quality,
   url,
   tags = [],
   statusNote,
@@ -37,7 +39,7 @@ const meta = `${year} · ${venue}`;
 ---
 
 <BaseCard href={url} external={Boolean(url)} class="publication-card">
-  <Fragment slot="meta">{meta}</Fragment>
+  <Fragment slot="meta">{meta}{quality && ` · `}<span class="meta-quality">{quality ? `${quality}` : ''}</span></Fragment>
   <Fragment slot="title">{title}</Fragment>
   <Fragment slot="description">{truncatedAuthors}</Fragment>
   {
@@ -54,6 +56,9 @@ const meta = `${year} · ${venue}`;
 </BaseCard>
 
 <style>
+  .meta-quality {
+    color: var(--color-tertiary);
+  }
   .publication-card :global(.card-description) {
     font-size: 0.875rem;
   }

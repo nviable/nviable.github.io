@@ -126,6 +126,8 @@ const publicationsCollection = defineCollection({
     authors: z.string(),
     venue: z.string(),
     year: z.number(),
+    /** Venue tier (e.g. CORE A*); drives highlight styling on the publications list */
+    quality: z.string().optional(),
     url: z.string().url().optional(),
     tags: z.array(z.string()).optional(),
     /** Shown when there is no URL (e.g. in submission) */

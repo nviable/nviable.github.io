@@ -5,41 +5,53 @@ year: 2025
 duration: "2022–2025"
 teamSize: 5
 outcomeSummary: "Role-play methodology and web platform for studying and training journalistic deepfake verification under deadline pressure — CHI 2024 paper, RIT Graduate Showcase 1st place (oral); platform includes AI-assisted scenario generation (MaGe) and structured feedback."
-overview: "Dungeons & Deepfakes adapts tabletop role-play to HCI research: journalists work through realistic verification scenarios with AI tools, revealing automation bias, confirmation bias, and cross-cultural differences in trust. A follow-on learning platform adds simulation-based training with generated scenarios, timelines, verdict-drift views, and quizzes. This file is starter copy — tighten claims and add links to your live demo and papers."
-problem: "Lab studies and surveys miss how reporters actually behave when a story is due and tools promise fast answers. We needed a repeatable, ethical way to observe tool use under pressure and later to train verification skills without only lecturing about model limits."
+overview: "Dungeons & Deepfakes adapts tabletop role-play mechanics to HCI research: journalists work through realistic verification scenarios with AI tools, revealing automation bias, confirmation bias, and cross-cultural differences in trust. A follow-on training platform digitizes the methodology with AI-generated scenarios (MaGe), interactive simulation flow, verdict-drift analytics, and competency quizzes."
+problem: "Lab studies and surveys miss how reporters actually behave when a story is due and tools promise fast answers. We needed a repeatable, ethical way to observe tool use under pressure — and later, to train verification skills without just lecturing about model limitations."
 constraints:
-  - "Participants in multiple countries (e.g. US and Bangladesh) with different newsroom norms"
-  - "Scenarios must feel realistic without using harmful real-world footage inappropriately"
-  - "Platform must support both research sessions and pedagogical reuse"
-approach: "Designed a scenario-based role-play protocol (CHI 2024) with 34 journalists, then built a learning web app with MaGe for AI-assisted pedagogical scenario material, interactive scenario flow, post-scenario analytics (verdict drift, action timelines), and competency checks. Iterate with journalism and HCI collaborators; align IRB and consent with your institution’s rules."
+  - "Participants in multiple countries (US and Bangladesh) with different newsroom norms, institutional trust levels, and resource availability"
+  - "Scenarios must feel realistic and high-stakes without using actual harmful deepfake footage"
+  - "Platform must support both controlled research sessions and scalable pedagogical reuse"
+  - "Manual Dungeon Master execution must translate to a digital, automated system without sacrificing ecological validity"
+approach: "Designed a scenario-based role-play protocol (CHI 2024) with 34 professional journalists across two countries, then built a learning web app with MaGe for AI-assisted scenario generation, interactive scenario flow, post-scenario analytics (verdict drift, action timelines), action-level pedagogical evaluation, and competency checks. Currently iterating with journalism and HCI collaborators toward deployment in investigative journalism education — and exploring extension to adjacent fields."
 keyDecisions:
-  - decision: "Use structured role-play instead of only think-aloud on static videos"
-    reasoning: "Deadlines, roles, and narrative framing change how people weigh model outputs; role-play surfaces those dynamics."
+  - decision: "Use structured role-play (D&D-inspired) instead of think-aloud on static videos"
+    reasoning: "Deadlines, newsroom roles, and narrative framing change how people weigh model outputs; role-play surfaces those dynamics in ways that standard usability tasks cannot. Participants also found the gamified structure engaging enough to volunteer busy professionals for a 60-minute research session."
     alternatives:
       - "Standard usability tasks on a fixed clip set"
-      - "Fully open-ended newsroom shadowing only"
-  - decision: "Separate research study tooling from the training product line but shared design language"
-    reasoning: "Lets you publish clean study results while still shipping a teachable system — adjust if your architecture merged them."
+      - "Fully open-ended newsroom shadowing without experimental control"
+  - decision: "Adapt the manual role-play into a digital platform driven by LLM-generated scenarios (MaGe)"
+    reasoning: "Manual execution placed heavy cognitive load on Dungeon Masters, limited scalability, and made consistent data collection difficult. MaGe's stateful generation pipeline separates pedagogical specification from narrative elaboration, maintaining quality while eliminating the researcher-as-DM bottleneck."
     alternatives:
-      - "One codebase for both with feature flags only"
-      - "Two unrelated codebases with no shared components"
+      - "Maintain manual administration with standardized facilitator training only"
+      - "Pre-author a fixed library of scenarios without AI generation"
+  - decision: "Cross-cultural study design (US + Bangladesh) from the start"
+    reasoning: "Institutional trust levels, resource availability, and verification norms differ significantly across media ecosystems. Including Bangladeshi journalists surfaced tool-reliance patterns invisible in US-only samples and motivated two of the seven scenarios explicitly set outside North America."
+    alternatives:
+      - "US-only pilot, defer international replication"
+      - "Online survey across regions without behavioral observation"
 techStack:
-  - "Python"
-  - "Flask"
-  - "React"
-  - "Figma"
-  - "LLM-assisted content generation (MaGe)"
+  - "Python (Flask / FastAPI)"
+  - "React + TypeScript + Vite + Tailwind CSS"
+  - "Zustand (state management)"
+  - "LLM-assisted content generation — MaGe (OpenAI GPT, Google Gemini, Perplexity Sonar Pro)"
+  - "Pydantic schema enforcement for structured LLM output"
+  - "SQLite (scenario & evaluation database)"
+  - "Figma (UX design)"
 impact:
   metrics:
-    - label: "Study scale (placeholder)"
-      value: "34 journalists (US & Bangladesh) — confirm in your paper"
-    - label: "Recognition (placeholder)"
-      value: "1st place oral presentation, RIT Graduate Showcase 2022"
-  qualitative: "Findings informed how the broader DeFake toolset explains uncertainty and supports human judgment. Swap in your own summary of bias findings and training outcomes."
+    - label: "Research study participants"
+      value: "34 professional journalists (24 US, 10 Bangladesh) — individual and group sessions"
+    - label: "Scenario quality (MaGe human evaluation)"
+      value: "Mean overall score 4.13/5 across 10 pedagogical metrics; rated by 19 journalism students"
+    - label: "Recognition"
+      value: "1st place oral presentation, RIT Graduate Showcase 2022; Premiere Venue ACM CHI 2024 publication"
+  qualitative: "Findings informed explainability design for the broader DeFake toolset. Cross-cultural comparison revealed that US journalists prioritized contextual verification given stronger institutional trust, while Bangladeshi journalists leaned more heavily on AI tools amid skepticism toward official sources — a contrast that directly shapes how uncertainty should be communicated in detection interfaces."
 learnings:
-  - "Scenario fidelity and facilitator guidance matter as much as the software"
-  - "Cross-cultural replication surfaced trust and workflow differences worth designing for explicitly"
-  - "Replace with lessons you want on the public site"
+  - "Scenario fidelity and facilitator guidance matter as much as the software — the Dungeon Master's improvisational responses to invented actions were as important as the predefined action set"
+  - "Cross-cultural replication surfaced trust and workflow differences (automation reliance, source skepticism) that must be designed for explicitly, not treated as edge cases"
+  - "LLMs can produce pedagogically coherent training scenarios at scale, but LLM self-evaluation overestimates quality relative to human learners — human oversight of generated content remains essential"
+  - "The 'Optimism Gap': AI evaluator personas consistently scored MaGe scenarios higher than journalism students, except on complexity — where students rated scenarios as significantly harder than the AI estimated"
+  - "Role-play's gamified structure was itself a recruitment asset: busy professionals who might skip a survey were willing to spend an hour on an engaging, game-like research activity"
 featured: true
 status: ongoing
 order: 2
@@ -51,6 +63,129 @@ relatedPublications:
   - verification-ai-newsroom-promise2025
 ---
 
-## Draft notes (delete or replace)
+## Overview
 
-Project pages: [Dungeons & Deepfakes on DeFake](https://defake.app/about/projects/dungeons-deepfakes). Add demo URL, IRB-safe description, and media kit links when available.
+Dungeons & Deepfakes (D&DF) is a scenario-based role-play methodology and interactive training platform designed to study and improve how journalists verify AI-generated media under real deadline pressure. The project adapts mechanics from tabletop role-playing games — roles, a Dungeon Master (DM), structured action choices, and cost-triggered events — into a rigorous HCI research framework, then extends that framework into a scalable digital training environment.
+
+The core insight is simple but easy to miss in lab settings: how a journalist behaves when a tool gives them a confident-sounding answer at 11pm before a story goes live is very different from how they answer a survey about verification best practices. D&DF creates a controlled but immersive environment that captures the former.
+
+---
+
+## The Problem
+
+Existing evaluations of deepfake detection tools rely heavily on static usability tasks or self-report surveys. Neither captures the interplay of **deadline pressure**, **role-based responsibility**, and **tool automation bias** that shapes real newsroom decisions. At the same time, training journalists to resist overreliance on detection tools requires more than lectures about model limitations — it requires practice in contexts that replicate the stakes.
+
+There was also a tooling gap: manually administering role-play sessions placed enormous cognitive load on the researcher acting as DM, required deep domain expertise to improvise plausible responses to unexpected participant actions, and made consistent, granular data collection difficult. Both the research methodology and any downstream training application needed a scalable solution.
+
+---
+
+## Phase 1 — The Role-Play Study (CHI 2024)
+
+### Framework Design
+
+The D&DF study framework draws on the **Serious Game Design Assessment (SGDA)** model, ensuring coherence between game mechanics, research purpose, narrative fiction, and visual presentation. Each session was delivered through a structured slide deck managed by a trained Dungeon Master, who guided participants through scenarios, played non-player characters, and adjudicated invented actions — all while maintaining experimental rigor.
+
+Participants assumed the role of investigative journalists at fictional but realistically described news organizations. Seven scenarios were developed, blending contemporary events across North American and international settings, with high-profile figures whose known behavioral patterns created natural verification challenges. Adversaries in the scenarios employed layered disinformation tactics: deepfake video, spear phishing, compromised accounts, and spoofed sources — mirroring real-world campaigns documented during the Russia-Ukraine conflict and South Korean political crises.
+
+### The Verification Cycle
+
+Each scenario followed a structured progression:
+
+1. **Role introduction** — journalist context, organizational resources, and a synthetic character profile
+2. **Scenario briefing** — a potentially manipulated video with referrer context and metadata
+3. **Initial verdict** — rated on a 5-point scale from *Real* to *Fake*
+4. **Action-response loop** — participants chose from a predefined action grid (regular, technical, goal) or invented their own; each action carried a credit cost that triggered scenario events when thresholds were crossed
+5. **Verdict updates** — participants revised their assessment after each action, creating a decision trajectory
+6. **Publication decision** — publish as real, publish as fake, or hold the story
+7. **Debrief** — participants were shown their action patterns and discussed automation bias, tool limitations, and verification workflow improvements
+
+A **group session variant** accommodated teams of 3–4 journalists, introducing collaborative dynamics, role-based hierarchies, and consensus requirements that revealed how social pressure and peer expertise influence tool interpretation.
+
+### Study Sample & Ethics
+
+A total of **34 professional journalists** participated — 24 from the United States (recruited via journalism networks and fact-checking organizations) and 10 from Bangladesh (recruited via snowball sampling in Dhaka, with compensation). Participants included fact-checkers, digital verification specialists, and general-assignment reporters. The study was approved by the RIT Institutional Review Board (IRB/HSRO), and all participants provided informed consent with an optional name-disclosure component.
+
+### Key Findings
+
+The study uncovered several cross-cutting patterns:
+
+- **Automation bias** was common, particularly in time-sensitive scenarios where tool confidence scores were treated as definitive rather than probabilistic
+- **Confirmation bias** emerged when participants' initial intuitions about a source's credibility shaped how they interpreted ambiguous tool outputs
+- **Cross-cultural divergence**: US journalists prioritized contextual verification (source credibility, platform provenance) reflecting stronger institutional trust, while Bangladeshi journalists leaned more heavily on AI tool outputs amid broader skepticism toward official sources
+- **Group dynamics** amplified both good and problematic behaviors — teams could distribute verification labor effectively, but peer pressure sometimes suppressed skepticism from individual members
+- Participants overwhelmingly rated the methodology positively and, unprompted, suggested it could be adapted as a **newsroom training tool**
+
+---
+
+## Phase 2 — The Training Platform
+
+### From Manual to Digital
+
+The manual D&DF study validated the methodology but exposed operational limits that prevented deployment at scale: a human DM was required for every session, scenario creation was labor-intensive, and detailed behavioral logging was inconsistent. The training platform was built to address each of these directly.
+
+### MaGe — AI Scenario Material Generator
+
+**MaGe** is a stateful, multi-stage LLM pipeline that generates complete, pedagogically-structured training scenarios from high-level seed inputs. Rather than end-to-end generation, MaGe separates **pedagogical specification** from **narrative elaboration**:
+
+1. A researcher provides a *Functional Seed* (narrative parameters: location, adversary type, tone) and a *Logical Seed* (gameplay constraints: action count, difficulty)
+2. The LLM generates a high-level narrative with a ground truth and a set of *Scenario Directives*
+3. Subsequent stages generate entities (characters, organizations), actions, events, and debrief questions — each stage informed by all previous outputs via a central `GenerationSession` object
+4. All components are assembled into a single `playable-scenario.json` file consumed by the web application
+
+MaGe integrates with **OpenAI GPT**, **Google Gemini 2.5 Flash**, and **Perplexity Sonar Pro**, with Pydantic schema enforcement ensuring structured JSON output regardless of the underlying model. Each action is tagged with a *pedagogical goal term* — **Clarify Truth**, **Introduce Ambiguity**, **Present Distractor**, **Provide Counter-Evidence**, or **Escalate Stakes** — that drives both action-response generation and post-scenario feedback scoring.
+
+### Scenario Quality Evaluation
+
+MaGe's output was evaluated through a two-stage framework combining LLM-as-judge scoring and a **human evaluation study with 19 journalism students**. Human participants rated scenarios across 10 quality metrics on a 1–5 Likert scale. Results showed:
+
+| Metric | Mean Score | SD |
+|---|---|---|
+| Complexity | 4.40 | 0.80 |
+| Clarity | 4.35 | 0.72 |
+| Plausibility / Authenticity | 4.32 | 0.95 |
+| Critical Thinking Stimulation | 4.00 | — |
+| Investigative Richness | 3.93 | 1.05 |
+| **Overall Score** | **4.13** | **0.70** |
+
+A notable finding was the **"Optimism Gap"**: AI evaluator personas rated scenarios systematically higher than human students on every metric *except* complexity — where students rated scenarios as significantly more cognitively demanding than the LLM estimated (human M = 4.42 vs. LLM M = 4.01, Cohen's *d* = −2.31). This confirms that LLM self-evaluation cannot serve as a proxy for learner workload and that human oversight of generated content remains essential.
+
+### The Interactive Platform
+
+The DDF Training Platform is a **React single-page application** (TypeScript, Vite, Tailwind CSS, Zustand) backed by a **FastAPI** server. The platform digitizes the core DDF mechanics into five phases managed by a finite state machine:
+
+- **Briefing** — scenario context, assigned journalist role, and media artifact
+- **Pre-Verification** — initial verdict before any investigative steps
+- **Verification Loop** — predefined actions (with credit costs), custom action flow (MaGe generates a context-aware DM response in real time), and verdict updates after each action
+- **Publication** — final decision when credits are exhausted or the trainee is confident
+- **Results Page** — post-scenario reflection showing:
+  - **Verdict Drift graph**: verdict trajectory plotted against actions taken and ground truth
+  - **Action-level evaluation**: each action scored *good / not-good / neutral* relative to its pedagogical goal and the trainee's verdict movement
+  - **Credit trajectory** and time-per-action
+  - **Learning objective quiz** with targeted feedback
+
+Every trainee interaction is written as an immutable log record, enabling both the results page feedback and downstream research analysis of verification behavior patterns.
+
+---
+
+## Status & Collaboration
+
+The project is **ongoing**. Current priorities include:
+
+- Expanding the scenario library across more geographic and media contexts
+- Implementing the **Human Approval Gate** — an interactive review step allowing instructors to refine AI-generated scenarios before deployment
+- Developing **adaptive debriefing** that generates personalized reflection questions based on each trainee's specific decision path
+- Extending the framework to domains beyond journalism — including **intelligence analysis**, **law enforcement**, and **cybersecurity** contexts where verification under time pressure and automation bias pose similar risks
+
+**I am actively looking to collaborate with educators in investigative journalism** who want to integrate D&DF scenarios into their curricula, and with researchers exploring how this methodology could transfer to other professional contexts where AI-assisted verification is becoming operationally critical.
+
+If you are interested in collaboration, pilot deployments, or discussing the methodology, please [reach out](https://nviable.me/contact).
+
+Project page on DeFake Project website [link](https://defake.app/about/projects/dungeons-deepfakes).
+
+---
+
+## Selected Publications
+
+- **Sohrawardi et al. (CHI 2024)** — *Dungeons & Deepfakes*: Role-play methodology for studying journalist interactions with deepfake detection tools
+- **Sohrawardi (Dissertation, 2025)** — *DeFaking Deepfakes*: AI Media Verification Tools for Journalists (Chapters 4 & 5)
+- **Verification & AI in the Newsroom (2025)** — Book chapter on the promise and limits of AI-assisted verification

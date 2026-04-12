@@ -25,6 +25,7 @@
  * @page
  */
 
+import ExternalLink from '@lucide/astro/icons/external-link';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SEO from '../components/SEO.astro';
 import { getCollection } from 'astro:content';
@@ -118,7 +119,7 @@ const categoryOrder: Array<'tools' | 'stack' | 'environment'> = ['tools', 'stack
                     {item.url ? (
                       <a href={item.url} target="_blank" rel="noopener noreferrer">
                         {item.name}
-                        <span class="external-link-icon" aria-hidden="true">↗</span>
+                        <ExternalLink class="external-link-icon" size={14} aria-hidden="true" />
                       </a>
                     ) : (
                       item.name
@@ -193,7 +194,7 @@ const categoryOrder: Array<'tools' | 'stack' | 'environment'> = ['tools', 'stack
     }
 
     .external-link-icon {
-      font-size: 0.875rem;
+      flex-shrink: 0;
       opacity: 0.6;
     }
 

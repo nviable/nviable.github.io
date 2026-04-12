@@ -25,6 +25,8 @@
  * ```
  */
 
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+
 interface Heading {
   /** Heading level (2 for h2, 3 for h3) */
   depth: number;
@@ -70,9 +72,7 @@ const shouldRender = filteredHeadings.length >= 3;
     >
       <span class="toc-title">Table of Contents</span>
       <span class="toc-count">{filteredHeadings.length} sections</span>
-      <svg class="toc-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
+      <ChevronDown class="toc-icon" size={16} aria-hidden="true" />
     </button>
     <ul class="toc-list" id="toc-list">
       {filteredHeadings.map((heading) => (

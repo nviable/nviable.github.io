@@ -9,6 +9,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SEO from '../components/SEO.astro';
 import StructuredData from '../components/StructuredData.astro';
 import ForwardLink from '../components/ForwardLink.astro';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
 // import Testimonials from '../components/Testimonials.astro';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../config';
@@ -126,27 +127,31 @@ const recentPublications = allPublications
 
       {recentPublications.length > 0 ? (
         <div class="publications-preview-list">
-          {recentPublications.map((pub) => (
-            <article class="publication-preview-item">
-              <span class="publication-preview-meta">
-                {pub.data.year}
-                {pub.data.tags && pub.data.tags.length > 0 && (
-                  <> · {pub.data.tags.slice(0, 3).join(' · ')}</>
-                )}
-              </span>
-              <h3 class="publication-preview-title">
-                {pub.data.url ? (
-                  <a href={pub.data.url} target="_blank" rel="noopener noreferrer">
-                    {pub.data.title}
-                  </a>
-                ) : (
-                  pub.data.title
-                )}
-              </h3>
-              <p class="publication-preview-authors">{pub.data.authors}</p>
-              <p class="publication-preview-venue">{pub.data.venue}</p>
-            </article>
-          ))}
+          {recentPublications.map((pub) => {
+            const href = pub.data.url ?? '/publications';
+            const external = Boolean(pub.data.url);
+            return (
+              <a
+                href={href}
+                class="publication-preview-item"
+                target={external ? '_blank' : undefined}
+                rel={external ? 'noopener noreferrer' : undefined}
+              >
+                <div class="publication-preview-main">
+                  <span class="publication-preview-meta">
+                    {pub.data.year}
+                    {pub.data.tags && pub.data.tags.length > 0 && (
+                      <> · {pub.data.tags.slice(0, 3).join(' · ')}</>
+                    )}
+                  </span>
+                  <h3 class="publication-preview-title">{pub.data.title}</h3>
+                  <p class="publication-preview-authors">{pub.data.authors}</p>
+                  <p class="publication-preview-venue">{pub.data.venue}</p>
+                </div>
+                <ArrowRight class="publication-preview-arrow" size={14} aria-hidden="true" />
+              </a>
+            );
+          })}
         </div>
       ) : (
         <p class="no-publications">No publications listed yet.</p>
@@ -427,12 +432,29 @@ const recentPublications = allPublications
     }
 
     .publication-preview-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
       padding: 1.5rem 0;
       border-bottom: 1px solid var(--color-border);
+      text-decoration: none;
+      color: inherit;
+      outline: none;
     }
 
     .publication-preview-item:last-child {
       border-bottom: none;
+    }
+
+    .publication-preview-item:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .publication-preview-main {
+      flex: 1;
+      min-width: 0;
     }
 
     .publication-preview-meta {
@@ -451,15 +473,29 @@ const recentPublications = allPublications
       line-height: 1.3;
       color: var(--color-text);
       margin-bottom: 0.35rem;
+      transition: color 0.2s ease;
     }
 
-    .publication-preview-title a {
-      color: inherit;
-      text-decoration: none;
+    .publication-preview-arrow {
+      flex-shrink: 0;
+      align-self: center;
+      color: var(--color-text-muted);
+      transition:
+        color 0.2s ease,
+        transform 0.2s ease;
     }
 
-    .publication-preview-title a:hover {
+    .publication-preview-arrow :global(svg) {
+      display: block;
+    }
+
+    .publication-preview-item:hover .publication-preview-title,
+    .publication-preview-item:hover .publication-preview-arrow {
       color: var(--color-accent);
+    }
+
+    .publication-preview-item:hover .publication-preview-arrow {
+      transform: translateX(0.25rem);
     }
 
     .publication-preview-authors,

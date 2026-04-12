@@ -26,6 +26,9 @@
  * ```
  */
 
+import ChevronLeft from '@lucide/astro/icons/chevron-left';
+import ChevronRight from '@lucide/astro/icons/chevron-right';
+
 interface Props {
   /** Current active page number (1-indexed) */
   currentPage: number;
@@ -92,16 +95,12 @@ function getPageUrl(page: number): string {
   <nav class="pagination" aria-label="Pagination">
     {currentPage > 1 ? (
       <a href={getPageUrl(currentPage - 1)} class="pagination-btn pagination-prev" aria-label="Previous page">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+        <ChevronLeft size={16} aria-hidden="true" />
         <span>Previous</span>
       </a>
     ) : (
       <span class="pagination-btn pagination-prev disabled" aria-disabled="true">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+        <ChevronLeft size={16} aria-hidden="true" />
         <span>Previous</span>
       </span>
     )}
@@ -125,16 +124,12 @@ function getPageUrl(page: number): string {
     {currentPage < totalPages ? (
       <a href={getPageUrl(currentPage + 1)} class="pagination-btn pagination-next" aria-label="Next page">
         <span>Next</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
+        <ChevronRight size={16} aria-hidden="true" />
       </a>
     ) : (
       <span class="pagination-btn pagination-next disabled" aria-disabled="true">
         <span>Next</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
+        <ChevronRight size={16} aria-hidden="true" />
       </span>
     )}
   </nav>

@@ -27,6 +27,8 @@
  * ```
  */
 
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+
 interface Props {
   /** Text displayed next to the arrow icon */
   text: string;
@@ -50,9 +52,7 @@ const Tag = href ? 'a' : 'span';
   class:list={['arrow-link', `arrow-link--${variant}`, className]}
 >
   {text}
-  <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M15.7071 5.29289C15.3166 4.90237 14.6834 4.90237 14.2929 5.29289C13.9024 5.68342 13.9024 6.31658 14.2929 6.70711L18.5858 11L3 11C2.44772 11 2 11.4477 2 12C2 12.5523 2.44772 13 3 13L18.5858 13L14.2929 17.2929C13.9024 17.6834 13.9024 18.3166 14.2929 18.7071C14.6834 19.0976 15.3166 19.0976 15.7071 18.7071L21.7071 12.7071C22.0976 12.3166 22.0976 11.6834 21.7071 11.2929L15.7071 5.29289Z"/>
-  </svg>
+  <ArrowRight class="arrow-icon" size={14} aria-hidden="true" />
 </Tag>
 
 <style>

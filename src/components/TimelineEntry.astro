@@ -41,6 +41,8 @@
  * ```
  */
 
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+
 interface Props {
   /** Date of the timeline event (formatted as "Month Year") */
   date: Date;
@@ -137,9 +139,7 @@ const entryId = `journey-${date.getTime()}`;
           type="button"
         >
           <span class="expand-text">Read more</span>
-          <svg class="expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
+          <ChevronDown class="expand-icon" size={16} aria-hidden="true" />
         </button>
         
         <div id={entryId} class="timeline-body" aria-hidden="true">

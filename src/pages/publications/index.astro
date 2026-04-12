@@ -55,6 +55,7 @@ const total = sorted.length;
             authors={entry.data.authors}
             venue={entry.data.venue}
             year={entry.data.year}
+            quality={entry.data.quality as 'A*' | 'A' | 'B' | 'C' | undefined}
             url={entry.data.url}
             tags={[
               KIND_TAG[entry.data.kind],
