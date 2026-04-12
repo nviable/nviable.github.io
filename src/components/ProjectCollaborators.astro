@@ -1,0 +1,84 @@
+---
+interface Collaborator {
+  name: string;
+  role?: string;
+  affiliation?: string;
+}
+
+interface Props {
+  collaborators: Collaborator[];
+}
+
+const { collaborators } = Astro.props;
+
+function tooltip(c: Collaborator): string {
+  const parts = [c.role, c.affiliation].filter(Boolean);
+  return parts.length ? parts.join(' · ') : c.name;
+}
+---
+
+{collaborators.length > 0 && (
+  <section class="project-collaborators" aria-labelledby="collaborators-heading">
+    <h2 id="collaborators-heading" class="project-collaborators__title">Collaborators</h2>
+    <ul class="project-collaborators__list">
+      {collaborators.map((c) => (
+        <li class="project-collaborators__chip" title={tooltip(c)}>
+          <span class="project-collaborators__name">{c.name}</span>
+          {(c.role || c.affiliation) && (
+            <span class="project-collaborators__meta">
+              {[c.role, c.affiliation].filter(Boolean).join(' · ')}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .project-collaborators {
+    margin-bottom: 2rem;
+  }
+
+  .project-collaborators__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin: 0 0 0.75rem;
+  }
+
+  .project-collaborators__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .project-collaborators__chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.125rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    max-width: 100%;
+  }
+
+  .project-collaborators__name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .project-collaborators__meta {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    line-height: 1.35;
+  }
+</style>

@@ -1,35 +1,9 @@
 ---
 /**
- * Case Study Detail Page
- * 
- * Dynamic route that displays a comprehensive project case study following a structured
- * narrative format. Presents the complete story of a project from problem identification
- * through to measurable impact and learnings.
- * 
- * Narrative Structure (enforced order):
- * 1. Overview - High-level project summary
- * 2. Problem - Challenge being addressed
- * 3. Constraints - Limitations and boundaries
- * 4. Approach - Solution strategy
- * 5. Key Decisions - Technical choices with reasoning and alternatives
- * 6. Tech Stack - Technologies used
- * 7. Result & Impact - Quantitative metrics and qualitative outcomes
- * 8. Learnings - Insights and takeaways
- * 
- * Features:
- * - Static path generation for all project entries
- * - Structured case study presentation
- * - Impact metrics grid (when available)
- * - Reading time calculation
- * - Structured data for SEO
- * - Optional additional markdown content
- * - Scroll-to-top functionality
- * - Related content navigation
- * - Back navigation to projects list
- * 
+ * Project detail page — structured frontmatter (abstract, highlights, collaborators,
+ * artifacts) plus MDX body; related papers via relatedPublications.
+ *
  * Route: /projects/[slug]
- * 
- * @page
  */
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -38,18 +12,13 @@ import StructuredData from '../../components/StructuredData.astro';
 import ScrollToTop from '../../components/ScrollToTop.astro';
 import BackLink from '../../components/BackLink.astro';
 import RelatedContent from '../../components/RelatedContent.astro';
-import ImpactMetrics from '../../components/ImpactMetrics.astro';
+import ProjectAbstractCard from '../../components/ProjectAbstractCard.astro';
+import ProjectHighlightStrip from '../../components/ProjectHighlightStrip.astro';
+import ProjectCollaborators from '../../components/ProjectCollaborators.astro';
+import ProjectArtifactButtons from '../../components/ProjectArtifactButtons.astro';
 import { getCollection, getEntry, render } from 'astro:content';
 import { calculateReadingTime, formatReadingTime } from '../../utils/readingTime';
 
-/**
- * Generates static paths for all project entries
- * 
- * Queries the projects content collection and creates a route for each entry
- * using the entry ID as the slug parameter.
- * 
- * @returns Array of path objects with params
- */
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
   return projects.map((project) => ({
@@ -58,42 +27,37 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-
-/**
- * Retrieves the specific project entry by slug
- * 
- * Redirects to 404 if the project is not found.
- */
 const project = await getEntry('projects', slug!);
 
 if (!project) {
   return Astro.redirect('/404');
 }
 
-// Render the content (v6-compatible method)
 const { Content } = await render(project);
 
 const {
   title,
+  subtitle,
   role,
+  institution,
   year,
   duration,
-  teamSize,
-  outcomeSummary,
-  overview,
-  problem,
-  constraints,
-  approach,
-  keyDecisions,
-  techStack,
-  impact,
-  learnings,
+  abstract,
+  highlights,
+  collaborators,
+  type: classificationType,
+  domains,
+  methodologyClass,
+  artifacts,
   relatedProjects,
   relatedPublications,
   status,
 } = project.data;
 
-// Status display configuration
+const metaDescription =
+  abstract.replace(/\s+/g, ' ').trim().slice(0, 155) +
+  (abstract.replace(/\s+/g, ' ').trim().length > 155 ? '…' : '');
+
 const statusConfig = {
   completed: { label: 'Completed', class: 'status--completed' },
   ongoing: { label: 'Ongoing', class: 'status--ongoing' },
@@ -102,30 +66,15 @@ const statusConfig = {
 };
 const statusInfo = statusConfig[status || 'completed'];
 
-/**
- * Calculates reading time from all case study content
- * 
- * Combines all text sections including overview, problem, approach, decisions,
- * impact, learnings, and optional markdown body to estimate total reading time.
- */
-const allText = [
-  overview,
-  problem,
-  approach,
-  ...constraints,
-  ...keyDecisions.map(d => `${d.decision} ${d.reasoning} ${d.alternatives?.join(' ') || ''}`),
-  impact.qualitative,
-  ...learnings,
-  project.body || '',
-].join(' ');
+const allText = [abstract, ...highlights, project.body || ''].join(' ');
 const readingTime = formatReadingTime(calculateReadingTime(allText));
 ---
 
 <BaseLayout>
-  <SEO 
+  <SEO
     slot="head"
     title={`${title} - Case Study`}
-    description={outcomeSummary}
+    description={metaDescription}
     type="article"
   />
 
@@ -133,16 +82,13 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
     type="Project"
     data={{
       title,
-      outcomeSummary,
-      problem,
-      impact: impact.qualitative,
-      techStack,
+      description: abstract,
       year,
+      keywords: domains.join(', '),
     }}
   />
 
   <main class="case-study">
-    <!-- Case Study Header -->
     <header class="case-study-header">
       <div class="header-badges">
         {status && status !== 'completed' && (
@@ -152,8 +98,14 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
         )}
       </div>
       <h1>{title}</h1>
+      {subtitle && <p class="case-study-subtitle">{subtitle}</p>}
+
+      <ProjectHighlightStrip highlights={highlights} />
+
       <div class="case-study-meta">
         <span class="meta-item">{role}</span>
+        <span class="meta-separator">·</span>
+        <span class="meta-item">{institution}</span>
         <span class="meta-separator">·</span>
         <span class="meta-item">{year}</span>
         {duration && (
@@ -162,115 +114,38 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
             <span class="meta-item">{duration}</span>
           </>
         )}
-        {teamSize && (
-          <>
-            <span class="meta-separator">·</span>
-            <span class="meta-item">{teamSize} {teamSize === 1 ? 'person' : 'people'}</span>
-          </>
-        )}
         <span class="meta-separator">·</span>
         <span class="meta-item">{readingTime}</span>
       </div>
-      <p class="outcome-summary">{outcomeSummary}</p>
+
+      <div class="case-study-classification">
+        <span class="classification-type">{classificationType}</span>
+        {domains.length > 0 && (
+          <span class="classification-domains">
+            {domains.map((d) => (
+              <span class="domain-chip">{d}</span>
+            ))}
+          </span>
+        )}
+        <span class="classification-method">{methodologyClass}</span>
+      </div>
     </header>
 
-    <!-- Overview Section -->
-    <section class="case-study-section">
-      <h2>Overview</h2>
-      <p>{overview}</p>
-    </section>
+    <ProjectAbstractCard abstract={abstract} />
 
-    <!-- Problem Section -->
-    <section class="case-study-section">
-      <h2>Problem</h2>
-      <p>{problem}</p>
-    </section>
+    <ProjectCollaborators collaborators={collaborators} />
 
-    <!-- Constraints Section -->
-    <section class="case-study-section">
-      <h2>Constraints</h2>
-      <ul class="constraints-list">
-        {constraints.map((constraint) => (
-          <li>{constraint}</li>
-        ))}
-      </ul>
-    </section>
-
-    <!-- Approach Section -->
-    <section class="case-study-section">
-      <h2>Approach</h2>
-      <p>{approach}</p>
-    </section>
-
-    <!-- Key Decisions Section -->
-    <section class="case-study-section">
-      <h2>Key Decisions</h2>
-      <div class="decisions-list">
-        {keyDecisions.map((decision) => (
-          <div class="decision-item">
-            <h3 class="decision-title">{decision.decision}</h3>
-            <div class="decision-reasoning">
-              <strong>Reasoning:</strong>
-              <p>{decision.reasoning}</p>
-            </div>
-            {decision.alternatives && decision.alternatives.length > 0 && (
-              <div class="decision-alternatives">
-                <strong>Alternatives considered:</strong>
-                <ul>
-                  {decision.alternatives.map((alt) => (
-                    <li>{alt}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </section>
-
-    <!-- Tech Stack Section -->
-    <section class="case-study-section">
-      <h2>Tech Stack</h2>
-      <ul class="tech-stack-list">
-        {techStack.map((tech) => (
-          <li>{tech}</li>
-        ))}
-      </ul>
-    </section>
-
-    <!-- Result/Impact Section -->
-    <section class="case-study-section">
-      <h2>Result & Impact</h2>
-      
-      {/* Display metrics with visualization */}
-      {impact.metrics && impact.metrics.length > 0 && (
-        <ImpactMetrics metrics={impact.metrics} />
-      )}
-      
-      <p class="impact-qualitative">{impact.qualitative}</p>
-    </section>
-
-    <!-- Learnings Section -->
-    <section class="case-study-section">
-      <h2>Learnings</h2>
-      <ul class="learnings-list">
-        {learnings.map((learning) => (
-          <li>{learning}</li>
-        ))}
-      </ul>
-    </section>
-
-    <!-- Additional MDX Content (if any) -->
     {Content && (
       <section class="case-study-content">
         <Content />
       </section>
     )}
 
-    <!-- Related Content -->
-    <RelatedContent 
-      relatedProjects={relatedProjects} 
-      relatedPublications={relatedPublications} 
+    <ProjectArtifactButtons artifacts={artifacts} />
+
+    <RelatedContent
+      relatedProjects={relatedProjects}
+      relatedPublications={relatedPublications}
     />
 
     <BackLink href="/projects" text="All projects" />
@@ -286,8 +161,8 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
     }
 
     .case-study-header {
-      margin-bottom: 3rem;
-      padding-bottom: 2rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
       border-bottom: 1px solid var(--color-border);
     }
 
@@ -327,160 +202,118 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
 
     .case-study-header h1 {
       font-size: 2.5rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       font-weight: 700;
       letter-spacing: -0.02em;
       line-height: 1.2;
     }
 
+    .case-study-subtitle {
+      font-size: 1.25rem;
+      line-height: 1.45;
+      color: var(--color-text-secondary);
+      margin: 0 0 1rem;
+    }
+
+    .case-study-classification {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+
+    .classification-type {
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .classification-domains {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .domain-chip {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--color-border);
+    }
+
+    .classification-method {
+      flex-basis: 100%;
+      font-size: 0.8125rem;
+    }
+
+    @media (min-width: 640px) {
+      .classification-method {
+        flex-basis: auto;
+        margin-left: 0;
+      }
+    }
+
     .case-study-meta {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 0.75rem;
       font-size: 0.9375rem;
       color: var(--color-text-secondary);
-      margin-bottom: 1.5rem;
     }
 
     .meta-separator {
       opacity: 0.5;
     }
 
-    .outcome-summary {
-      font-size: 1.125rem;
-      line-height: 1.6;
-      color: var(--color-text-secondary);
-    }
-
-    .case-study-section {
-      margin-bottom: 3rem;
-    }
-
-    .case-study-section h2 {
-      font-size: 1.75rem;
-      margin-bottom: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    .case-study-section p {
-      font-size: 1.125rem;
-      line-height: 1.7;
-      color: var(--color-text-secondary);
-    }
-
-    .constraints-list,
-    .tech-stack-list,
-    .learnings-list {
-      list-style: none;
-      padding: 0;
-    }
-
-    .constraints-list li,
-    .tech-stack-list li,
-    .learnings-list li {
+    .case-study-content {
+      margin-bottom: 2.5rem;
       font-size: 1.0625rem;
       line-height: 1.7;
-      padding: 0.5rem 0;
-      padding-left: 1.5rem;
-      position: relative;
       color: var(--color-text-secondary);
     }
 
-    .constraints-list li::before,
-    .tech-stack-list li::before,
-    .learnings-list li::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0.55rem;
-      width: 1.125rem;
-      height: 1.125rem;
-      background-color: var(--color-accent);
-      -webkit-mask-image: url(/icons/lucide-arrow-right.svg);
-      mask-image: url(/icons/lucide-arrow-right.svg);
-      -webkit-mask-size: contain;
-      mask-size: contain;
-      -webkit-mask-repeat: no-repeat;
-      mask-repeat: no-repeat;
-      -webkit-mask-position: center;
-      mask-position: center;
-    }
-
-    .decisions-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-
-    .decision-item {
-      padding: 1.5rem;
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      background: var(--color-bg-secondary);
-    }
-
-    .decision-title {
-      font-size: 1.25rem;
-      font-weight: 600;
+    .case-study-content :global(h2) {
+      font-size: 1.75rem;
+      margin-top: 2.5rem;
       margin-bottom: 1rem;
+      font-weight: 700;
       color: var(--color-text);
     }
 
-    .decision-reasoning,
-    .decision-alternatives {
-      margin-top: 1rem;
+    .case-study-content :global(h3) {
+      font-size: 1.25rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: var(--color-text);
     }
 
-    .decision-reasoning strong,
-    .decision-alternatives strong {
-      display: block;
-      font-size: 0.9375rem;
-      color: var(--color-text-muted);
-      margin-bottom: 0.5rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .case-study-content :global(p) {
+      margin-bottom: 1rem;
     }
 
-    .decision-reasoning p {
-      font-size: 1.0625rem;
-      margin-top: 0.5rem;
-      color: var(--color-text-secondary);
-    }
-
-    .decision-alternatives ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 0.5rem;
-    }
-
-    .decision-alternatives li {
-      font-size: 1.0625rem;
-      line-height: 1.6;
-      padding: 0.25rem 0;
+    .case-study-content :global(ul),
+    .case-study-content :global(ol) {
+      margin-bottom: 1rem;
       padding-left: 1.25rem;
-      position: relative;
-      color: var(--color-text-secondary);
     }
 
-    .decision-alternatives li::before {
-      content: "•";
-      position: absolute;
-      left: 0;
-      color: var(--color-accent);
+    .case-study-content :global(table) {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9375rem;
     }
 
-    .impact-qualitative {
-      font-size: 1.125rem;
-      line-height: 1.7;
-      color: var(--color-text-secondary);
-    }
-
-    .case-study-content {
-      margin-top: 3rem;
-      font-size: 1.0625rem;
-      line-height: 1.7;
-      color: var(--color-text-secondary);
+    .case-study-content :global(th),
+    .case-study-content :global(td) {
+      border: 1px solid var(--color-border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
     }
 
     @media (max-width: 768px) {
@@ -490,22 +323,6 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
 
       .case-study-header h1 {
         font-size: 2rem;
-      }
-
-      .outcome-summary {
-        font-size: 1.125rem;
-      }
-
-      .case-study-section h2 {
-        font-size: 1.5rem;
-      }
-
-      .case-study-section p {
-        font-size: 1rem;
-      }
-
-      .decision-item {
-        padding: 1.25rem;
       }
     }
   </style>

@@ -1,0 +1,103 @@
+---
+import Code from '@lucide/astro/icons/code';
+import Database from '@lucide/astro/icons/database';
+import Globe from '@lucide/astro/icons/globe';
+import FileText from '@lucide/astro/icons/file-text';
+import ExternalLink from '@lucide/astro/icons/external-link';
+
+type ArtifactType = 'demo' | 'code' | 'dataset' | 'paper' | 'website' | 'other';
+
+interface Artifact {
+  label: string;
+  url: string;
+  type: ArtifactType;
+}
+
+interface Props {
+  artifacts: Artifact[];
+}
+
+const { artifacts } = Astro.props;
+
+const iconFor = (t: ArtifactType) => {
+  switch (t) {
+    case 'code':
+      return Code;
+    case 'dataset':
+      return Database;
+    case 'website':
+    case 'demo':
+      return Globe;
+    case 'paper':
+      return FileText;
+    default:
+      return ExternalLink;
+  }
+};
+---
+
+{artifacts.length > 0 && (
+  <section class="project-artifacts" aria-labelledby="project-artifacts-heading">
+    <h2 id="project-artifacts-heading" class="project-artifacts__title">Artifacts</h2>
+    <div class="project-artifacts__cluster">
+      {artifacts.map((a) => {
+        const Icon = iconFor(a.type);
+        return (
+          <a
+            href={a.url}
+            class="project-artifacts__btn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Icon size={18} aria-hidden="true" class="project-artifacts__icon" />
+            <span>{a.label}</span>
+          </a>
+        );
+      })}
+    </div>
+  </section>
+)}
+
+<style>
+  .project-artifacts {
+    margin-bottom: 2.5rem;
+  }
+
+  .project-artifacts__title {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .project-artifacts__cluster {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .project-artifacts__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .project-artifacts__btn:hover {
+    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .project-artifacts__icon {
+    flex-shrink: 0;
+    color: var(--color-accent);
+  }
+</style>

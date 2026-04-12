@@ -13,6 +13,7 @@ import ArrowRight from '@lucide/astro/icons/arrow-right';
 // import Testimonials from '../components/Testimonials.astro';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../config';
+import { truncateForPreview } from '../utils/preview';
 
 /**
  * Queries and filters featured projects for hero section
@@ -88,7 +89,7 @@ const recentPublications = allPublications
               <a href={`/projects/${project.id}`} class="case-snapshot">
                 <span class="case-label">Research · {project.data.role}</span>
                 <span class="case-title">{project.data.title}</span>
-                <span class="case-outcome">{project.data.outcomeSummary}</span>
+                <span class="case-outcome">{truncateForPreview(project.data.abstract)}</span>
               </a>
             ))}
           </div>

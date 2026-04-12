@@ -1,65 +1,39 @@
 ---
 /**
- * ProjectCard Component
- * 
- * Displays a project or case study entry in a card format with role, year, outcome summary,
- * and technology stack. Extends BaseCard component with project-specific features including
- * an optional featured badge, status indicator, and automatic tech stack truncation.
- * 
- * @component
- * 
- * @example
- * ```astro
- * <ProjectCard
- *   title="E-commerce Platform Redesign"
- *   slug="ecommerce-redesign"
- *   outcomeSummary="Increased conversion rate by 45% and reduced cart abandonment"
- *   role="Lead Frontend Developer"
- *   year={2024}
- *   techStack={['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Stripe']}
- *   featured={true}
- *   status="completed"
- * />
- * ```
+ * Project card for the projects index — abstract preview, domains, role/year meta.
  */
 
 import Star from '@lucide/astro/icons/star';
 import BaseCard from './BaseCard.astro';
 import ForwardLink from './ForwardLink.astro';
+import { truncateForPreview } from '../utils/preview';
 
 interface Props {
-  /** Project title (displayed as card heading) */
   title: string;
-  
-  /** URL slug for the project (used to generate /projects/{slug} link) */
   slug: string;
-  
-  /** Brief summary of project outcomes or impact */
-  outcomeSummary: string;
-  
-  /** Your role in the project (e.g., "Lead Developer", "Technical Architect") */
+  abstract: string;
   role: string;
-  
-  /** Year the project was completed */
   year: number;
-  
-  /** Optional array of technologies used (displays max 4, shows "+N" for remaining) */
-  techStack?: string[];
-  
-  /** Whether to display the featured badge (default: false) */
+  domains?: string[];
   featured?: boolean;
-  
-  /** Project status (default: 'completed') */
   status?: 'completed' | 'ongoing' | 'archived' | 'inactive';
 }
 
-const { title, slug, outcomeSummary, role, year, techStack = [], featured = false, status = 'completed' } = Astro.props;
+const {
+  title,
+  slug,
+  abstract,
+  role,
+  year,
+  domains = [],
+  featured = false,
+  status = 'completed',
+} = Astro.props;
 
-// Show max 4 tech tags to keep card clean and consistent
-const displayTech = techStack.slice(0, 4);
-const hasMoreTech = techStack.length > 4;
+const preview = truncateForPreview(abstract);
+const displayDomains = domains.slice(0, 4);
+const hasMoreDomains = domains.length > 4;
 
-// Status display configuration
 const statusConfig = {
   completed: { label: 'Completed', class: 'status--completed' },
   ongoing: { label: 'Ongoing', class: 'status--ongoing' },
@@ -83,22 +57,22 @@ const statusInfo = statusConfig[status];
       </span>
     )}
   </div>
-  
+
   <Fragment slot="meta">{role} · {year}</Fragment>
   <Fragment slot="title">{title}</Fragment>
-  <Fragment slot="description">{outcomeSummary}</Fragment>
-  
-  {displayTech.length > 0 && (
+  <Fragment slot="description">{preview}</Fragment>
+
+  {displayDomains.length > 0 && (
     <div slot="tags" class="tags-list">
-      {displayTech.map((tech) => (
-        <span class="tag">{tech}</span>
+      {displayDomains.map((d) => (
+        <span class="tag">{d}</span>
       ))}
-      {hasMoreTech && (
-        <span class="tag-more">+{techStack.length - 4}</span>
+      {hasMoreDomains && (
+        <span class="tag-more">+{domains.length - 4}</span>
       )}
     </div>
   )}
-  
+
   <ForwardLink text="View details" />
 </BaseCard>
 

@@ -1,0 +1,38 @@
+---
+interface Props {
+  abstract: string;
+}
+
+const { abstract } = Astro.props;
+---
+
+<section class="project-abstract" aria-labelledby="project-abstract-heading">
+  <h2 id="project-abstract-heading" class="project-abstract__heading">Abstract</h2>
+  <p class="project-abstract__text">{abstract}</p>
+</section>
+
+<style>
+  .project-abstract {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem 1.25rem;
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+  }
+
+  .project-abstract__heading {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin: 0 0 0.75rem;
+  }
+
+  .project-abstract__text {
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--color-text-secondary);
+  }
+</style>

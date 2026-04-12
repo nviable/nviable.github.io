@@ -5,7 +5,8 @@
  * Uses Astro's Content Collections API with Zod for type-safe content management.
  * 
  * Collections:
- * - projects: Case studies with structured narrative format
+ * - projects: Research projects with structured frontmatter (identity, classification,
+ *   people, abstract, highlights, artifacts, related project/publication slugs)
  * - publications: Research publications (external links; optional detail pages later)
  * - journey: Career timeline entries
  * - writing: Blog posts and articles
@@ -22,93 +23,62 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+const projectArtifactEntry = z.object({
+  label: z.string(),
+  url: z.string().url(),
+  type: z.enum(['demo', 'code', 'dataset', 'paper', 'website', 'other']),
+});
+
+const projectCollaboratorEntry = z.object({
+  name: z.string(),
+  role: z.string().optional(),
+  affiliation: z.string().optional(),
+});
+
 /**
- * Projects (Case Studies) Collection
- * 
- * Structured case studies following a narrative format: Overview → Problem → 
- * Constraints → Approach → Key Decisions → Tech Stack → Impact → Learnings.
- * 
- * Features:
- * - Required narrative sections for consistent storytelling
- * - Key decisions with reasoning and alternatives
- * - Impact metrics (quantitative and qualitative)
- * - Featured flag for homepage showcase
- * - Optional custom order for manual curation
- * - Related project and decision slugs for cross-referencing
+ * Projects collection
+ *
+ * Frontmatter is grouped for authoring and templates: identity, classification,
+ * people & context, abstract, highlights, artifacts, and related slugs.
+ * Narrative detail lives in the MDX body (e.g. research questions, phases).
  */
 const projectsCollection = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/projects' }),
   schema: z.object({
-    /** Project title */
+    // Identity
     title: z.string(),
-    
-    /** Your role in the project */
-    role: z.string(),
-    
-    /** Year the project was completed */
-    year: z.number(),
-    
-    /** Project duration (e.g., "3 months", "1.5 years") */
-    duration: z.string().optional(),
-    
-    /** Team size for scope context */
-    teamSize: z.number().optional(),
-    
-    /** Brief summary of outcomes and impact */
-    outcomeSummary: z.string(),
-    
-    /** High-level project overview */
-    overview: z.string(),
-    
-    /** Problem being addressed */
-    problem: z.string(),
-    
-    /** Project constraints and limitations */
-    constraints: z.array(z.string()),
-    
-    /** Solution approach and strategy */
-    approach: z.string(),
-    
-    /** Key technical decisions with reasoning */
-    keyDecisions: z.array(z.object({
-      decision: z.string(),
-      reasoning: z.string(),
-      alternatives: z.array(z.string()).optional(),
-    })),
-    
-    /** Technologies and frameworks used */
-    techStack: z.array(z.string()),
-    
-    /** Project impact and results */
-    impact: z.object({
-      /** Quantitative metrics (optional) */
-      metrics: z.array(z.object({
-        label: z.string(),
-        value: z.string(),
-      })).optional(),
-      /** Qualitative impact description */
-      qualitative: z.string(),
-    }),
-    
-    /** Key learnings and takeaways */
-    learnings: z.array(z.string()),
-    
-    /** Whether to feature on homepage */
+    subtitle: z.string().optional(),
+    /** Optional; route uses the file id — keep in sync if set */
+    slug: z.string().optional(),
     featured: z.boolean().default(false),
-    
-    /** Project status */
     status: z
       .enum(['completed', 'ongoing', 'archived', 'inactive'])
       .default('completed'),
-    
-    /** Custom sort order (lower numbers first) */
     order: z.number().optional(),
-    
-    /** Related project slugs for cross-referencing */
+    /** Primary year for listings and meta (e.g. start or latest milestone) */
+    year: z.number(),
+
+    // Classification
+    type: z.string(),
+    domains: z.array(z.string()).default([]),
+    methodologyClass: z.string(),
+
+    // People & context
+    role: z.string(),
+    institution: z.string(),
+    duration: z.string().optional(),
+    collaborators: z.array(projectCollaboratorEntry).default([]),
+
+    // Abstract & highlights
+    abstract: z.string(),
+    highlights: z.array(z.string()).min(3).max(5),
+
+    // Artifacts & connections (papers use relatedPublications → publications collection)
+    artifacts: z.array(projectArtifactEntry).default([]),
     relatedProjects: z.array(z.string()).optional(),
-    
-    /** Related publication entry IDs for cross-referencing */
     relatedPublications: z.array(z.string()).optional(),
+    /** Optional tags for search/filter experiments (not required by templates) */
+    tags: z.array(z.string()).optional(),
   }),
 });
 

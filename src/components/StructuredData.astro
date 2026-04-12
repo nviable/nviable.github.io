@@ -52,15 +52,17 @@ function generateStructuredData(type: string, data: Record<string, any>) {
         '@context': baseContext,
         '@type': 'CreativeWork',
         name: data.title,
-        description: data.description || data.outcomeSummary,
+        description: data.description || data.abstract || data.outcomeSummary,
         author: {
           '@type': 'Person',
           name: data.authorName || siteConfig.author.name,
         },
         dateCreated: data.year ? `${data.year}-01-01` : undefined,
-        keywords: data.techStack?.join(', '),
-        about: data.problem,
-        result: data.impact,
+        keywords:
+          typeof data.keywords === 'string'
+            ? data.keywords
+            : data.techStack?.join(', '),
+        about: data.abstract || data.description,
       };
     
     case 'Article':
