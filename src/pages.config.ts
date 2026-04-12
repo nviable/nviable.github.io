@@ -81,13 +81,15 @@ export const pagesConfig = {
   },
   
   /**
-   * Journey timeline page (/journey)
+   * Journey & speaking timeline (/journey) — merges `journey` and `speaking` collections
    */
   journey: {
-    title: 'Journey - Career Growth & Learning Timeline',
-    description: 'A chronological timeline of my professional journey, highlighting key milestones, learning moments, and career transitions that shaped my growth as an engineer.',
+    title: 'Journey — timeline, talks & appearances',
+    description:
+      'Chronological timeline of career milestones, learning, transitions, and speaking — conferences, meetups, interviews, workshops, and webinars.',
     heading: 'Journey',
-    intro: 'A timeline of my professional growth and learning progression. This isn\'t a resume—it\'s a story of how I\'ve evolved as an engineer, the pivotal moments that shaped my thinking, and the skills I\'ve developed along the way.',
+    intro:
+      'Career milestones, learning moments, transitions, and speaking engagements in one place.',
   },
   
   /**
@@ -105,9 +107,9 @@ export const pagesConfig = {
    */
   speaking: {
     title: 'Speaking - Talks & Presentations',
-    description: 'Conference talks, meetup presentations, podcast appearances, and workshops on software engineering, architecture, and technical leadership.',
+    description: 'Conference talks, meetup presentations, interviews, and workshops on software engineering, architecture, and technical leadership.',
     heading: 'Speaking',
-    intro: 'I regularly speak at conferences, meetups, and on podcasts about software architecture, engineering practices, and technical leadership. Here\'s a collection of my talks and presentations.',
+    intro: 'I regularly speak at conferences, meetups, and in interviews about software architecture, engineering practices, and technical leadership. Here\'s a collection of my talks and presentations.',
   },
   
   /**

@@ -85,7 +85,7 @@ skills:
 ---
 ```
 
-**Type options:** `milestone`, `learning`, `transition`
+**Type options:** `milestone`, `learning`, `transition`, `conference`, `meetup` (the last two use the same timeline styling as speaking entries)
 
 ## Writing (Blog) Template
 
@@ -132,7 +132,7 @@ featured: false
 Optional talk abstract.
 ```
 
-**Type options:** `conference`, `meetup`, `podcast`, `workshop`, `webinar`
+**Type options:** `conference`, `meetup`, `interview`, `workshop`, `webinar`
 
 ## Testimonial Template
 

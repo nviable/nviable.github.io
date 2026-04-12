@@ -55,7 +55,7 @@ interface Props {
   location: string;
   
   /** Type of speaking engagement (determines badge color) */
-  type: 'conference' | 'meetup' | 'podcast' | 'workshop' | 'webinar';
+  type: 'conference' | 'meetup' | 'interview' | 'workshop' | 'webinar';
   
   /** Optional URL to presentation slides */
   slides?: string;
@@ -107,7 +107,7 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
 const typeLabels: Record<string, string> = {
   conference: 'Conference',
   meetup: 'Meetup',
-  podcast: 'Podcast',
+  interview: 'Interview',
   workshop: 'Workshop',
   webinar: 'Webinar'
 };
@@ -228,7 +228,7 @@ const typeLabels: Record<string, string> = {
     border-color: #10b981;
   }
 
-  .talk-type[data-type="podcast"] {
+  .talk-type[data-type="interview"] {
     color: #8b5cf6;
     border-color: #8b5cf6;
   }

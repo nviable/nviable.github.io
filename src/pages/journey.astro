@@ -1,0 +1,344 @@
+---
+/**
+ * Journey & speaking — merged timeline with category filters and load-more batches.
+ * Route: /journey
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SEO from '../components/SEO.astro';
+import PageStats from '../components/PageStats.astro';
+import TimelineListItem from '../components/TimelineListItem.astro';
+import { getCollection, render } from 'astro:content';
+import { pagesConfig } from '../pages.config';
+
+const PAGE_SIZE = 10;
+
+const categoryLabels: Record<string, string> = {
+  all: 'All',
+  milestone: 'Milestone',
+  learning: 'Learning',
+  transition: 'Transition',
+  conference: 'Conference',
+  meetup: 'Meetup',
+  interview: 'Interview',
+  workshop: 'Workshop',
+  webinar: 'Webinar',
+};
+
+const allJourney = await getCollection('journey');
+const allSpeaking = await getCollection('speaking');
+
+const journeyBlocks = await Promise.all(
+  allJourney.map(async (entry) => {
+    const { Content } = await render(entry);
+    const hasContent = Boolean(entry.body && entry.body.trim().length > 0);
+    return {
+      kind: 'journey' as const,
+      id: entry.id,
+      category: entry.data.type,
+      date: entry.data.date,
+      entry,
+      Content,
+      hasContent,
+    };
+  })
+);
+
+const speakingBlocks = allSpeaking.map((entry) => ({
+  kind: 'speaking' as const,
+  id: entry.id,
+  category: entry.data.type,
+  date: entry.data.date,
+  entry,
+}));
+
+type Block = (typeof journeyBlocks)[number] | (typeof speakingBlocks)[number];
+
+const merged: Block[] = [...journeyBlocks, ...speakingBlocks].sort(
+  (a, b) => b.date.getTime() - a.date.getTime()
+);
+
+const usedCategories = [...new Set(merged.map((m) => m.category))].sort();
+const filterOptions = [
+  { value: 'all', label: 'All' },
+  ...usedCategories.map((c) => ({ value: c, label: categoryLabels[c] ?? c })),
+];
+
+const journeyCount = journeyBlocks.length;
+const speakingCount = speakingBlocks.length;
+---
+
+<BaseLayout>
+  <SEO
+    slot="head"
+    title={pagesConfig.journey.title}
+    description={pagesConfig.journey.description}
+    type="website"
+  />
+
+  <main class="page-container">
+    <header class="page-header">
+      <h1 class="page-title">{pagesConfig.journey.heading}</h1>
+      <p class="page-intro">{pagesConfig.journey.intro}</p>
+      <PageStats
+        text={`${merged.length} entries · ${journeyCount} career & learning · ${speakingCount} speaking`}
+      />
+    </header>
+
+    {merged.length === 0 ? (
+      <p class="empty-state">No timeline entries yet. Add content under <code>src/content/journey/</code> or <code>src/content/speaking/</code>.</p>
+    ) : (
+      <>
+        <div class="timeline-toolbar" role="toolbar" aria-label="Filter timeline by category">
+          <span class="timeline-toolbar__label">Show:</span>
+          <div class="timeline-filters" id="timeline-filters">
+            {filterOptions.map(({ value, label }) => (
+              <button
+                type="button"
+                class:list={['timeline-filter', value === 'all' && 'is-active']}
+                data-category={value}
+                aria-pressed={value === 'all' ? 'true' : 'false'}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div class="timeline-list" id="timeline-list" data-page-size={PAGE_SIZE}>
+          {merged.map((item, index) => {
+            const isLast = index === merged.length - 1;
+            if (item.kind === 'journey') {
+              const JourneyBody = item.Content;
+              return (
+                <div
+                  class="timeline-slot"
+                  data-timeline-item
+                  data-category={item.category}
+                  data-source={item.kind}
+                  hidden={index >= PAGE_SIZE}
+                >
+                  <TimelineListItem
+                    itemId={`journey-${item.id}`}
+                    date={item.entry.data.date}
+                    category={item.category}
+                    title={item.entry.data.title}
+                    description={item.entry.data.description}
+                    variant="journey"
+                    isLast={isLast}
+                    skills={item.entry.data.skills}
+                    hasExpandable={item.hasContent}
+                  >
+                    {item.hasContent && <JourneyBody />}
+                  </TimelineListItem>
+                </div>
+              );
+            }
+            return (
+              <div
+                class="timeline-slot"
+                data-timeline-item
+                data-category={item.category}
+                data-source={item.kind}
+                hidden={index >= PAGE_SIZE}
+              >
+                <TimelineListItem
+                  itemId={`speaking-${item.id}`}
+                  date={item.entry.data.date}
+                  category={item.category}
+                  title={item.entry.data.title}
+                  description={item.entry.data.description}
+                  variant="speaking"
+                  isLast={isLast}
+                  event={item.entry.data.event}
+                  eventUrl={item.entry.data.eventUrl}
+                  location={item.entry.data.location}
+                  duration={item.entry.data.duration}
+                  topics={item.entry.data.topics}
+                  slides={item.entry.data.slides}
+                  video={item.entry.data.video}
+                  featured={item.entry.data.featured}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <div class="timeline-load-wrap">
+          <button type="button" class="timeline-load-more" id="timeline-load-more" hidden>
+            Load 10 more
+          </button>
+          <p class="timeline-end-note" id="timeline-end-note" hidden>
+            Showing all entries for this filter.
+          </p>
+        </div>
+      </>
+    )}
+  </main>
+
+  <script is:inline>
+    const PAGE_SIZE = 10;
+
+    function initTimeline() {
+      const list = document.getElementById('timeline-list');
+      const loadBtn = document.getElementById('timeline-load-more');
+      const endNote = document.getElementById('timeline-end-note');
+      const filterRoot = document.getElementById('timeline-filters');
+      if (!list || !loadBtn || !filterRoot || !endNote) return;
+
+      const slots = () =>
+        Array.from(list.querySelectorAll('[data-timeline-item]'));
+
+      let filter = 'all';
+      let visibleCount = PAGE_SIZE;
+
+      function matching() {
+        return slots().filter((s) => {
+          if (filter === 'all') return true;
+          return s.getAttribute('data-category') === filter;
+        });
+      }
+
+      function apply() {
+        const m = matching();
+        const show = Math.min(visibleCount, m.length);
+        slots().forEach((s) => {
+          s.hidden = true;
+        });
+        for (let i = 0; i < show; i++) {
+          m[i].hidden = false;
+        }
+        const moreLeft = m.length > show;
+        loadBtn.hidden = !moreLeft;
+        endNote.hidden = moreLeft || m.length === 0;
+
+        filterRoot.querySelectorAll('.timeline-filter').forEach((btn) => {
+          const cat = btn.getAttribute('data-category');
+          const isOn = cat === filter;
+          btn.classList.toggle('is-active', isOn);
+          btn.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+        });
+      }
+
+      filterRoot.addEventListener('click', (e) => {
+        const el = e.target;
+        if (!(el instanceof Element)) return;
+        const t = el.closest('.timeline-filter');
+        if (!t || !filterRoot.contains(t)) return;
+        const cat = t.getAttribute('data-category') || 'all';
+        filter = cat;
+        visibleCount = PAGE_SIZE;
+        apply();
+      });
+
+      loadBtn.addEventListener('click', () => {
+        visibleCount += PAGE_SIZE;
+        apply();
+      });
+
+      apply();
+    }
+
+    initTimeline();
+  </script>
+
+  <style>
+    .timeline-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem 1rem;
+      margin: 1.5rem 0 1.25rem;
+    }
+
+    .timeline-toolbar__label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .timeline-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .timeline-filter {
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+    }
+
+    .timeline-filter:hover {
+      border-color: var(--color-accent);
+      color: var(--color-text);
+    }
+
+    .timeline-filter.is-active {
+      border-color: var(--color-accent);
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--color-accent);
+    }
+
+    .timeline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 0.5rem;
+      padding-top: 0.25rem;
+    }
+
+    .timeline-slot[data-timeline-item][hidden] {
+      display: none !important;
+    }
+
+    .timeline-load-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 2rem 0 1rem;
+    }
+
+    .timeline-load-more {
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-secondary);
+      color: var(--color-text);
+      cursor: pointer;
+      transition:
+        border-color 0.15s ease,
+        background 0.15s ease;
+    }
+
+    .timeline-load-more:hover {
+      border-color: var(--color-accent);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .timeline-end-note {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+
+    .empty-state code {
+      font-size: 0.85em;
+    }
+  </style>
+</BaseLayout>

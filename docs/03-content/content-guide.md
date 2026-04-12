@@ -125,7 +125,7 @@ Career timeline entries showing milestones, learnings, and transitions.
 ---
 date: 2024-01-15
 title: "Entry Title"
-type: "milestone"  # Options: milestone, learning, transition
+type: "milestone"  # Options: milestone, learning, transition, conference, meetup
 description: "What happened and what you learned"
 skills:            # Optional
   - "Skill 1"
@@ -167,7 +167,7 @@ draft: false              # Set true to hide from production
 
 Location: `src/content/speaking/`
 
-Conference talks, meetup presentations, podcast appearances.
+Conference talks, meetup presentations, interviews.
 
 ```yaml
 ---
@@ -176,7 +176,7 @@ description: "Talk description"
 event: "Event Name"
 date: 2024-01-15
 location: "City, Country"  # or "Online"
-type: "conference"         # Options: conference, meetup, podcast, workshop, webinar
+type: "conference"         # Options: conference, meetup, interview, workshop, webinar
 eventUrl: ""               # Optional
 slides: ""                 # Optional
 video: ""                  # Optional

@@ -42,6 +42,7 @@
  */
 
 import ChevronDown from '@lucide/astro/icons/chevron-down';
+import { formatTimelineDate } from '../utils/timelineDate';
 
 interface Props {
   /** Date of the timeline event (formatted as "Month Year") */
@@ -65,16 +66,7 @@ interface Props {
 
 const { date, title, type, description, skills, hasContent = false } = Astro.props;
 
-/**
- * Formats the date to show month and year only
- * 
- * Uses US English locale with long month format.
- * Example output: "January 2024"
- */
-const formattedDate = new Intl.DateTimeFormat('en-US', {
-  year: 'numeric',
-  month: 'long'
-}).format(date);
+const formattedDate = formatTimelineDate(date);
 
 /**
  * Human-readable labels for timeline entry types

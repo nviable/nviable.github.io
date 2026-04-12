@@ -114,7 +114,8 @@ const publicationsCollection = defineCollection({
  * learning experiences, and career transitions.
  * 
  * Features:
- * - Three entry types (milestone, learning, transition)
+ * - Entry types: milestone, learning, transition, plus conference/meetup for
+ *   professional gatherings that live in `journey/` but use speaking-style categories
  * - Skills/technologies per entry
  * - Optional expandable content
  */
@@ -127,8 +128,8 @@ const journeyCollection = defineCollection({
     /** Entry title */
     title: z.string(),
     
-    /** Type of timeline entry */
-    type: z.enum(['milestone', 'learning', 'transition']),
+    /** Type of timeline entry (conference/meetup match speaking categories for filters/icons) */
+    type: z.enum(['milestone', 'learning', 'transition', 'conference', 'meetup']),
     
     /** Brief description */
     description: z.string(),
@@ -202,10 +203,10 @@ const usesCollection = defineCollection({
 /**
  * Speaking/Talks Collection
  * 
- * Conference talks, meetup presentations, podcast appearances, and workshops.
+ * Conference talks, meetup presentations, interviews, and workshops.
  * 
  * Features:
- * - Five talk types (conference, meetup, podcast, workshop, webinar)
+ * - Five talk types (conference, meetup, interview, workshop, webinar)
  * - Links to slides and video recordings
  * - Event information and location
  * - Optional topics and duration
@@ -233,7 +234,7 @@ const speakingCollection = defineCollection({
     location: z.string(),
     
     /** Type of speaking engagement */
-    type: z.enum(['conference', 'meetup', 'podcast', 'workshop', 'webinar']),
+    type: z.enum(['conference', 'meetup', 'interview', 'workshop', 'webinar']),
     
     /** Link to slides (optional) */
     slides: z.string().url().optional(),

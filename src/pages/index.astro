@@ -14,6 +14,7 @@ import ArrowRight from '@lucide/astro/icons/arrow-right';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../config';
 import { truncateForPreview } from '../utils/preview';
+import { formatTimelineDate } from '../utils/timelineDate';
 
 /**
  * Queries and filters featured projects for hero section
@@ -34,6 +35,24 @@ const featuredProjects = allProjects
  * providing immediate evidence of impact and outcomes.
  */
 const caseSnapshots = featuredProjects.slice(0, 3);
+
+/**
+ * Five most recent timeline rows (journey + speaking), same ordering as /journey.
+ */
+const journeyForHero = await getCollection('journey');
+const speakingForHero = await getCollection('speaking');
+const heroJourneyFeed = [
+  ...journeyForHero.map((e) => ({
+    date: e.data.date,
+    title: e.data.title,
+  })),
+  ...speakingForHero.map((e) => ({
+    date: e.data.date,
+    title: e.data.title,
+  })),
+]
+  .sort((a, b) => b.date.getTime() - a.date.getTime())
+  .slice(0, 5);
 
 /**
  * Recent publications for homepage preview (newest by year, then order).
@@ -93,6 +112,44 @@ const recentPublications = allPublications
               </a>
             ))}
           </div>
+
+          {heroJourneyFeed.length > 0 && (
+            <div
+              class="hero-journey-ticker"
+              id="hero-journey-ticker"
+              data-count={heroJourneyFeed.length}
+              aria-labelledby="hero-journey-updates-label"
+            >
+              <div class="hero-journey-header">
+                <p id="hero-journey-updates-label" class="hero-journey-label">Latest updates</p>
+                <ForwardLink href="/journey" text="View all" variant="muted" class="hero-journey-view-all" />
+              </div>
+              <div class="hero-journey-viewport">
+                {heroJourneyFeed.map((row, i) => (
+                  <a
+                    href="/journey"
+                    class:list={['hero-journey-slide', i === 0 && 'is-active']}
+                    data-slide-index={i}
+                  >
+                    <time class="hero-journey-date" datetime={row.date.toISOString()}>
+                      {formatTimelineDate(row.date)}
+                    </time>
+                    <span class="hero-journey-slide-title">{row.title}</span>
+                  </a>
+                ))}
+              </div>
+              {heroJourneyFeed.length > 1 && (
+                <div class="hero-journey-dots" aria-hidden="true">
+                  {heroJourneyFeed.map((_, i) => (
+                    <span
+                      class:list={['hero-journey-dot', i === 0 && 'is-active']}
+                      data-dot-index={i}
+                    ></span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -392,6 +449,145 @@ const recentPublications = allPublications
       line-height: 1.5;
     }
 
+    /* Recent timeline — auto slider, no card (under project snapshots) */
+    .hero-journey-ticker {
+      margin-top: 1.25rem;
+    }
+
+    .hero-journey-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin: 0 0 0.5rem;
+    }
+
+    .hero-journey-label {
+      margin: 0;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+    }
+
+    .hero-journey-header :global(.hero-journey-view-all) {
+      flex-shrink: 0;
+      font-size: 0.75rem;
+    }
+
+    .hero-journey-header :global(.hero-journey-view-all .arrow-icon) {
+      width: 12px;
+      height: 12px;
+    }
+
+    .hero-journey-viewport {
+      position: relative;
+      min-height: 4.25rem;
+    }
+
+    .hero-journey-slide {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      text-decoration: none;
+      color: inherit;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition:
+        opacity 0.45s ease,
+        visibility 0.45s ease;
+      outline: none;
+    }
+
+    .hero-journey-slide.is-active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      z-index: 1;
+    }
+
+    .hero-journey-slide:focus-visible {
+      border-radius: 4px;
+      box-shadow: 0 0 0 2px var(--color-accent);
+    }
+
+    .hero-journey-date {
+      font-size: 0.75rem;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text-muted);
+      letter-spacing: 0.02em;
+    }
+
+    .hero-journey-slide-title {
+      font-size: 0.875rem;
+      line-height: 1.45;
+      color: var(--color-text-secondary);
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      margin: 0;
+    }
+
+    .hero-journey-slide:hover .hero-journey-slide-title {
+      color: var(--color-accent);
+    }
+
+    .hero-journey-dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.65rem;
+    }
+
+    .hero-journey-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--color-text-muted);
+      opacity: 0.35;
+      transition: opacity 0.25s ease;
+    }
+
+    .hero-journey-dot.is-active {
+      opacity: 1;
+      background: var(--color-accent);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-journey-viewport {
+        min-height: 0;
+      }
+
+      .hero-journey-slide {
+        position: relative !important;
+        left: auto;
+        top: auto;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transition: none;
+        padding: 0.45rem 0;
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .hero-journey-slide:last-of-type {
+        border-bottom: none;
+      }
+
+      .hero-journey-dots {
+        display: none;
+      }
+    }
+
     .introduction {
       max-width: 600px;
       margin-bottom: 5rem;
@@ -652,4 +848,50 @@ const recentPublications = allPublications
       }
     }
   </style>
+
+  <script is:inline>
+    (function () {
+      var root = document.getElementById('hero-journey-ticker');
+      if (!root) return;
+      var slides = root.querySelectorAll('.hero-journey-slide');
+      var dots = root.querySelectorAll('.hero-journey-dot');
+      if (slides.length < 2) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      var i = 0;
+      var n = slides.length;
+      var timer;
+
+      function go(index) {
+        i = ((index % n) + n) % n;
+        slides.forEach(function (el, j) {
+          el.classList.toggle('is-active', j === i);
+        });
+        dots.forEach(function (el, j) {
+          el.classList.toggle('is-active', j === i);
+        });
+      }
+
+      function tick() {
+        go(i + 1);
+      }
+
+      function start() {
+        clearInterval(timer);
+        timer = setInterval(tick, 5000);
+      }
+
+      function stop() {
+        clearInterval(timer);
+      }
+
+      start();
+      root.addEventListener('mouseenter', stop);
+      root.addEventListener('mouseleave', start);
+      root.addEventListener('focusin', stop);
+      root.addEventListener('focusout', function (e) {
+        if (!root.contains(e.relatedTarget)) start();
+      });
+    })();
+  </script>
 </BaseLayout>
