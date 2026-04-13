@@ -1,0 +1,51 @@
+---
+/**
+ * Remote image (e.g. Cloudflare R2) with build-time optimization.
+ *
+ * **Where optimization happens:** R2 stores the file you upload as-is. At `astro build`,
+ * Astro’s `<Image />` downloads the remote file and Sharp re-encodes it (default: WebP, quality 80)
+ * into `/_astro/...` — that is when resizing/compression happens, not at upload.
+ *
+ * Requires PUBLIC_ASSETS_URL / remotePatterns in astro.config and env.
+ *
+ * @example MDX
+ * import RemoteImage from '@/components/RemoteImage.astro';
+ * <RemoteImage src={`${import.meta.env.PUBLIC_ASSETS_URL}/journey/hero.webp`} alt="..." />
+ */
+import { Image } from 'astro:assets';
+
+interface Props {
+  /** Full HTTPS URL to the image on your allowed remote host */
+  src: string;
+  alt: string;
+  /** Extra classes on the outer wrapper (spacing + frame use `.remote-image-block` by default) */
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  decoding?: 'async' | 'auto' | 'sync';
+  quality?: number;
+  format?: 'avif' | 'webp' | 'png' | 'jpg';
+}
+
+const {
+  src,
+  alt,
+  class: className,
+  loading = 'lazy',
+  decoding = 'async',
+  quality = 80,
+  format = 'webp',
+} = Astro.props;
+---
+
+<div class:list={['remote-image-block', className]}>
+  <Image
+    src={src}
+    alt={alt}
+    inferSize
+    class="remote-image-block__img"
+    loading={loading}
+    decoding={decoding}
+    quality={quality}
+    format={format}
+  />
+</div>

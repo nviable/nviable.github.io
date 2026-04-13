@@ -208,3 +208,29 @@ pre code {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* R2 / CDN images via RemoteImage.astro — vertical rhythm in prose & journey expand */
+.remote-image-block {
+  margin: var(--space-lg) 0 var(--space-xl);
+}
+
+.remote-image-block:first-child {
+  margin-top: 0;
+}
+
+.remote-image-block .remote-image-block__img,
+.remote-image-block :global(picture),
+.remote-image-block :global(picture img) {
+  display: block;
+  width: 100%;
+  max-width: min(100%, 42rem);
+  margin-inline: auto;
+}
+
+.remote-image-block :global(picture img),
+.remote-image-block .remote-image-block__img {
+  height: auto;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+}

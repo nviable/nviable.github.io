@@ -23,6 +23,7 @@ import { defineConfig, envField } from 'astro/config';
 import { loadEnv } from 'vite';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import { fileURLToPath } from 'node:url';
 
 import cloudflare from "@astrojs/cloudflare";
 
@@ -32,7 +33,28 @@ import cloudflare from "@astrojs/cloudflare";
  * Uses Vite's loadEnv to read environment variables at build time.
  * Falls back to 'production' if NODE_ENV is not set.
  */
-const { SITE_URL } = loadEnv(process.env.NODE_ENV || 'production', process.cwd(), '');
+const mode = process.env.NODE_ENV || 'production';
+const env = loadEnv(mode, process.cwd(), '');
+const { SITE_URL } = env;
+
+/**
+ * Allow Astro `<Image />` to optimize fetches from your R2 public hostname (custom domain or r2.dev).
+ * Set PUBLIC_ASSETS_URL in .env / CI to the origin only, e.g. https://media.example.com or https://pub-xxx.r2.dev
+ */
+function assetsRemotePatterns(assetsBaseUrl) {
+  if (!assetsBaseUrl || typeof assetsBaseUrl !== 'string') return [];
+  try {
+    const u = new URL(assetsBaseUrl);
+    const protocol = (u.protocol.replace(':', '') || 'https');
+    const pathname =
+      !u.pathname || u.pathname === '/'
+        ? '/**'
+        : `${u.pathname.replace(/\/$/, '')}/**`;
+    return [{ protocol, hostname: u.hostname, pathname }];
+  } catch {
+    return [];
+  }
+}
 
 /** File watching is unreliable on native Windows and when WSL runs against a repo on a Windows drive (/mnt/...). */
 function viteWatchNeedsPolling() {
@@ -126,6 +148,9 @@ export default defineConfig({
       SOCIAL_BLUESKY: envField.string({ context: 'client', access: 'public', default: '' }),
       SOCIAL_ORCID: envField.string({ context: 'client', access: 'public', default: '' }),
       SOCIAL_SCHOLAR: envField.string({ context: 'client', access: 'public', default: '' }),
+
+      /** Public base URL for R2 (or other CDN) images — same origin you use in `<Image src={...} />` (no trailing path required) */
+      PUBLIC_ASSETS_URL: envField.string({ context: 'client', access: 'public', default: '' }),
     },
   },
 
@@ -151,8 +176,7 @@ export default defineConfig({
         limitInputPixels: 268402689, // ~16K x 16K pixels
       }
     },
-    // Remote image patterns (currently empty - add patterns as needed)
-    remotePatterns: [],
+    remotePatterns: assetsRemotePatterns(env.PUBLIC_ASSETS_URL),
   },
 
   /**
@@ -173,6 +197,11 @@ export default defineConfig({
 
   // Polling when watchers miss saves (Windows, or WSL + project under /mnt/c|d|...).
   vite: {
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    },
     server: {
       watch: viteWatchNeedsPolling() ? { usePolling: true, interval: 150 } : {},
     },
