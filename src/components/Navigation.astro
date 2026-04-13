@@ -1,48 +1,21 @@
 ---
 /**
  * Navigation Component
- * 
- * Main site navigation with responsive behavior and theme toggle. Features centered
- * navigation on desktop and horizontal scrolling on mobile. The theme toggle is fixed
- * at the right edge with a gradient fade effect.
- * 
- * Navigation items are configured in src/config.ts and automatically include a "Home"
- * link at the beginning. Active page highlighting is handled both server-side and
- * client-side for View Transitions support.
- * 
- * @component
- * 
- * @example
- * ```astro
- * <Navigation />
- * ```
+ *
+ * Main site navigation with theme toggle. Desktop: centered horizontal links.
+ * Mobile: full-screen link panel (slide-in) with dimmed backdrop and animated
+ * hamburger in the navbar that morphs to close when open.
  */
 import { siteConfig } from '../config';
 import ThemeToggle from './ThemeToggle.astro';
 
 const currentPath = Astro.url.pathname;
 
-/**
- * Navigation items with Home prepended
- * 
- * Combines a hardcoded Home link with navigation items from site config
- * to ensure Home is always first in the navigation.
- */
 const navItems = [
   { label: 'Home', href: '/' },
   ...siteConfig.nav,
 ];
 
-/**
- * Determines if a navigation item should be marked as active
- * 
- * Home link is only active on the exact root path. Other links are active
- * if the current path starts with their href, allowing child pages to
- * highlight their parent navigation item.
- * 
- * @param href - The navigation item's URL
- * @returns True if the navigation item should be marked as active
- */
 const isActive = (href: string) => {
   if (href === '/') {
     return currentPath === '/';
@@ -51,11 +24,14 @@ const isActive = (href: string) => {
 };
 ---
 
-<nav class="site-nav" aria-label="Main navigation">
+<nav class="site-nav" aria-label="Main navigation" data-nav-root>
+  <div class="nav-mobile-backdrop" data-nav-backdrop aria-hidden="true"></div>
+
   <a
     href="/"
     class="nav-brand"
     aria-label={`${siteConfig.title} — Home`}
+    data-nav-brand
   >
     <img
       class="nav-logo"
@@ -67,21 +43,45 @@ const isActive = (href: string) => {
       decoding="async"
     />
   </a>
-  <div class="nav-scroll">
+
+  <div
+    id="site-nav-panel"
+    class="nav-panel"
+    data-nav-panel
+    aria-hidden="false"
+  >
     <ul class="nav-list">
-      {navItems.map((item) => (
-        <li class="nav-item">
-          <a 
-            href={item.href} 
-            class:list={['nav-link', { 'nav-link--active': isActive(item.href) }]}
-            aria-current={isActive(item.href) ? 'page' : undefined}
-          >
-            {item.label}
-          </a>
-        </li>
-      ))}
+      {
+        navItems.map((item) => (
+          <li class="nav-item">
+            <a
+              href={item.href}
+              class:list={['nav-link', { 'nav-link--active': isActive(item.href) }]}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
     </ul>
   </div>
+
+  <button
+    type="button"
+    class="nav-menu-toggle"
+    aria-label="Open menu"
+    aria-expanded="false"
+    aria-controls="site-nav-panel"
+    data-nav-toggle
+  >
+    <span class="nav-hamburger" aria-hidden="true">
+      <span class="nav-hamburger__bar"></span>
+      <span class="nav-hamburger__bar"></span>
+      <span class="nav-hamburger__bar"></span>
+    </span>
+  </button>
+
   <div class="nav-end">
     <ThemeToggle />
   </div>
@@ -91,19 +91,19 @@ const isActive = (href: string) => {
   function updateActiveNav() {
     const currentPath = window.location.pathname;
     const navLinks = document.querySelectorAll('.nav-link');
-    
+
     navLinks.forEach((link) => {
       const href = link.getAttribute('href');
-      let isActive = false;
-      
+      let active = false;
+
       if (href === '/') {
-        isActive = currentPath === '/';
+        active = currentPath === '/';
       } else if (href) {
-        isActive = currentPath.startsWith(href);
+        active = currentPath.startsWith(href);
       }
-      
-      link.classList.toggle('nav-link--active', isActive);
-      if (isActive) {
+
+      link.classList.toggle('nav-link--active', active);
+      if (active) {
         link.setAttribute('aria-current', 'page');
       } else {
         link.removeAttribute('aria-current');
@@ -111,12 +111,167 @@ const isActive = (href: string) => {
     });
   }
 
-  // Run on initial load and after each navigation
-  document.addEventListener('astro:page-load', updateActiveNav);
+  function setupMobileNav() {
+    const rootEl = document.querySelector('[data-nav-root]');
+    if (!(rootEl instanceof HTMLElement)) return;
+
+    if (rootEl.dataset.navBound === '1') {
+      updateActiveNav();
+      return;
+    }
+    rootEl.dataset.navBound = '1';
+
+    const panelEl = rootEl.querySelector('[data-nav-panel]');
+    const toggleEl = rootEl.querySelector('[data-nav-toggle]');
+    const backdropEl = rootEl.querySelector('[data-nav-backdrop]');
+    const listEl = rootEl.querySelector('.nav-list');
+
+    if (
+      !(panelEl instanceof HTMLElement) ||
+      !(toggleEl instanceof HTMLButtonElement) ||
+      !(backdropEl instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    const mq = window.matchMedia('(min-width: 769px)');
+
+    function syncPanelTop() {
+      const top = rootEl.getBoundingClientRect().bottom;
+      document.documentElement.style.setProperty('--nav-panel-top', `${Math.ceil(top)}px`);
+    }
+
+    function isMobileNav() {
+      return !mq.matches;
+    }
+
+    /** @param {boolean} open */
+    function setOpen(open) {
+      if (!isMobileNav()) {
+        rootEl.classList.remove('is-open');
+        toggleEl.setAttribute('aria-expanded', 'false');
+        toggleEl.setAttribute('aria-label', 'Open menu');
+        panelEl.removeAttribute('inert');
+        panelEl.setAttribute('aria-hidden', 'false');
+        document.body.style.removeProperty('overflow');
+        return;
+      }
+
+      rootEl.classList.toggle('is-open', open);
+      toggleEl.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggleEl.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+
+      if (open) {
+        syncPanelTop();
+        panelEl.removeAttribute('inert');
+        panelEl.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        const first = listEl?.querySelector('a[href]');
+        window.requestAnimationFrame(() => {
+          if (first instanceof HTMLElement) first.focus();
+        });
+      } else {
+        panelEl.setAttribute('inert', '');
+        panelEl.setAttribute('aria-hidden', 'true');
+        document.body.style.removeProperty('overflow');
+        if (document.activeElement instanceof Node && panelEl.contains(document.activeElement)) {
+          toggleEl.focus();
+        }
+      }
+    }
+
+    function closeMenu() {
+      setOpen(false);
+    }
+
+    function toggleMenu() {
+      setOpen(!rootEl.classList.contains('is-open'));
+    }
+
+    /** Mobile-only: start closed for assistive tech */
+    function applyMode() {
+      if (isMobileNav()) {
+        if (!rootEl.classList.contains('is-open')) {
+          panelEl.setAttribute('inert', '');
+          panelEl.setAttribute('aria-hidden', 'true');
+        }
+      } else {
+        rootEl.classList.remove('is-open');
+        panelEl.removeAttribute('inert');
+        panelEl.setAttribute('aria-hidden', 'false');
+        document.body.style.removeProperty('overflow');
+        toggleEl.setAttribute('aria-expanded', 'false');
+        toggleEl.setAttribute('aria-label', 'Open menu');
+      }
+    }
+
+    applyMode();
+
+    toggleEl.addEventListener('click', () => {
+      if (!isMobileNav()) return;
+      toggleMenu();
+    });
+
+    backdropEl.addEventListener('click', closeMenu);
+
+    listEl?.addEventListener('click', (e) => {
+      const t = e.target;
+      if (t instanceof Element && t.closest('a') && isMobileNav()) {
+        closeMenu();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && rootEl.classList.contains('is-open')) {
+        closeMenu();
+      }
+    });
+
+    mq.addEventListener('change', () => {
+      closeMenu();
+      applyMode();
+    });
+
+    window.addEventListener(
+      'resize',
+      () => {
+        if (rootEl.classList.contains('is-open')) syncPanelTop();
+      },
+      { passive: true }
+    );
+  }
+
+  function onNavPageLoad() {
+    updateActiveNav();
+    const root = document.querySelector('[data-nav-root]');
+    if (root instanceof HTMLElement && root.classList.contains('is-open')) {
+      root.classList.remove('is-open');
+      document.body.style.removeProperty('overflow');
+      const panel = root.querySelector('[data-nav-panel]');
+      const toggle = root.querySelector('[data-nav-toggle]');
+      if (panel instanceof HTMLElement) {
+        panel.setAttribute('inert', '');
+        panel.setAttribute('aria-hidden', 'true');
+      }
+      if (toggle instanceof HTMLButtonElement) {
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Open menu');
+      }
+    }
+    setupMobileNav();
+  }
+
+  document.addEventListener('astro:page-load', onNavPageLoad);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', onNavPageLoad, { once: true });
+  } else {
+    onNavPageLoad();
+  }
 </script>
 
 <style>
   .site-nav {
+    --nav-toggle-w: 48px;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -124,6 +279,12 @@ const isActive = (href: string) => {
     background: var(--color-bg);
     padding: var(--space-sm) 0;
     margin-bottom: var(--space-md);
+    position: relative;
+    z-index: 120;
+  }
+
+  .nav-mobile-backdrop {
+    display: none;
   }
 
   .nav-brand {
@@ -135,6 +296,8 @@ const isActive = (href: string) => {
     text-decoration: none;
     border-radius: 6px;
     outline-offset: 3px;
+    position: relative;
+    z-index: 3;
   }
 
   .nav-brand:focus-visible {
@@ -147,7 +310,7 @@ const isActive = (href: string) => {
     width: auto;
   }
 
-  .nav-scroll {
+  .nav-panel {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -157,9 +320,11 @@ const isActive = (href: string) => {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    position: relative;
+    z-index: 2;
   }
 
-  .nav-scroll::-webkit-scrollbar {
+  .nav-panel::-webkit-scrollbar {
     display: none;
   }
 
@@ -186,7 +351,7 @@ const isActive = (href: string) => {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: color var(--transition-base);
     white-space: nowrap;
   }
 
@@ -198,6 +363,85 @@ const isActive = (href: string) => {
     color: var(--color-text);
   }
 
+  .nav-menu-toggle {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: var(--nav-toggle-w);
+    height: var(--nav-toggle-w);
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: var(--border-radius-md);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    position: relative;
+    z-index: 3;
+    transition:
+      color var(--transition-fast),
+      background var(--transition-fast);
+  }
+
+  .nav-menu-toggle:hover {
+    color: var(--color-text);
+    background: var(--color-bg-secondary);
+  }
+
+  .nav-menu-toggle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .nav-hamburger {
+    position: relative;
+    display: block;
+    width: 1.375rem;
+    height: 14px;
+  }
+
+  .nav-hamburger__bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 1px;
+    background: currentColor;
+    transform-origin: center;
+    transition:
+      transform 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+      opacity 0.2s ease,
+      top 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .nav-hamburger__bar:nth-child(1) {
+    top: 0;
+  }
+
+  .nav-hamburger__bar:nth-child(2) {
+    top: 6px;
+  }
+
+  .nav-hamburger__bar:nth-child(3) {
+    top: 12px;
+  }
+
+  .site-nav.is-open .nav-hamburger__bar:nth-child(1) {
+    top: 6px;
+    transform: rotate(45deg);
+  }
+
+  .site-nav.is-open .nav-hamburger__bar:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0.2);
+  }
+
+  .site-nav.is-open .nav-hamburger__bar:nth-child(3) {
+    top: 6px;
+    transform: rotate(-45deg);
+  }
+
   .nav-end {
     flex-shrink: 0;
     display: flex;
@@ -206,6 +450,7 @@ const isActive = (href: string) => {
     border-left: 1px solid var(--color-border);
     background: var(--color-bg);
     position: relative;
+    z-index: 3;
   }
 
   .nav-end::before {
@@ -220,6 +465,38 @@ const isActive = (href: string) => {
   }
 
   @media (max-width: 768px) {
+    .site-nav {
+      z-index: 200;
+      gap: 0.35rem;
+    }
+
+    .nav-mobile-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      margin: 0;
+      border: none;
+      padding: 0;
+      background: rgba(0, 0, 0, 0.52);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition:
+        opacity 0.32s ease,
+        visibility 0.32s ease;
+    }
+
+    :global(html[data-theme='light']) .nav-mobile-backdrop {
+      background: rgba(0, 0, 0, 0.28);
+    }
+
+    .site-nav.is-open .nav-mobile-backdrop {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
     .nav-brand {
       margin-left: 0.5rem;
     }
@@ -228,29 +505,104 @@ const isActive = (href: string) => {
       height: 1.75rem;
     }
 
-    .nav-list {
+    .nav-menu-toggle {
+      display: inline-flex;
+      margin-left: auto;
+    }
+
+    .nav-panel {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: var(--nav-panel-top, 3.35rem);
+      bottom: 0;
+      z-index: 2;
+      flex-direction: column;
       justify-content: flex-start;
-      gap: 1.5rem;
-      padding: 0.5rem 1rem;
+      overflow: hidden;
+      overflow-x: hidden;
+      padding: 0;
+      background: var(--color-bg);
+      border-top: 1px solid var(--color-border);
+      box-shadow: var(--shadow-lg);
+      transform: translateX(100%);
+      transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .site-nav.is-open .nav-panel {
+      transform: translateX(0);
+    }
+
+    .nav-list {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 0;
+      min-width: 0;
+      width: 100%;
+      padding: 0.75rem 0 max(1.5rem, env(safe-area-inset-bottom));
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-item {
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .nav-item:last-child {
+      border-bottom: none;
     }
 
     .nav-link {
-      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      min-height: 3.35rem;
+      font-size: 1.0625rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 1.25rem 1.5rem;
+      padding-left: max(1.5rem, env(safe-area-inset-left));
+      padding-right: max(1.5rem, env(safe-area-inset-right));
+      white-space: normal;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+
+    .nav-link:hover {
+      background: var(--color-bg-secondary);
     }
 
     .nav-end {
-      padding: 0 0.5rem;
+      padding: 0 0.65rem;
+      border-left: none;
+    }
+
+    .nav-end :global(.theme-toggle) {
+      width: var(--nav-toggle-w);
+      height: var(--nav-toggle-w);
     }
 
     .nav-end::before {
-      left: -16px;
-      width: 16px;
+      display: none;
+    }
+  }
+
+  @media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+    .nav-panel {
+      transition: transform 0.01ms;
+    }
+
+    .nav-mobile-backdrop {
+      transition: opacity 0.01ms;
+    }
+
+    .nav-hamburger__bar {
+      transition-duration: 0.01ms;
     }
   }
 </style>
 
 <style is:global>
-  /* logo.svg uses white fills; keep visible on light theme */
   html[data-theme='light'] .site-nav .nav-logo {
     filter: brightness(0);
   }
