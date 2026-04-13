@@ -121,6 +121,7 @@ event: "Event or Conference Name"
 date: 2024-01-15
 location: "City, Country"
 type: "conference"
+url: "https://conference-website.example"  # Optional
 slides: "https://speakerdeck.com/your-slides"
 video: "https://youtube.com/watch?v=xxx"
 duration: "30 min"

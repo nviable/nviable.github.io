@@ -88,6 +88,23 @@ const projectsCollection = defineCollection({
  * Research outputs with optional external venue links. Tags describe research
  * areas for display only (not filtered on the site).
  */
+/**
+ * Optional timeline metadata and outbound links — shared by `journey` and `speaking`
+ * so any entry type can use the same fields; templates show each block only when set.
+ */
+const timelineExtrasSchema = z.object({
+  /** Primary link (event site, venue, article, etc.) */
+  url: z.string().url().optional(),
+  duration: z.string().optional(),
+  topics: z.array(z.string()).optional(),
+  slides: z.string().url().optional(),
+  video: z.string().url().optional(),
+  featured: z.boolean().default(false),
+  relatedPresentation: z.string().url().optional(),
+  relatedPaper: z.string().url().optional(),
+  relatedArticle: z.string().url().optional(),
+});
+
 const publicationsCollection = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/publications' }),
   schema: z.object({
@@ -117,26 +134,35 @@ const publicationsCollection = defineCollection({
  * - Entry types: milestone, learning, transition, plus conference/meetup for
  *   professional gatherings that live in `journey/` but use speaking-style categories
  * - Skills/technologies per entry
- * - Optional expandable content
+ * - Optional expandable MDX body
+ * - Same optional links/meta as speaking (event, location, slides, related URLs, etc.)
  */
 const journeyCollection = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/journey' }),
-  schema: z.object({
-    /** Date of the timeline entry */
-    date: z.coerce.date(),
-    
-    /** Entry title */
-    title: z.string(),
-    
-    /** Type of timeline entry (conference/meetup match speaking categories for filters/icons) */
-    type: z.enum(['milestone', 'learning', 'transition', 'conference', 'meetup']),
-    
-    /** Brief description */
-    description: z.string(),
-    
-    /** Skills or technologies associated with this entry */
-    skills: z.array(z.string()).optional(),
-  }),
+  schema: z
+    .object({
+      /** Date of the timeline entry */
+      date: z.coerce.date(),
+
+      /** Entry title */
+      title: z.string(),
+
+      /** Type of timeline entry (conference/meetup match speaking categories for filters/icons) */
+      type: z.enum(['milestone', 'learning', 'transition', 'conference', 'meetup']),
+
+      /** Brief description */
+      description: z.string(),
+
+      /** Skills or technologies associated with this entry */
+      skills: z.array(z.string()).optional(),
+
+      /** Optional venue/publication name (shown in meta row when set) */
+      event: z.string().optional(),
+
+      /** Optional location (city, country, or "Online") */
+      location: z.string().optional(),
+    })
+    .merge(timelineExtrasSchema),
 });
 
 /**
@@ -207,50 +233,33 @@ const usesCollection = defineCollection({
  * 
  * Features:
  * - Five talk types (conference, meetup, interview, workshop, webinar)
- * - Links to slides and video recordings
- * - Event information and location
- * - Optional topics and duration
- * - Featured flag for highlighting
+ * - Event information and location (required)
+ * - Shared optional extras with journey: url, slides, video, topics, duration,
+ *   relatedPresentation / relatedPaper / relatedArticle, featured
  */
 const speakingCollection = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/speaking' }),
-  schema: z.object({
-    /** Talk title */
-    title: z.string(),
-    
-    /** Talk description */
-    description: z.string(),
-    
-    /** Event name */
-    event: z.string(),
-    
-    /** Event website URL (optional) */
-    eventUrl: z.string().url().optional(),
-    
-    /** Date of the talk */
-    date: z.coerce.date(),
-    
-    /** Location (city, country, or "Online") */
-    location: z.string(),
-    
-    /** Type of speaking engagement */
-    type: z.enum(['conference', 'meetup', 'interview', 'workshop', 'webinar']),
-    
-    /** Link to slides (optional) */
-    slides: z.string().url().optional(),
-    
-    /** Link to video recording (optional) */
-    video: z.string().url().optional(),
-    
-    /** Talk duration (e.g., "45 min", "1 hour") */
-    duration: z.string().optional(),
-    
-    /** Topics covered in the talk */
-    topics: z.array(z.string()).optional(),
-    
-    /** Whether to feature this talk */
-    featured: z.boolean().default(false),
-  }),
+  schema: z
+    .object({
+      /** Talk title */
+      title: z.string(),
+
+      /** Talk description */
+      description: z.string(),
+
+      /** Event name */
+      event: z.string(),
+
+      /** Date of the talk */
+      date: z.coerce.date(),
+
+      /** Location (city, country, or "Online") */
+      location: z.string(),
+
+      /** Type of speaking engagement */
+      type: z.enum(['conference', 'meetup', 'interview', 'workshop', 'webinar']),
+    })
+    .merge(timelineExtrasSchema),
 });
 
 /**

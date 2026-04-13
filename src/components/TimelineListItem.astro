@@ -13,6 +13,8 @@ import MonitorPlay from '@lucide/astro/icons/monitor-play';
 import ChevronDown from '@lucide/astro/icons/chevron-down';
 import ExternalLink from '@lucide/astro/icons/external-link';
 import Play from '@lucide/astro/icons/play';
+import FileText from '@lucide/astro/icons/file-text';
+import Newspaper from '@lucide/astro/icons/newspaper';
 import { formatTimelineDate } from '../utils/timelineDate';
 
 /** Lucide outline icons per timeline category */
@@ -45,19 +47,21 @@ interface Props {
   category: string;
   title: string;
   description: string;
-  variant: 'journey' | 'speaking';
   /** Omit grey spine below last row */
   isLast?: boolean;
   skills?: string[];
   hasExpandable?: boolean;
   event?: string;
-  eventUrl?: string;
+  url?: string;
   location?: string;
   duration?: string;
   topics?: string[];
   slides?: string;
   video?: string;
   featured?: boolean;
+  relatedPresentation?: string;
+  relatedPaper?: string;
+  relatedArticle?: string;
 }
 
 const {
@@ -66,18 +70,20 @@ const {
   category,
   title,
   description,
-  variant,
   isLast = false,
   skills = [],
   hasExpandable = false,
   event = '',
-  eventUrl,
+  url,
   location = '',
   duration,
   topics = [],
   slides,
   video,
   featured = false,
+  relatedPresentation,
+  relatedPaper,
+  relatedArticle,
 } = Astro.props;
 
 const safeId = itemId.replace(/[^a-zA-Z0-9_-]/g, '-');
@@ -85,9 +91,23 @@ const bodyId = `tl-expand-${safeId}`;
 const formattedDate = formatTimelineDate(date);
 const categoryLabel = CATEGORY_LABELS[category] ?? category;
 const CategoryIcon = ICON_BY_CATEGORY[category] ?? Flag;
+
+const hasPrimaryMeta = Boolean((url && event) || event || url);
+const showLocation = Boolean(location);
+const showDuration = Boolean(duration);
+const showMeta = hasPrimaryMeta || showLocation || showDuration;
+const showSkillPills = skills.length > 0;
+const showTopicPills = topics.length > 0;
+const showResourceLinks = Boolean(
+  slides ||
+    video ||
+    relatedPresentation ||
+    relatedPaper ||
+    relatedArticle
+);
 ---
 
-<article class="tl-item" data-variant={variant} data-category={category}>
+<article class="tl-item" data-category={category}>
   <div class="tl-track" aria-hidden="true">
     <div class="tl-bubble" data-category={category}>
       <CategoryIcon class="tl-icon" size={18} stroke-width={2} aria-hidden="true" />
@@ -99,40 +119,45 @@ const CategoryIcon = ICON_BY_CATEGORY[category] ?? Flag;
     <header class="tl-head">
       <time class="tl-date" datetime={date.toISOString()}>{formattedDate}</time>
       <span class="tl-badge" data-category={category}>{categoryLabel}</span>
-      {variant === 'speaking' && featured && (
-        <span class="tl-featured">Featured</span>
-      )}
+      {featured && <span class="tl-featured">Featured</span>}
     </header>
 
     <h3 class="tl-title">{title}</h3>
     <p class="tl-desc">{description}</p>
 
-    {variant === 'speaking' && (event || location || duration) && (
+    {showMeta && (
       <p class="tl-meta">
-        {eventUrl ? (
-          <a href={eventUrl} class="tl-meta__link" target="_blank" rel="noopener noreferrer">
+        {url && event ? (
+          <a href={url} class="tl-meta__link" target="_blank" rel="noopener noreferrer">
             {event}
             <ExternalLink size={12} aria-hidden="true" />
           </a>
-        ) : (
-          event && <span>{event}</span>
-        )}
-        {location && (
+        ) : event ? (
+          <span>{event}</span>
+        ) : url ? (
+          <a href={url} class="tl-meta__link" target="_blank" rel="noopener noreferrer">
+            Link
+            <ExternalLink size={12} aria-hidden="true" />
+          </a>
+        ) : null}
+        {showLocation && (
           <>
-            <span class="tl-meta__sep" aria-hidden="true">·</span>
+            {hasPrimaryMeta && <span class="tl-meta__sep" aria-hidden="true">·</span>}
             <span>{location}</span>
           </>
         )}
-        {duration && (
+        {showDuration && (
           <>
-            <span class="tl-meta__sep" aria-hidden="true">·</span>
+            {(hasPrimaryMeta || showLocation) && (
+              <span class="tl-meta__sep" aria-hidden="true">·</span>
+            )}
             <span>{duration}</span>
           </>
         )}
       </p>
     )}
 
-    {variant === 'journey' && skills.length > 0 && (
+    {showSkillPills && (
       <ul class="tl-pills" aria-label="Skills">
         {skills.map((s) => (
           <li>{s}</li>
@@ -140,7 +165,7 @@ const CategoryIcon = ICON_BY_CATEGORY[category] ?? Flag;
       </ul>
     )}
 
-    {variant === 'speaking' && topics.length > 0 && (
+    {showTopicPills && (
       <ul class="tl-pills" aria-label="Topics">
         {topics.map((t) => (
           <li>{t}</li>
@@ -148,7 +173,7 @@ const CategoryIcon = ICON_BY_CATEGORY[category] ?? Flag;
       </ul>
     )}
 
-    {variant === 'speaking' && (slides || video) && (
+    {showResourceLinks && (
       <p class="tl-links">
         {slides && (
           <a href={slides} class="tl-link" target="_blank" rel="noopener noreferrer">
@@ -162,10 +187,33 @@ const CategoryIcon = ICON_BY_CATEGORY[category] ?? Flag;
             Video
           </a>
         )}
+        {relatedPresentation && (
+          <a
+            href={relatedPresentation}
+            class="tl-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Presentation size={14} aria-hidden="true" />
+            Presentation
+          </a>
+        )}
+        {relatedPaper && (
+          <a href={relatedPaper} class="tl-link" target="_blank" rel="noopener noreferrer">
+            <FileText size={14} aria-hidden="true" />
+            Paper
+          </a>
+        )}
+        {relatedArticle && (
+          <a href={relatedArticle} class="tl-link" target="_blank" rel="noopener noreferrer">
+            <Newspaper size={14} aria-hidden="true" />
+            Article
+          </a>
+        )}
       </p>
     )}
 
-    {variant === 'journey' && hasExpandable && (
+    {hasExpandable && (
       <>
         <button
           type="button"

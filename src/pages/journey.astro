@@ -43,13 +43,21 @@ const journeyBlocks = await Promise.all(
   })
 );
 
-const speakingBlocks = allSpeaking.map((entry) => ({
-  kind: 'speaking' as const,
-  id: entry.id,
-  category: entry.data.type,
-  date: entry.data.date,
-  entry,
-}));
+const speakingBlocks = await Promise.all(
+  allSpeaking.map(async (entry) => {
+    const { Content } = await render(entry);
+    const hasContent = Boolean(entry.body && entry.body.trim().length > 0);
+    return {
+      kind: 'speaking' as const,
+      id: entry.id,
+      category: entry.data.type,
+      date: entry.data.date,
+      entry,
+      Content,
+      hasContent,
+    };
+  })
+);
 
 type Block = (typeof journeyBlocks)[number] | (typeof speakingBlocks)[number];
 
@@ -123,16 +131,27 @@ const speakingCount = speakingBlocks.length;
                     category={item.category}
                     title={item.entry.data.title}
                     description={item.entry.data.description}
-                    variant="journey"
                     isLast={isLast}
                     skills={item.entry.data.skills}
                     hasExpandable={item.hasContent}
+                    event={item.entry.data.event}
+                    url={item.entry.data.url}
+                    location={item.entry.data.location}
+                    duration={item.entry.data.duration}
+                    topics={item.entry.data.topics}
+                    slides={item.entry.data.slides}
+                    video={item.entry.data.video}
+                    featured={item.entry.data.featured}
+                    relatedPresentation={item.entry.data.relatedPresentation}
+                    relatedPaper={item.entry.data.relatedPaper}
+                    relatedArticle={item.entry.data.relatedArticle}
                   >
                     {item.hasContent && <JourneyBody />}
                   </TimelineListItem>
                 </div>
               );
             }
+            const SpeakingBody = item.Content;
             return (
               <div
                 class="timeline-slot"
@@ -147,17 +166,22 @@ const speakingCount = speakingBlocks.length;
                   category={item.category}
                   title={item.entry.data.title}
                   description={item.entry.data.description}
-                  variant="speaking"
                   isLast={isLast}
                   event={item.entry.data.event}
-                  eventUrl={item.entry.data.eventUrl}
+                  url={item.entry.data.url}
                   location={item.entry.data.location}
                   duration={item.entry.data.duration}
                   topics={item.entry.data.topics}
                   slides={item.entry.data.slides}
                   video={item.entry.data.video}
                   featured={item.entry.data.featured}
-                />
+                  relatedPresentation={item.entry.data.relatedPresentation}
+                  relatedPaper={item.entry.data.relatedPaper}
+                  relatedArticle={item.entry.data.relatedArticle}
+                  hasExpandable={item.hasContent}
+                >
+                  {item.hasContent && <SpeakingBody />}
+                </TimelineListItem>
               </div>
             );
           })}

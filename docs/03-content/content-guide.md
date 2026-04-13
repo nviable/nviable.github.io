@@ -119,7 +119,7 @@ relatedDecisions:  # Optional - slugs of related decisions
 
 Location: `src/content/journey/`
 
-Career timeline entries showing milestones, learnings, and transitions.
+Career timeline entries showing milestones, learnings, and transitions. Journey shares the same optional link fields as speaking (below): `url`, `slides`, `video`, `topics`, `duration`, `featured`, `relatedPresentation`, `relatedPaper`, `relatedArticle`, plus optional `event` and `location` for venue-style rows. Optional MDX body becomes a collapsible “Read more” on `/journey`.
 
 ```yaml
 ---
@@ -129,6 +129,11 @@ type: "milestone"  # Options: milestone, learning, transition, conference, meetu
 description: "What happened and what you learned"
 skills:            # Optional
   - "Skill 1"
+# url: "https://..."           # Optional — primary outbound link
+# event: "Venue or host"      # Optional
+# location: "City, Country"   # Optional
+# slides: "https://..."        # Optional
+# relatedPaper: "https://..."  # Optional
 ---
 ```
 
@@ -177,12 +182,15 @@ event: "Event Name"
 date: 2024-01-15
 location: "City, Country"  # or "Online"
 type: "conference"         # Options: conference, meetup, interview, workshop, webinar
-eventUrl: ""               # Optional
+url: ""                    # Optional — primary link (e.g. event or article)
 slides: ""                 # Optional
 video: ""                  # Optional
 duration: "45 min"         # Optional
 topics:                    # Optional
   - "Topic 1"
+relatedPresentation: ""    # Optional
+relatedPaper: ""           # Optional
+relatedArticle: ""         # Optional
 featured: false
 ---
 ```

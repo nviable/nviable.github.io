@@ -17,7 +17,7 @@
  *   title="Building Scalable Design Systems"
  *   description="A deep dive into creating maintainable design systems for large teams"
  *   event="React Summit 2024"
- *   eventUrl="https://reactsummit.com"
+ *   url="https://reactsummit.com"
  *   date={new Date('2024-06-15')}
  *   location="Amsterdam, Netherlands"
  *   type="conference"
@@ -34,6 +34,8 @@ import ExternalLink from '@lucide/astro/icons/external-link';
 import Play from '@lucide/astro/icons/play';
 import Presentation from '@lucide/astro/icons/presentation';
 import Star from '@lucide/astro/icons/star';
+import FileText from '@lucide/astro/icons/file-text';
+import Newspaper from '@lucide/astro/icons/newspaper';
 
 interface Props {
   /** Talk title (displayed as card heading) */
@@ -45,8 +47,12 @@ interface Props {
   /** Name of the event or venue */
   event: string;
   
-  /** Optional URL to the event website */
-  eventUrl?: string;
+  /** Optional primary URL (event site, article, etc.) */
+  url?: string;
+
+  relatedPresentation?: string;
+  relatedPaper?: string;
+  relatedArticle?: string;
   
   /** Date of the speaking engagement (formatted as "Month Year") */
   date: Date;
@@ -73,19 +79,22 @@ interface Props {
   featured?: boolean;
 }
 
-const { 
+const {
   title,
   description,
-  event, 
-  eventUrl, 
-  date, 
-  location, 
-  type, 
-  slides, 
-  video, 
+  event,
+  url,
+  date,
+  location,
+  type,
+  slides,
+  video,
   duration,
   topics = [],
-  featured = false 
+  featured = false,
+  relatedPresentation,
+  relatedPaper,
+  relatedArticle,
 } = Astro.props;
 
 /**
@@ -131,8 +140,8 @@ const typeLabels: Record<string, string> = {
   <p class="talk-description">{description}</p>
   
   <div class="talk-event">
-    {eventUrl ? (
-      <a href={eventUrl} target="_blank" rel="noopener noreferrer" class="event-link">
+    {url ? (
+      <a href={url} target="_blank" rel="noopener noreferrer" class="event-link">
         {event}
         <ExternalLink class="external-icon" size={12} aria-hidden="true" />
       </a>
@@ -151,7 +160,7 @@ const typeLabels: Record<string, string> = {
     </div>
   )}
   
-  {(slides || video) && (
+  {(slides || video || relatedPresentation || relatedPaper || relatedArticle) && (
     <div class="talk-links">
       {slides && (
         <a href={slides} target="_blank" rel="noopener noreferrer" class="talk-link">
@@ -163,6 +172,29 @@ const typeLabels: Record<string, string> = {
         <a href={video} target="_blank" rel="noopener noreferrer" class="talk-link">
           <Play size={16} aria-hidden="true" />
           Video
+        </a>
+      )}
+      {relatedPresentation && (
+        <a
+          href={relatedPresentation}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="talk-link"
+        >
+          <Presentation size={16} aria-hidden="true" />
+          Presentation
+        </a>
+      )}
+      {relatedPaper && (
+        <a href={relatedPaper} target="_blank" rel="noopener noreferrer" class="talk-link">
+          <FileText size={16} aria-hidden="true" />
+          Paper
+        </a>
+      )}
+      {relatedArticle && (
+        <a href={relatedArticle} target="_blank" rel="noopener noreferrer" class="talk-link">
+          <Newspaper size={16} aria-hidden="true" />
+          Article
         </a>
       )}
     </div>
