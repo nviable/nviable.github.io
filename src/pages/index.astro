@@ -63,7 +63,7 @@ const recentPublications = allPublications
     if (b.data.year !== a.data.year) return b.data.year - a.data.year;
     return (a.data.order ?? 999) - (b.data.order ?? 999);
   })
-  .slice(0, 3);
+  .slice(0, 5);
 ---
 
 <BaseLayout>
@@ -201,6 +201,7 @@ const recentPublications = allPublications
                     {pub.data.tags && pub.data.tags.length > 0 && (
                       <> · {pub.data.tags.slice(0, 3).join(' · ')}</>
                     )}
+                    <span class="publication-preview-quality">{pub.data.quality && ` · ${pub.data.quality}`}</span>
                   </span>
                   <h3 class="publication-preview-title">{pub.data.title}</h3>
                   <p class="publication-preview-authors">{pub.data.authors}</p>
@@ -662,6 +663,10 @@ const recentPublications = allPublications
       letter-spacing: 0.05em;
       color: var(--color-text-muted);
       margin-bottom: 0.5rem;
+    }
+
+    .publication-preview-quality {
+      color: var(--color-tertiary);
     }
 
     .publication-preview-title {
