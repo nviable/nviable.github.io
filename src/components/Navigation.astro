@@ -90,6 +90,7 @@ const isActive = (href: string) => {
 <script>
   function updateActiveNav() {
     const currentPath = window.location.pathname;
+    /** @type {NodeListOf<HTMLAnchorElement>} */
     const navLinks = document.querySelectorAll('.nav-link');
 
     navLinks.forEach((link) => {
@@ -125,7 +126,6 @@ const isActive = (href: string) => {
     const toggleEl = rootEl.querySelector('[data-nav-toggle]');
     const backdropEl = rootEl.querySelector('[data-nav-backdrop]');
     const listEl = rootEl.querySelector('.nav-list');
-
     if (
       !(panelEl instanceof HTMLElement) ||
       !(toggleEl instanceof HTMLButtonElement) ||
@@ -133,11 +133,15 @@ const isActive = (href: string) => {
     ) {
       return;
     }
+    const root = rootEl;
+    const panel = panelEl;
+    const toggle = toggleEl;
+    const backdrop = backdropEl;
 
     const mq = window.matchMedia('(min-width: 769px)');
 
     function syncPanelTop() {
-      const top = rootEl.getBoundingClientRect().bottom;
+      const top = root.getBoundingClientRect().bottom;
       document.documentElement.style.setProperty('--nav-panel-top', `${Math.ceil(top)}px`);
     }
 
@@ -145,37 +149,36 @@ const isActive = (href: string) => {
       return !mq.matches;
     }
 
-    /** @param {boolean} open */
-    function setOpen(open) {
+    function setOpen(open = false) {
       if (!isMobileNav()) {
-        rootEl.classList.remove('is-open');
-        toggleEl.setAttribute('aria-expanded', 'false');
-        toggleEl.setAttribute('aria-label', 'Open menu');
-        panelEl.removeAttribute('inert');
-        panelEl.setAttribute('aria-hidden', 'false');
+        root.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Open menu');
+        panel.removeAttribute('inert');
+        panel.setAttribute('aria-hidden', 'false');
         document.body.style.removeProperty('overflow');
         return;
       }
 
-      rootEl.classList.toggle('is-open', open);
-      toggleEl.setAttribute('aria-expanded', open ? 'true' : 'false');
-      toggleEl.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      root.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
 
       if (open) {
         syncPanelTop();
-        panelEl.removeAttribute('inert');
-        panelEl.setAttribute('aria-hidden', 'false');
+        panel.removeAttribute('inert');
+        panel.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
         const first = listEl?.querySelector('a[href]');
         window.requestAnimationFrame(() => {
           if (first instanceof HTMLElement) first.focus();
         });
       } else {
-        panelEl.setAttribute('inert', '');
-        panelEl.setAttribute('aria-hidden', 'true');
+        panel.setAttribute('inert', '');
+        panel.setAttribute('aria-hidden', 'true');
         document.body.style.removeProperty('overflow');
-        if (document.activeElement instanceof Node && panelEl.contains(document.activeElement)) {
-          toggleEl.focus();
+        if (document.activeElement instanceof Node && panel.contains(document.activeElement)) {
+          toggle.focus();
         }
       }
     }
@@ -185,34 +188,34 @@ const isActive = (href: string) => {
     }
 
     function toggleMenu() {
-      setOpen(!rootEl.classList.contains('is-open'));
+      setOpen(!root.classList.contains('is-open'));
     }
 
     /** Mobile-only: start closed for assistive tech */
     function applyMode() {
       if (isMobileNav()) {
-        if (!rootEl.classList.contains('is-open')) {
-          panelEl.setAttribute('inert', '');
-          panelEl.setAttribute('aria-hidden', 'true');
+        if (!root.classList.contains('is-open')) {
+          panel.setAttribute('inert', '');
+          panel.setAttribute('aria-hidden', 'true');
         }
       } else {
-        rootEl.classList.remove('is-open');
-        panelEl.removeAttribute('inert');
-        panelEl.setAttribute('aria-hidden', 'false');
+        root.classList.remove('is-open');
+        panel.removeAttribute('inert');
+        panel.setAttribute('aria-hidden', 'false');
         document.body.style.removeProperty('overflow');
-        toggleEl.setAttribute('aria-expanded', 'false');
-        toggleEl.setAttribute('aria-label', 'Open menu');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Open menu');
       }
     }
 
     applyMode();
 
-    toggleEl.addEventListener('click', () => {
+    toggle.addEventListener('click', () => {
       if (!isMobileNav()) return;
       toggleMenu();
     });
 
-    backdropEl.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
 
     listEl?.addEventListener('click', (e) => {
       const t = e.target;
@@ -222,7 +225,7 @@ const isActive = (href: string) => {
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && rootEl.classList.contains('is-open')) {
+      if (e.key === 'Escape' && root.classList.contains('is-open')) {
         closeMenu();
       }
     });
@@ -235,7 +238,7 @@ const isActive = (href: string) => {
     window.addEventListener(
       'resize',
       () => {
-        if (rootEl.classList.contains('is-open')) syncPanelTop();
+        if (root.classList.contains('is-open')) syncPanelTop();
       },
       { passive: true }
     );

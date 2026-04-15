@@ -62,6 +62,7 @@ coverage/
 .settings/
 *.sublime-project
 *.sublime-workspace
+settings.json
 
 # wrangler files
 .wrangler
