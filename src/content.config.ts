@@ -12,6 +12,7 @@
  * - writing: Blog posts and articles
  * - uses: Tools, stack, and environment documentation
  * - speaking: Conference talks and presentations
+ * - experience: About, personal, positions, and education (hub + detail MDX)
  * - testimonials: Endorsements and recommendations
  * 
  * All collections use the glob loader to read MDX files from their respective directories.
@@ -166,6 +167,34 @@ const journeyCollection = defineCollection({
 });
 
 /**
+ * Experience collection
+ *
+ * MDX for /experience/:slug. Frontmatter drives the hub (bullets, keywords, personal
+ * blurbs); the MDX body is the detail page narrative.
+ */
+const experienceCollection = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/experience' }),
+  schema: z.object({
+    title: z.string(),
+    category: z.enum(['about', 'personal', 'experience', 'education']),
+    /** Breadcrumb and compact labels */
+    breadcrumbLabel: z.string(),
+    subtitle: z.string().optional(),
+    metaLine: z.string().optional(),
+    /** Resume-style bullets on the Experience hub (positions & education) */
+    homeBullets: z.array(z.string()).optional(),
+    /** Keyword pills above “Read more” on the hub */
+    keywords: z.array(z.string()).optional(),
+    /** Short paragraphs for the Personal section on the hub only */
+    hubParagraphs: z.array(z.string()).optional(),
+    /** Sort order within category on the hub (lower first) */
+    order: z.number(),
+    /** SEO / social description for the detail page */
+    description: z.string().optional(),
+  }),
+});
+
+/**
  * Writing (Blog) Collection
  * 
  * Blog posts and technical articles with MDX support.
@@ -316,5 +345,6 @@ export const collections = {
   writing: writingCollection,
   uses: usesCollection,
   speaking: speakingCollection,
+  experience: experienceCollection,
   testimonials: testimonialsCollection,
 };

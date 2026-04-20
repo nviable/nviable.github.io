@@ -1,0 +1,374 @@
+---
+/**
+ * Experience hub — intro, research interests, positions, education, personal (MDX-backed).
+ * Route: /experience
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SEO from '../../components/SEO.astro';
+import { getCollection } from 'astro:content';
+import { pagesConfig } from '../../pages.config';
+import { researchInterests } from '../../data/researchInterests';
+import type { ResearchInterestIconId } from '../../data/researchInterests';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+import ShieldCheck from '@lucide/astro/icons/shield-check';
+import ScanSearch from '@lucide/astro/icons/scan-search';
+import Users from '@lucide/astro/icons/users';
+import Brain from '@lucide/astro/icons/brain';
+import Scale from '@lucide/astro/icons/scale';
+import Sparkles from '@lucide/astro/icons/sparkles';
+
+const all = await getCollection('experience');
+
+const sortByOrder = (a: (typeof all)[0], b: (typeof all)[0]) =>
+  a.data.order - b.data.order;
+
+const jobs = all.filter((e) => e.data.category === 'experience').sort(sortByOrder);
+const education = all.filter((e) => e.data.category === 'education').sort(sortByOrder);
+const personal = all.find((e) => e.data.category === 'personal');
+
+const introParas = pagesConfig.experience.introParagraphs?.length
+  ? [...pagesConfig.experience.introParagraphs]
+  : [];
+
+const interestIcons: Record<
+  ResearchInterestIconId,
+  typeof ShieldCheck
+> = {
+  'shield-check': ShieldCheck,
+  'scan-search': ScanSearch,
+  users: Users,
+  brain: Brain,
+  scale: Scale,
+  sparkles: Sparkles,
+};
+---
+
+<BaseLayout>
+  <SEO
+    slot="head"
+    title={pagesConfig.experience.title}
+    description={pagesConfig.experience.description}
+    type="website"
+  />
+
+  <main class="page-container experience-hub">
+    <header class="page-header">
+      <h1 class="page-title">{pagesConfig.experience.heading}</h1>
+      <div class="page-intro experience-hub__intro">
+        {introParas.map((p) => (
+          <p>{p}</p>
+        ))}
+      </div>
+      <p class="experience-hub__about-link">
+        <a href="/experience/about" class="exp-text-link">More about me</a>
+        <ArrowRight class="exp-text-link__arrow" size={16} aria-hidden="true" />
+      </p>
+    </header>
+
+    <section class="exp-block" aria-labelledby="exp-interests-heading">
+      <h2 id="exp-interests-heading" class="exp-block__heading">Research interests</h2>
+      <ul class="exp-interests exp-interests--icons">
+        {
+          researchInterests.map((item) => {
+            const Icon = interestIcons[item.icon];
+            return (
+              <li class="exp-interests__row">
+                <span class="exp-interests__icon" aria-hidden="true">
+                  <Icon size={20} stroke-width={2} />
+                </span>
+                <span class="exp-interests__text">{item.text}</span>
+              </li>
+            );
+          })
+        }
+      </ul>
+      <p class="exp-block__note">
+        Publications and funded projects live on <a href="/publications">Publications</a> and{' '}
+        <a href="/projects">Projects</a>.
+      </p>
+    </section>
+
+    <section class="exp-block" aria-labelledby="exp-jobs-heading">
+      <h2 id="exp-jobs-heading" class="exp-block__heading">Positions</h2>
+      <div class="exp-card-list">
+        {
+          jobs.map((job) => (
+            <article class="exp-card">
+              <h3 class="exp-card__title">{job.data.title}</h3>
+              {job.data.subtitle && <p class="exp-card__subtitle">{job.data.subtitle}</p>}
+              {job.data.metaLine && <p class="exp-card__meta">{job.data.metaLine}</p>}
+              {job.data.homeBullets && job.data.homeBullets.length > 0 && (
+                <ul class="exp-card__bullets">
+                  {job.data.homeBullets.map((b) => (
+                    <li>{b}</li>
+                  ))}
+                </ul>
+              )}
+              {job.data.keywords && job.data.keywords.length > 0 && (
+                <ul class="exp-card__pills" aria-label="Keywords">
+                  {job.data.keywords.map((k) => (
+                    <li>{k}</li>
+                  ))}
+                </ul>
+              )}
+              <a class="exp-readmore" href={`/experience/${job.id}`}>
+                <span>Read more</span>
+                <ArrowRight size={18} stroke-width={2} aria-hidden="true" />
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="exp-block" aria-labelledby="exp-edu-heading">
+      <h2 id="exp-edu-heading" class="exp-block__heading">Education</h2>
+      <div class="exp-card-list">
+        {
+          education.map((edu) => (
+            <article class="exp-card">
+              <h3 class="exp-card__title">{edu.data.title}</h3>
+              {edu.data.subtitle && <p class="exp-card__subtitle">{edu.data.subtitle}</p>}
+              {edu.data.metaLine && <p class="exp-card__meta">{edu.data.metaLine}</p>}
+              {edu.data.homeBullets && edu.data.homeBullets.length > 0 && (
+                <ul class="exp-card__bullets">
+                  {edu.data.homeBullets.map((b) => (
+                    <li>{b}</li>
+                  ))}
+                </ul>
+              )}
+              {edu.data.keywords && edu.data.keywords.length > 0 && (
+                <ul class="exp-card__pills" aria-label="Keywords">
+                  {edu.data.keywords.map((k) => (
+                    <li>{k}</li>
+                  ))}
+                </ul>
+              )}
+              <a class="exp-readmore" href={`/experience/${edu.id}`}>
+                <span>Read more</span>
+                <ArrowRight size={18} stroke-width={2} aria-hidden="true" />
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    {
+      personal && (
+        <section class="exp-block" aria-labelledby="exp-personal-heading">
+          <h2 id="exp-personal-heading" class="exp-block__heading">Personal</h2>
+          <div class="exp-personal">
+            {personal.data.hubParagraphs?.map((para) => <p>{para}</p>)}
+            <a class="exp-readmore" href={`/experience/${personal.id}`}>
+              <span>Read more</span>
+              <ArrowRight size={18} stroke-width={2} aria-hidden="true" />
+            </a>
+          </div>
+        </section>
+      )
+    }
+  </main>
+</BaseLayout>
+
+<style>
+  .experience-hub__intro p {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--color-text-secondary);
+    margin: 0 0 1rem;
+    max-width: 65ch;
+  }
+
+  .experience-hub__about-link {
+    margin: 0.25rem 0 0;
+    max-width: 65ch;
+  }
+
+  .exp-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .exp-text-link:hover {
+    text-decoration: underline;
+  }
+
+  .exp-text-link__arrow {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .experience-hub .exp-block {
+    margin-bottom: 2.5rem;
+  }
+
+  .experience-hub .exp-block__heading {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    color: var(--color-text);
+    letter-spacing: 0.02em;
+  }
+
+  .experience-hub .exp-block__note {
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    margin: 1rem 0 0;
+    line-height: 1.6;
+  }
+
+  .experience-hub .exp-block__note a {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .experience-hub .exp-block__note a:hover {
+    text-decoration: underline;
+  }
+
+  .experience-hub .exp-interests--icons {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: 65ch;
+  }
+
+  .experience-hub .exp-interests__row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-bottom: 0.85rem;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+  }
+
+  .experience-hub .exp-interests__icon {
+    flex-shrink: 0;
+    margin-top: 0.12rem;
+    color: var(--color-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .experience-hub .exp-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .experience-hub .exp-card {
+    padding: 1.25rem 1.35rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    background: var(--color-bg-secondary);
+  }
+
+  .experience-hub .exp-card__title {
+    margin: 0 0 0.25rem;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-text);
+  }
+
+  .experience-hub .exp-card__subtitle {
+    margin: 0 0 0.35rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  .experience-hub .exp-card__meta {
+    margin: 0 0 0.85rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+    line-height: 1.45;
+  }
+
+  .experience-hub .exp-card__bullets {
+    margin: 0 0 1rem;
+    padding-left: 1.2rem;
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+  }
+
+  .experience-hub .exp-card__bullets li {
+    margin-bottom: 0.45rem;
+  }
+
+  .experience-hub .exp-card__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+  }
+
+  .experience-hub .exp-card__pills li {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+  }
+
+  .experience-hub .exp-card__pills li:last-child {
+    margin-bottom: auto;
+  }
+
+  .experience-hub .exp-readmore {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.15rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-accent);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      border-color var(--transition-fast),
+      background var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .experience-hub .exp-readmore:hover {
+    border-color: var(--color-accent);
+    background: rgba(67, 72, 156, 0.08);
+  }
+
+  .experience-hub .exp-personal {
+    max-width: 65ch;
+  }
+
+  .experience-hub .exp-personal p {
+    margin: 0 0 0.85rem;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+  }
+
+  .experience-hub .exp-personal .exp-readmore {
+    margin-top: 0.5rem;
+  }
+</style>

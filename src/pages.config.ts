@@ -40,6 +40,9 @@ interface PageMeta {
   
   /** Page intro text (displayed below heading, optional) */
   intro?: string;
+
+  /** Multiple intro paragraphs below the heading (optional; e.g. Experience hub) */
+  introParagraphs?: readonly string[];
 }
 
 /**
@@ -80,6 +83,21 @@ export const pagesConfig = {
     intro: 'Peer-reviewed papers, book chapters, and dissertation. Links open the venue or preprint page where available; fuller pages on this site may be added later.',
   },
   
+  /**
+   * Experience / resume hub (/experience) — overview with detail subpages
+   */
+  experience: {
+    title: 'Experience — background, roles & education',
+    description:
+      'Human-centered HCI and digital media forensics researcher: DeFake Project, mixed-methods work with experts, and industry UX — with room to go deeper on each chapter.',
+    heading: 'Experience',
+    introParagraphs: [
+      'I want the technologies we build to be designed with humans in mind — not the other way around. With years of work across AI, product development, and HCI, I try to stay on the user’s side of the problem while still being honest about what is technically and organizationally feasible.',
+      'On the digital forensics side, that same instinct shows up as a push for tools and workflows that give people real autonomy in verifying content themselves, instead of asking them to simply trust someone else’s word. We live in a crowded information space where many “authorities” act in their own self-interest; I care about designs that make evidence and reasoning legible so users can decide for themselves.',
+      'My research and the systems I help build are meant to reflect that stance.',
+    ],
+  },
+
   /**
    * Journey & speaking timeline (/journey) — merges `journey` and `speaking` collections
    */

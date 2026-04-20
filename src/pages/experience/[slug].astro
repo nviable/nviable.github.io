@@ -1,0 +1,121 @@
+---
+/**
+ * Experience detail — MDX body from content collection.
+ * Route: /experience/:slug
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SEO from '../../components/SEO.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { getCollection, getEntry, render } from 'astro:content';
+import { pagesConfig } from '../../pages.config';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('experience');
+  return entries.map((e) => ({ params: { slug: e.id } }));
+}
+
+const { slug } = Astro.params;
+const entry = slug ? await getEntry('experience', slug) : undefined;
+
+if (!entry) {
+  return Astro.redirect('/experience');
+}
+
+const { Content } = await render(entry);
+
+const categoryLabel: Record<string, string> = {
+  about: 'About',
+  personal: 'Personal',
+  experience: 'Position',
+  education: 'Education',
+};
+
+const breadcrumbItems = [
+  { label: 'Home', href: '/' },
+  { label: pagesConfig.experience.heading, href: '/experience' },
+  { label: entry.data.breadcrumbLabel },
+];
+
+const seoTitle = `${entry.data.breadcrumbLabel} · ${pagesConfig.experience.heading}`;
+const seoDescription =
+  entry.data.description ??
+  entry.data.metaLine ??
+  pagesConfig.experience.description;
+---
+
+<BaseLayout>
+  <SEO slot="head" title={seoTitle} description={seoDescription} type="website" />
+
+  <main class="page-container experience-detail">
+    <Breadcrumb items={breadcrumbItems} />
+
+    <header class="exp-detail-header">
+      <p class="exp-detail-kind">{categoryLabel[entry.data.category] ?? 'Experience'}</p>
+      <h1 class="page-title exp-detail-title">{entry.data.title}</h1>
+      {entry.data.subtitle && <p class="exp-detail-subtitle">{entry.data.subtitle}</p>}
+      {entry.data.metaLine && <p class="exp-detail-meta">{entry.data.metaLine}</p>}
+    </header>
+
+    <div class="exp-detail-body prose">
+      <Content />
+    </div>
+
+    <p class="exp-detail-back">
+      <a href="/experience">← All experience</a>
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .experience-detail .exp-detail-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .experience-detail .exp-detail-kind {
+    margin: 0 0 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .experience-detail .exp-detail-title {
+    margin: 0 0 0.35rem;
+  }
+
+  .experience-detail .exp-detail-subtitle {
+    margin: 0 0 0.35rem;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  .experience-detail .exp-detail-meta {
+    margin: 0.5rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+
+  .experience-detail .exp-detail-body.prose {
+    max-width: 65ch;
+  }
+
+  .experience-detail .exp-detail-back {
+    margin: 2.5rem 0 0;
+    font-size: 0.9375rem;
+  }
+
+  .experience-detail .exp-detail-back a {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .experience-detail .exp-detail-back a:hover {
+    text-decoration: underline;
+  }
+</style>
