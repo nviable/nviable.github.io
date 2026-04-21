@@ -27,11 +27,11 @@
     "assets:upload": "node scripts/upload-r2.mjs"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "12",
-    "@astrojs/mdx": "^4.0.0",
+    "@astrojs/cloudflare": "13",
+    "@astrojs/mdx": "^5.0.3",
     "@astrojs/sitemap": "^3.6.1",
     "@lucide/astro": "^1.8.0",
-    "astro": "^5.18.1",
+    "astro": "^6.1.8",
     "sharp": "^0.34.5"
   },
   "devDependencies": {
