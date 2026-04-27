@@ -66,8 +66,64 @@ Open [http://localhost:4321](http://localhost:4321). The dev server reloads when
 | `npm run preview` | Build, then run locally with [Wrangler](https://developers.cloudflare.com/workers/wrangler/) (Cloudflare adapter) |
 | `npm run deploy` | Build and deploy to Cloudflare (requires Wrangler login and project setup) |
 | `npm run cf-typegen` | Regenerate Wrangler-related types |
+| `npm run assets:upload` | Upload a file to R2 (see [Images on Cloudflare R2](#images-on-cloudflare-r2)) |
 
 For a static preview of the build without Cloudflare, you can serve `dist/` with any static file server after `npm run build`.
+
+## Images on Cloudflare R2
+
+The site can load optimized images from a **public** R2 bucket (or custom domain) using `PUBLIC_ASSETS_URL` and the `RemoteImage` component (`src/components/RemoteImage.astro`). The repo includes a small uploader that talks to R2’s **S3-compatible API**.
+
+### One-time: bucket, public URL, and API credentials
+
+1. In the [Cloudflare dashboard](https://dash.cloudflare.com) open **R2** → **Create bucket** (e.g. `my-site-assets`). Object keys are the path (e.g. `journey/2026-04-11/photo.jpg`).
+
+2. **Expose objects in the browser** (pick one or both):
+   - **Custom domain** (recommended for production): R2 → your bucket → **Settings** → **Custom Domains** — connect something like `cdn.yoursite.com` and note the public URL pattern (sometimes the path includes the bucket name, e.g. `https://cdn.yoursite.com/bucket-name/...`).
+
+3. **S3 API credentials** for uploads: R2 → **Manage R2 API Tokens** (or **Account API Tokens** with R2 permissions) → create a token with **Object Read & Write** (and **Create** for the target bucket as needed). You get:
+   - **Access Key ID** and **Secret Access Key** — map to `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` in `.env`.
+   - **S3 API endpoint** for the account, usually: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` (no bucket in the hostname) — this is `R2_ENDPOINT`.
+
+4. **Environment variables** (copy from [`.env.example`](./.env.example), fill a local `.env` — **never commit secrets**):
+   - **`R2_ENDPOINT`** — account S3 endpoint (see above).
+   - **`R2_ACCESS_KEY_ID`**, **`R2_SECRET_ACCESS_KEY`** — from the R2 / S3 API token.
+   - **`R2_BUCKET`** — exact bucket name.
+   - **`R2_PUBLIC_BASE_URL`** (optional but useful) — the **https** prefix that matches what visitors use in the browser, **no trailing slash**. If the public URL is `https://cdn.example.com/my-bucket/key`, set this to `https://cdn.example.com/my-bucket` so the uploader can print the final public URL.
+   - **`PUBLIC_ASSETS_URL`** — same idea as the public base for the site: the prefix Astro uses for `RemoteImage` and `astro.config` remote image patterns. It should match how objects are **actually** served (including bucket in the path if your CDN is set up that way). Set in **local `.env` and Cloudflare Pages** environment for builds.
+
+5. `astro.config.mjs` whitelists your asset origin; after changing `PUBLIC_ASSETS_URL`, restart the dev server.
+
+### Upload a file from this repo
+
+With `.env` loaded and dependencies installed:
+
+```bash
+npm run assets:upload -- <object-key> <path-to-local-file>
+```
+
+Example:
+
+```bash
+npm run assets:upload -- journey/2026-04-11/ims.jpg ./images/ims.jpg
+```
+
+The script (`scripts/upload-r2.mjs`) uses `@aws-sdk/client-s3` with `forcePathStyle: true` (required for R2). It sets a long `Cache-Control` for images. If `R2_PUBLIC_BASE_URL` is set, it prints the full **https** URL to use in content.
+
+**Alternatives:** [Wrangler R2](https://developers.cloudflare.com/workers/wrangler/commands/#r2) (`wrangler r2 object put ...`), the R2 **Upload** action in the dashboard, or any S3 client pointed at the same endpoint and bucket.
+
+### Use an image in MDX
+
+Reference the public URL. Prefer the env-based prefix so dev/prod stay aligned:
+
+```mdx
+<RemoteImage
+  src={`${import.meta.env.PUBLIC_ASSETS_URL}/journey/2026-04-11/ims.jpg`}
+  alt="Description"
+/>
+```
+
+If `PUBLIC_ASSETS_URL` is empty locally, the image will not resolve until the variable is set.
 
 ## Project layout (short)
 
