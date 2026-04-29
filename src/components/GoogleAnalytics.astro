@@ -1,0 +1,39 @@
+---
+/**
+ * Google Analytics 4 (gtag) — only when GOOGLE_ANALYTICS_ID is set (e.g. G-XXXXXXXXXX).
+ * Fires virtual page views on ClientRouter soft navigations (`astro:page-load`).
+ */
+import { GOOGLE_ANALYTICS_ID } from 'astro:env/client';
+
+const measurementId = GOOGLE_ANALYTICS_ID?.trim() ?? '';
+---
+
+{
+  measurementId && (
+    <>
+      <script
+        is:inline
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
+      />
+      <script define:vars={{ measurementId }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', measurementId, { send_page_view: false });
+
+        function sendPageView() {
+          gtag('event', 'page_view', {
+            page_path: window.location.pathname + window.location.search,
+            page_title: document.title,
+          });
+        }
+
+        document.addEventListener('astro:page-load', sendPageView);
+      </script>
+    </>
+  )
+}

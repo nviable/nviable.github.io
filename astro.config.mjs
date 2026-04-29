@@ -151,6 +151,9 @@ export default defineConfig({
 
       /** Public base URL for R2 (or other CDN) images — same origin you use in `<Image src={...} />` (no trailing path required) */
       PUBLIC_ASSETS_URL: envField.string({ context: 'client', access: 'public', default: '' }),
+
+      /** Google Analytics 4 measurement ID (e.g. G-XXXXXXXXXX). Empty = no GA scripts. */
+      GOOGLE_ANALYTICS_ID: envField.string({ context: 'client', access: 'public', default: '' }),
     },
   },
 
