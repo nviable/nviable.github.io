@@ -16,6 +16,7 @@ import Users from '@lucide/astro/icons/users';
 import Brain from '@lucide/astro/icons/brain';
 import Scale from '@lucide/astro/icons/scale';
 import Sparkles from '@lucide/astro/icons/sparkles';
+import FileDown from '@lucide/astro/icons/file-down';
 
 const all = await getCollection('experience');
 
@@ -41,6 +42,11 @@ const interestIcons: Record<
   scale: Scale,
   sparkles: Sparkles,
 };
+
+const assetsBase = (import.meta.env.PUBLIC_ASSETS_URL as string | undefined)
+  ?.trim()
+  .replace(/\/$/, '');
+const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : '';
 ---
 
 <BaseLayout>
@@ -52,8 +58,24 @@ const interestIcons: Record<
   />
 
   <main class="page-container experience-hub">
-    <header class="page-header">
-      <h1 class="page-title">{pagesConfig.experience.heading}</h1>
+    <header class="page-header experience-hub__header">
+      <div class="experience-hub__title-row">
+        <h1 class="page-title experience-hub__page-title">{pagesConfig.experience.heading}</h1>
+        {
+          resumePdfUrl && (
+            <a
+              href={resumePdfUrl}
+              class="experience-hub__resume-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+            >
+              <FileDown size={18} stroke-width={2} aria-hidden="true" />
+              Download Resume (PDF)
+            </a>
+          )
+        }
+      </div>
       <div class="page-intro experience-hub__intro">
         {introParas.map((p) => (
           <p>{p}</p>
@@ -172,6 +194,54 @@ const interestIcons: Record<
 </BaseLayout>
 
 <style>
+  .experience-hub__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.25rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .experience-hub__page-title {
+    margin-bottom: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .experience-hub__resume-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-accent);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: inherit;
+    line-height: 1.2;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .experience-hub__resume-btn:hover {
+    border-color: var(--color-accent);
+    background: rgba(67, 72, 156, 0.1);
+    color: var(--color-accent-hover);
+  }
+
+  .experience-hub__resume-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
   .experience-hub__intro p {
     font-size: 1.0625rem;
     line-height: 1.75;
