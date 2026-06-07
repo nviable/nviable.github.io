@@ -17,6 +17,7 @@ import Brain from '@lucide/astro/icons/brain';
 import Scale from '@lucide/astro/icons/scale';
 import Sparkles from '@lucide/astro/icons/sparkles';
 import FileDown from '@lucide/astro/icons/file-down';
+import { PUBLIC_ASSETS_URL } from 'astro:env/client';
 
 const all = await getCollection('experience');
 
@@ -43,9 +44,7 @@ const interestIcons: Record<
   sparkles: Sparkles,
 };
 
-const assetsBase = (import.meta.env.PUBLIC_ASSETS_URL as string | undefined)
-  ?.trim()
-  .replace(/\/$/, '');
+const assetsBase = PUBLIC_ASSETS_URL.trim().replace(/\/$/, '');
 const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : '';
 ---
 
