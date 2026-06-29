@@ -63,7 +63,7 @@ export const siteConfig = {
    * 
    * Used as fallback when page-specific title is not provided.
    */
-  title: getEnv('SITE_TITLE', 'John Sohrawardi — Portfolio Website'),
+  title: getEnv('SITE_TITLE', 'Saniat Sohrawardi — HCI & Digital Media Forensics Researcher'),
   
   /**
    * Site description
@@ -83,7 +83,7 @@ export const siteConfig = {
    */
   author: {
     /** Full name */
-    name: getEnv('SITE_AUTHOR_NAME', 'Your Name'),
+    name: getEnv('SITE_AUTHOR_NAME', 'Saniat Sohrawardi'),
     
     /** Professional title or role */
     title: getEnv('SITE_AUTHOR_TITLE', 'Postdoctoral Researcher · HCI & Digital Media Forensics'),

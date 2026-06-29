@@ -16,13 +16,13 @@ role: "Lead researcher & founder"
 institution: "Rochester Institute of Technology"
 duration: "2018–present (ongoing)"
 collaborators: []
-abstract: "The DeFake Project builds interpretable, workflow-aligned interfaces on top of ML detection (video, audio, identity signals) so journalists, analysts, and investigators can verify synthetic and manipulated media without blind trust in model scores. Work is interdisciplinary with funding from Knight, NSF, DoD, and Omidyar, and spans the flagship web application, Varuna, Dungeons & Deepfakes, and We.DeFake — co-designed with journalists, analysts, and law enforcement. This entry summarizes the umbrella initiative; refine metrics and claims with what you are comfortable publishing."
+abstract: "The DeFake Project is an interdisciplinary research initiative building interpretable, workflow-aligned tools that help journalists, intelligence analysts, and investigators verify synthetic and manipulated media — without blind trust in a single model score. Its flagship web application, DeFake.app, layers multiple forensic signals (intra-frame and inter-frame video artifacts, audio, and speaker identity) into a forensic-style interface co-designed with practitioners, rather than reducing a complex judgment to one probability bar. Founded in 2018 and led across four universities, the project spans the flagship application and a family of related efforts — Varuna, Dungeons & Deepfakes, and We.DeFake — with funding from Knight, NSF, DoD, and Omidyar. Its research has appeared at venues including CHI, SOUPS, CCS, and IEEE, and the work has been featured by outlets such as CNET, Spectrum News, and the Columbia Journalism Review."
 highlights:
-  - "Knight · NSF · DoD · Omidyar funded (verify wording)"
-  - "Multi-signal forensic UI vs. single score"
-  - "Co-designed with journalists & analysts"
-  - "~18 researchers, multi-university collaboration"
-  - "Knight AI & the News Open Challenge — verify citation"
+  - "Funded by Knight, NSF, DoD & Omidyar"
+  - "Multi-signal forensic UI — not a single score"
+  - "Co-designed with journalists, analysts & investigators"
+  - "~18 researchers across four universities"
+  - "Featured by CNET, Spectrum News & CJR"
 artifacts:
   - label: "DeFake Project site"
     url: "https://defake.app/about"
@@ -42,41 +42,37 @@ relatedPublications:
 
 ### Problem
 
-Off-the-shelf deepfake detectors are black boxes. Journalists, intelligence analysts, and investigators need explainable cues, provenance context, and interfaces that match how they already work under time pressure — not a single probability bar.
+Off-the-shelf deepfake detectors are black boxes. Journalists, intelligence analysts, and investigators need explainable cues, provenance context, and interfaces that match how they already work under time pressure — not a single probability bar they are asked to trust or distrust on faith.
 
 ### Constraints
 
-- Stakeholders span newsrooms, government, and academia with different threat models
+- Stakeholders span newsrooms, government, and academia, each with different threat models
 - Models and attack surfaces evolve faster than traditional release cycles
 - Human-in-the-loop judgment must stay central to avoid automation bias
-- Funding and compliance requirements across multiple sponsors
+- Funding and compliance requirements span multiple sponsors
 
 ### Approach
 
-Mixed-methods research (interviews, diary studies, workshops, usability tests) drives requirements and iteration. High-fidelity Figma prototypes are tested before engineering commits. The stack combines Flask/React services with PyTorch/Keras models, Dockerized components, and design patterns that surface evidence (intra-frame, inter-frame, audio, speaker identity) in a forensic-style UI rather than a single verdict.
+Mixed-methods research — interviews, diary studies, workshops, and usability tests — drives requirements and iteration. High-fidelity Figma prototypes are tested with practitioners before engineering commits. The stack combines Flask/React services with PyTorch/Keras models and Dockerized components, and the design surfaces evidence across signals (intra-frame, inter-frame, audio, speaker identity) in a forensic-style interface rather than a single verdict.
 
 ### Key decisions
 
-**Prioritize explainable, multi-signal UI over a single authenticity score** — Expert users need to justify conclusions to editors and courts; layered evidence reduces harmful over-trust in one number. Alternatives: minimal UI wrapping a single classifier output; fully automated moderation pipeline.
+**Prioritize an explainable, multi-signal UI over a single authenticity score** — Expert users need to justify conclusions to editors and, sometimes, to courts; layered evidence reduces harmful over-trust in one number. Alternatives considered: a minimal UI wrapping a single classifier output; a fully automated moderation pipeline.
 
-**Co-design with journalists and analysts from the first prototype** — Workflow fit and trust are as important as raw AUROC; field studies surfaced needs no lab study would catch. Alternatives: ship a demo first and collect feedback post-launch; rely only on academic peer review for validation.
+**Co-design with journalists and analysts from the first prototype** — Workflow fit and trust matter as much as raw model accuracy; field studies surfaced needs no lab study would catch. Alternatives considered: ship a demo first and collect feedback post-launch; rely only on academic peer review for validation.
 
 ### Tech stack
 
 Python, Flask, React, PyTorch, Keras, Figma, Docker.
 
-### Impact (draft)
+### Impact
 
-Sub-projects include the analytic interface, Varuna (ontology-driven forensics platform), Dungeons & Deepfakes (training/simulation), and We.DeFake (federated ActivityPub community). Replace this paragraph with outcomes you are comfortable publishing.
+The DeFake Project has grown from an idea into a sustained, interdisciplinary collaboration of roughly 18 researchers across four universities, supported by Knight, NSF, DoD, and Omidyar. It anchors a family of related efforts: the analytic interface, [Varuna](/projects/varuna) (an ontology-driven forensics platform), [Dungeons & Deepfakes](/projects/dungeons-and-deepfakes) (scenario-based verification training), and [We.DeFake](/projects/we-defake) (a federated collaboration community).
+
+The research program has produced peer-reviewed work at CHI, SOUPS, CCS, and IEEE venues (see the related publications below), and the tool and its findings have reached both practitioner and public audiences — through coverage by CNET, Spectrum News, and the Columbia Journalism Review, and through direct engagement with government and standards communities, including a DARPA briefing on the project's media-forensics ontology.
 
 ### Learnings
 
 - Usable security for media integrity means designing for doubt, calibration, and audit trails — not just accuracy
+- Trust is earned at the interface: practitioners adopt detection tools when the evidence and its limits are legible, not when a score is simply high
 - Cross-institution roadmaps need explicit stakeholder alignment and shared definitions of done
-- Replace with your own takeaways after you edit this draft
-
----
-
-## Draft notes (delete or replace)
-
-Link out: [defake.app](https://defake.app/about) and project subpages. Add screenshots, evaluation results, and partner acknowledgments when you are ready.

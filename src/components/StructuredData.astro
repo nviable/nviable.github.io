@@ -97,6 +97,7 @@ function generateStructuredData(type: string, data: Record<string, any>) {
         '@context': baseContext,
         '@type': 'Person',
         name: data.name || siteConfig.author.name,
+        alternateName: data.alternateName || 'John Sohrawardi',
         jobTitle: data.jobTitle || siteConfig.author.title,
         description: data.description || siteConfig.author.bio,
         url: data.url || siteURL,

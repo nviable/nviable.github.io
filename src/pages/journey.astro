@@ -212,7 +212,26 @@ const speakingCount = speakingBlocks.length;
       const slots = () =>
         Array.from(list.querySelectorAll('[data-timeline-item]'));
 
-      let filter = 'all';
+      const validCategories = Array.from(
+        filterRoot.querySelectorAll('.timeline-filter')
+      ).map((b) => b.getAttribute('data-category') || 'all');
+
+      function readFilterFromUrl() {
+        const requested = new URLSearchParams(window.location.search).get('filter');
+        return requested && validCategories.includes(requested) ? requested : 'all';
+      }
+
+      function syncUrl(value) {
+        const url = new URL(window.location.href);
+        if (value && value !== 'all') {
+          url.searchParams.set('filter', value);
+        } else {
+          url.searchParams.delete('filter');
+        }
+        window.history.replaceState({}, '', url);
+      }
+
+      let filter = readFilterFromUrl();
       let visibleCount = PAGE_SIZE;
 
       function matching() {
@@ -251,11 +270,19 @@ const speakingCount = speakingBlocks.length;
         const cat = t.getAttribute('data-category') || 'all';
         filter = cat;
         visibleCount = PAGE_SIZE;
+        syncUrl(filter);
         apply();
       });
 
       loadBtn.addEventListener('click', () => {
         visibleCount += PAGE_SIZE;
+        apply();
+      });
+
+      // Keep the view in sync when navigating via browser back/forward.
+      window.addEventListener('popstate', () => {
+        filter = readFilterFromUrl();
+        visibleCount = PAGE_SIZE;
         apply();
       });
 

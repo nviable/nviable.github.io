@@ -1,6 +1,7 @@
 ---
 /**
  * Publication list card: title, authors, venue/year (venue tier e.g. A* in meta), tags, link when URL exists.
+ * A status badge (e.g. "In submission") marks work that is not yet formally published.
  */
 import BaseCard from './BaseCard.astro';
 import ForwardLink from './ForwardLink.astro';
@@ -13,6 +14,7 @@ interface Props {
   quality?: 'A*' | 'A' | 'B' | 'C' | undefined;
   url?: string;
   tags?: string[];
+  status?: 'published' | 'inSubmission' | 'inPreparation' | 'underReview';
   statusNote?: string;
   maxAuthorsLength?: number;
 }
@@ -25,6 +27,7 @@ const {
   quality,
   url,
   tags = [],
+  status,
   statusNote,
   maxAuthorsLength = 220,
 } = Astro.props;
@@ -34,12 +37,24 @@ function truncate(text: string, maxLength: number): string {
   return text.slice(0, maxLength).trim() + '…';
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  inSubmission: 'In submission',
+  underReview: 'Under review',
+  inPreparation: 'In preparation',
+};
+const statusLabel = status && status !== 'published' ? STATUS_LABELS[status] : undefined;
+const isUnpublished = Boolean(statusLabel);
+
 const truncatedAuthors = truncate(authors, maxAuthorsLength);
 const meta = `${year} · ${venue}`;
+const linkText = isUnpublished ? 'Read preprint' : 'Open publication';
 ---
 
-<BaseCard href={url} external={Boolean(url)} class="publication-card">
-  <Fragment slot="meta">{meta}{quality && ` · `}<span class="meta-quality">{quality ? `${quality}` : ''}</span></Fragment>
+<BaseCard href={url} external={Boolean(url)} class:list={['publication-card', isUnpublished && 'publication-card--unpublished']}>
+  <Fragment slot="meta">
+    {statusLabel && <span class="status-badge">{statusLabel}</span>}
+    {meta}{quality && ` · `}<span class="meta-quality">{quality ? `${quality}` : ''}</span>
+  </Fragment>
   <Fragment slot="title">{title}</Fragment>
   <Fragment slot="description">{truncatedAuthors}</Fragment>
   {
@@ -51,7 +66,7 @@ const meta = `${year} · ${venue}`;
       </div>
     )
   }
-  {url && <ForwardLink text="Open publication" variant="muted" />}
+  {url && <ForwardLink text={linkText} variant="muted" />}
   {!url && statusNote && <p class="status-note">{statusNote}</p>}
 </BaseCard>
 
@@ -61,6 +76,20 @@ const meta = `${year} · ${venue}`;
   }
   .publication-card :global(.card-description) {
     font-size: 0.875rem;
+  }
+
+  .status-badge {
+    display: inline-block;
+    margin-right: 0.5rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: rgba(234, 179, 8, 0.14);
+    color: #ca8a04;
+    vertical-align: middle;
   }
 
   .status-note {

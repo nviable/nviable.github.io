@@ -61,6 +61,7 @@ const total = sorted.length;
               KIND_TAG[entry.data.kind],
               ...(entry.data.tags ?? []),
             ]}
+            status={entry.data.status}
             statusNote={entry.data.statusNote}
           />
         ))}

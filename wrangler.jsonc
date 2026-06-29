@@ -14,4 +14,23 @@
     "binding": "ASSETS",
     "directory": "dist"
   }
+
+  // ── Contact form (Cloudflare Email Routing) ──────────────────────────────
+  // The /contact page renders a working form ONLY when the CONTACT_MAILER
+  // binding below exists; otherwise it falls back to prefilled mailto links.
+  // To enable server-side sending:
+  //   1. Cloudflare dashboard → your zone → Email → Email Routing (enable it).
+  //   2. Add and VERIFY a destination address (your real inbox).
+  //   3. Uncomment the two blocks below and set the verified address.
+  //   4. Create a Turnstile widget, then: `npx wrangler secret put TURNSTILE_SECRET_KEY`
+  //      and set PUBLIC_TURNSTILE_SITE_KEY in your build env.
+  // See docs/CONTACT-FORM-SETUP.md for the full walkthrough.
+  //
+  // ,"send_email": [
+  //   { "name": "CONTACT_MAILER", "destination_address": "you@verified-inbox.example" }
+  // ]
+  // ,"vars": {
+  //   "CONTACT_FROM": "website@nviable.me",
+  //   "CONTACT_TO": "you@verified-inbox.example"
+  // }
 }

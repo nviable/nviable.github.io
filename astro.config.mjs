@@ -120,7 +120,7 @@ export default defineConfig({
       // Site configuration
       SITE_URL: envField.string({ context: 'client', access: 'public', default: 'https://example.com' }),
       SITE_LANGUAGE: envField.string({ context: 'client', access: 'public', default: 'en' }),
-      SITE_TITLE: envField.string({ context: 'client', access: 'public', default: 'John Sohrawardi — Portfolio Website' }),
+      SITE_TITLE: envField.string({ context: 'client', access: 'public', default: 'Saniat Sohrawardi — HCI & Digital Media Forensics Researcher' }),
       SITE_DESCRIPTION: envField.string({
         context: 'client',
         access: 'public',
@@ -129,7 +129,7 @@ export default defineConfig({
       }),
       
       // Author information
-      SITE_AUTHOR_NAME: envField.string({ context: 'client', access: 'public', default: 'John Sohrawardi' }),
+      SITE_AUTHOR_NAME: envField.string({ context: 'client', access: 'public', default: 'Saniat Sohrawardi' }),
       SITE_AUTHOR_TITLE: envField.string({ context: 'client', access: 'public', default: 'Postdoctoral Researcher · HCI & Digital Media Forensics' }),
       SITE_AUTHOR_BIO: envField.string({
         context: 'client',
@@ -154,6 +154,9 @@ export default defineConfig({
 
       /** Google Analytics 4 measurement ID (e.g. G-XXXXXXXXXX). Empty = no GA scripts. */
       GOOGLE_ANALYTICS_ID: envField.string({ context: 'client', access: 'public', default: '' }),
+
+      /** Cloudflare Turnstile site key for the contact form widget. Empty = no widget. */
+      PUBLIC_TURNSTILE_SITE_KEY: envField.string({ context: 'client', access: 'public', default: '' }),
     },
   },
 
