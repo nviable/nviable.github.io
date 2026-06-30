@@ -1,77 +1,251 @@
 ---
 /**
- * Contact Page
- * 
- * Minimal, intentional contact page with clear visual hierarchy and zone-based layout.
- * Prioritizes email as the primary contact method while providing secondary social links.
- * 
- * Layout Structure:
- * - Zone 1 (Primary): Email address with context about response time
- * - Zone 2 (Secondary): Social media links (only shown if configured)
- * 
- * Features:
- * - Clean, distraction-free design
- * - Large, prominent email link
- * - Automatic filtering of configured social links
- * - Responsive layout
- * - Clear visual hierarchy
- * 
+ * Contact Page — on-demand (server-rendered on Cloudflare Workers).
+ *
+ * Two modes, chosen at request time:
+ *  - If the `CONTACT_MAILER` Email Routing binding is configured, render a real
+ *    contact form. POSTs are handled here: validate → (optional) Turnstile →
+ *    send via the binding → redirect (Post/Redirect/Get) with a ?status flag.
+ *  - Otherwise, fall back to polished prefilled-`mailto:` buttons so the page is
+ *    useful immediately, before any Cloudflare setup is done.
+ *
+ * See docs/CONTACT-FORM-SETUP.md to enable the form.
+ *
  * Route: /contact
- * 
  * @page
  */
+export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SEO from '../components/SEO.astro';
 import { siteConfig } from '../config';
 import { pagesConfig } from '../pages.config';
 
-/**
- * Filters and formats social links from site configuration
- * 
- * Only includes platforms that have a URL configured (non-empty values).
- * Capitalizes platform names for display (e.g., "github" becomes "Github").
- * 
- * @returns Array of social link objects with platform name and URL
- */
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+const env = (Astro.locals as any)?.runtime?.env ?? {};
+const mailerConfigured = Boolean(env.CONTACT_MAILER);
+
+/** Collaboration types — drive both the form's topic select and the mailto subjects. */
+const TOPICS = [
+  'Research partnership or collaboration',
+  'Invited talk or panel',
+  'Student / mentee inquiry',
+  'Media or press request',
+  'Something else',
+];
+
 const socialLinks = Object.entries(siteConfig.social)
-  .filter(([_, url]) => url)
+  .filter(([, url]) => url)
   .map(([platform, url]) => ({
     platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-    url
+    url,
   }));
+
+/** Strip CR/LF so user-supplied values can't inject extra email headers. */
+function headerSafe(value: string): string {
+  return value.replace(/[\r\n]+/g, ' ').trim();
+}
+
+function buildMime(opts: {
+  from: string;
+  to: string;
+  replyTo: string;
+  replyToName: string;
+  subject: string;
+  text: string;
+}): string {
+  const headers = [
+    `From: Website Contact <${headerSafe(opts.from)}>`,
+    `To: <${headerSafe(opts.to)}>`,
+    `Reply-To: ${headerSafe(opts.replyToName)} <${headerSafe(opts.replyTo)}>`,
+    `Subject: ${headerSafe(opts.subject)}`,
+    `Date: ${new Date().toUTCString()}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset="utf-8"',
+    'Content-Transfer-Encoding: 8bit',
+  ];
+  const body = opts.text.replace(/\r?\n/g, '\r\n');
+  return headers.join('\r\n') + '\r\n\r\n' + body + '\r\n';
+}
+
+type FormStatus = 'idle' | 'sent' | 'error' | 'invalid' | 'notconfigured';
+let formStatus: FormStatus = 'idle';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const name = String(data.get('name') ?? '').trim();
+    const email = String(data.get('email') ?? '').trim();
+    const topic = String(data.get('topic') ?? '').trim();
+    const message = String(data.get('message') ?? '').trim();
+    const honeypot = String(data.get('company') ?? '').trim();
+    const token = String(data.get('cf-turnstile-response') ?? '');
+
+    // Honeypot: bots fill the hidden field — pretend success and drop it.
+    if (honeypot) return Astro.redirect('/contact?status=sent', 303);
+
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!name || !emailValid || !message) {
+      return Astro.redirect('/contact?status=invalid', 303);
+    }
+
+    // Verify Turnstile when a secret is configured.
+    if (env.TURNSTILE_SECRET_KEY) {
+      const res = await fetch(
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            secret: String(env.TURNSTILE_SECRET_KEY),
+            response: token,
+            remoteip: Astro.request.headers.get('cf-connecting-ip') ?? '',
+          }),
+        },
+      );
+      const outcome: any = await res.json();
+      if (!outcome?.success) return Astro.redirect('/contact?status=invalid', 303);
+    }
+
+    if (!env.CONTACT_MAILER) {
+      return Astro.redirect('/contact?status=notconfigured', 303);
+    }
+
+    const host = (() => {
+      try {
+        return new URL(siteConfig.url).hostname;
+      } catch {
+        return 'nviable.me';
+      }
+    })();
+    const from = String(env.CONTACT_FROM || `website@${host}`);
+    const to = String(env.CONTACT_TO || from);
+    const text = [
+      'New message from the website contact form.',
+      '',
+      `Name:   ${name}`,
+      `Email:  ${email}`,
+      `Topic:  ${topic || '—'}`,
+      '',
+      'Message:',
+      message,
+    ].join('\n');
+
+    const { EmailMessage } = await import('cloudflare:email');
+    const raw = buildMime({
+      from,
+      to,
+      replyTo: email,
+      replyToName: name,
+      subject: `[Website] ${topic || 'Contact'} — ${name}`,
+      text,
+    });
+    await env.CONTACT_MAILER.send(new EmailMessage(from, to, raw));
+    return Astro.redirect('/contact?status=sent', 303);
+  } catch {
+    return Astro.redirect('/contact?status=error', 303);
+  }
+} else {
+  const param = Astro.url.searchParams.get('status');
+  if (param === 'sent' || param === 'error' || param === 'invalid' || param === 'notconfigured') {
+    formStatus = param;
+  }
+}
+
+const banners: Record<Exclude<FormStatus, 'idle'>, { kind: 'ok' | 'err'; text: string }> = {
+  sent: { kind: 'ok', text: 'Thanks — your message is on its way. I read every email and reply within a few days.' },
+  error: { kind: 'err', text: 'Something went wrong sending your message. Please email me directly using the address below.' },
+  invalid: { kind: 'err', text: 'Please check your name, a valid email, and a message, then try again.' },
+  notconfigured: { kind: 'err', text: 'The form isn’t live yet — please email me directly using the address below.' },
+};
+const banner = formStatus !== 'idle' ? banners[formStatus] : null;
 ---
 
 <BaseLayout>
-  <SEO 
+  <SEO
     slot="head"
     title={pagesConfig.contact.title}
     description={pagesConfig.contact.description}
     type="website"
+    image="/og/contact.png"
   />
 
   <main class="contact-page">
-    <!-- Zone 1: Primary Intent -->
     <section class="primary-zone">
       <h1>{pagesConfig.contact.heading}</h1>
-      <a href={`mailto:${siteConfig.author.email}`} class="email-link">
-        {siteConfig.author.email}
-      </a>
-      <p class="context">
-        I read every email. Expect a reply within a few days.
+      <p class="lead">
+        I’m open to <strong>research partnerships</strong>, <strong>invited talks and panels</strong>,
+        student inquiries, and press on deepfakes, media forensics, and human-centered verification.
       </p>
     </section>
 
-    <!-- Zone 2: Secondary (Social) -->
+    {banner && (
+      <p class:list={['form-banner', banner.kind === 'ok' ? 'form-banner--ok' : 'form-banner--err']} role="status">
+        {banner.text}
+      </p>
+    )}
+
+    {mailerConfigured ? (
+      <section class="form-zone">
+        <form method="POST" action="/contact" class="contact-form">
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" required autocomplete="name" />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required autocomplete="email" />
+          </div>
+          <div class="field">
+            <label for="topic">What’s this about?</label>
+            <select id="topic" name="topic">
+              {TOPICS.map((t) => <option value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div class="field">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="6" required></textarea>
+          </div>
+
+          {/* Honeypot — hidden from people, tempting to bots */}
+          <div class="hp" aria-hidden="true">
+            <label for="company">Company</label>
+            <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          {turnstileSiteKey && (
+            <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="auto"></div>
+          )}
+
+          <button type="submit" class="submit-btn">Send message</button>
+        </form>
+
+        <p class="form-alt">
+          Prefer not to use a form? Email <a href={`mailto:${siteConfig.author.email}`}>{siteConfig.author.email}</a>.
+        </p>
+      </section>
+    ) : (
+      <section class="mailto-zone">
+        <p class="mailto-intro">Pick the closest topic to start an email with the subject pre-filled:</p>
+        <div class="mailto-buttons">
+          {TOPICS.map((t) => (
+            <a class="mailto-btn" href={`mailto:${siteConfig.author.email}?subject=${encodeURIComponent(t)}`}>
+              {t}
+            </a>
+          ))}
+        </div>
+        <a href={`mailto:${siteConfig.author.email}`} class="email-link">{siteConfig.author.email}</a>
+        <p class="context">I read every email. Expect a reply within a few days.</p>
+      </section>
+    )}
+
     {socialLinks.length > 0 && (
       <section class="secondary-zone">
         <h2>Elsewhere</h2>
         <div class="social-links">
           {socialLinks.map((link, index) => (
             <>
-              <a href={link.url} target="_blank" rel="noopener noreferrer">
-                {link.platform}
-              </a>
+              <a href={link.url} target="_blank" rel="noopener noreferrer">{link.platform}</a>
               {index < socialLinks.length - 1 && <span class="separator">·</span>}
             </>
           ))}
@@ -79,6 +253,15 @@ const socialLinks = Object.entries(siteConfig.social)
       </section>
     )}
   </main>
+
+  {turnstileSiteKey && mailerConfigured && (
+    <script
+      is:inline
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      async
+      defer
+    ></script>
+  )}
 
   <style>
     .contact-page {
@@ -88,25 +271,161 @@ const socialLinks = Object.entries(siteConfig.social)
     }
 
     .primary-zone {
-      margin-bottom: 3rem;
+      margin-bottom: 2rem;
     }
 
     .primary-zone h1 {
-      font-size: 1.125rem;
-      font-weight: 500;
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .lead {
+      font-size: 1.0625rem;
+      line-height: 1.7;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    .form-banner {
+      margin: 0 0 1.75rem;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      border: 1px solid var(--color-border);
+    }
+
+    .form-banner--ok {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: rgba(34, 197, 94, 0.4);
+      color: var(--color-text);
+    }
+
+    .form-banner--err {
+      background: rgba(234, 179, 8, 0.12);
+      border-color: rgba(234, 179, 8, 0.4);
+      color: var(--color-text);
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .field label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--color-text);
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      width: 100%;
+      transition: border-color 0.15s ease;
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 7rem;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--color-accent);
+    }
+
+    .hp {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    .submit-btn {
+      align-self: flex-start;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--color-text);
+      color: var(--color-bg);
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .submit-btn:hover {
+      opacity: 0.85;
+    }
+
+    .form-alt {
+      margin: 1.5rem 0 0;
+      font-size: 0.9375rem;
       color: var(--color-text-muted);
-      margin-bottom: 1.5rem;
-      letter-spacing: 0.01em;
+    }
+
+    .form-alt a {
+      color: var(--color-text-secondary);
+    }
+
+    .mailto-intro {
+      font-size: 0.9375rem;
+      color: var(--color-text-muted);
+      margin: 0 0 1rem;
+    }
+
+    .mailto-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+
+    .mailto-btn {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      padding: 0.55rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .mailto-btn:hover {
+      border-color: var(--color-accent);
+      color: var(--color-text);
     }
 
     .email-link {
       display: block;
-      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      font-size: clamp(1.5rem, 4.5vw, 2.25rem);
       font-weight: 600;
       color: var(--color-text);
       text-decoration: none;
       letter-spacing: -0.02em;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       transition: color 0.2s ease;
     }
 
@@ -118,9 +437,11 @@ const socialLinks = Object.entries(siteConfig.social)
       font-size: 1rem;
       color: var(--color-text-muted);
       line-height: 1.6;
+      margin: 0;
     }
 
     .secondary-zone {
+      margin-top: 3rem;
       padding-top: 3rem;
       border-top: 1px solid var(--color-border);
     }
@@ -159,15 +480,7 @@ const socialLinks = Object.entries(siteConfig.social)
 
     @media (max-width: 640px) {
       .contact-page {
-        padding: 4rem 1rem 6rem;
-      }
-
-      .primary-zone {
-        margin-bottom: 4rem;
-      }
-
-      .primary-zone h1 {
-        font-size: 1rem;
+        padding: 2.5rem 1rem 6rem;
       }
     }
   </style>

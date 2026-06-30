@@ -10,7 +10,6 @@ import SEO from '../components/SEO.astro';
 import StructuredData from '../components/StructuredData.astro';
 import ForwardLink from '../components/ForwardLink.astro';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
-// import Testimonials from '../components/Testimonials.astro';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../config';
 import { truncateForPreview } from '../utils/preview';
@@ -64,6 +63,12 @@ const recentPublications = allPublications
     return (a.data.order ?? 999) - (b.data.order ?? 999);
   })
   .slice(0, 5);
+
+const PUB_STATUS_LABELS: Record<string, string> = {
+  inSubmission: 'In submission',
+  underReview: 'Under review',
+  inPreparation: 'In preparation',
+};
 ---
 
 <BaseLayout>
@@ -72,6 +77,7 @@ const recentPublications = allPublications
     title={siteConfig.title}
     description={siteConfig.description}
     type="website"
+    image="/og/home.png"
     noSuffix
   />
 
@@ -158,7 +164,7 @@ const recentPublications = allPublications
       <div class="research-focus-inner">
         <h2 id="research-focus-heading" class="research-focus-heading">Focus</h2>
         <p class="research-focus-body">
-          {siteConfig.author.bio}
+          I co-founded and lead the <strong>DeFake Project</strong>, an interdisciplinary initiative spanning four universities, working at the boundary of qualitative inquiry, interface design, and machine-learning deployment. Seven-plus years in HCI and ML research and four in industry UX have taught me to stay on the user&rsquo;s side of a problem while being honest about what is technically and organizationally feasible.
         </p>
         <p class="research-focus-themes">
           Usable deepfake detection · Digital media forensics (vision, audio, metadata, identity) · Mixed-methods HCI with expert practitioners · Explainable AI and automation bias · Simulation-based training for verification
@@ -197,6 +203,9 @@ const recentPublications = allPublications
               >
                 <div class="publication-preview-main">
                   <span class="publication-preview-meta">
+                    {pub.data.status && pub.data.status !== 'published' && (
+                      <span class="publication-preview-status">{PUB_STATUS_LABELS[pub.data.status]}</span>
+                    )}
                     {pub.data.year}
                     {pub.data.tags && pub.data.tags.length > 0 && (
                       <> · {pub.data.tags.slice(0, 3).join(' · ')}</>
@@ -216,17 +225,6 @@ const recentPublications = allPublications
         <p class="no-publications">No publications listed yet.</p>
       )}
     </section>
-
-    <!-- Testimonials -->
-    <!-- <Testimonials limit={3} /> -->
-
-    <!-- What I Think About -->
-    <!-- <section class="thinking">
-      <h2>Problems I Enjoy Solving</h2>
-      <p class="thinking-list">
-        How to scale systems without scaling complexity · When to choose consistency over availability · Making legacy codebases maintainable · Designing APIs that last · Building teams that ship · Turning technical debt into technical investment · Documenting decisions so future-you understands past-you
-      </p>
-    </section> -->
 
     <section class="cta">
       <h2>Collaborate or get in touch</h2>
@@ -667,6 +665,18 @@ const recentPublications = allPublications
 
     .publication-preview-quality {
       color: var(--color-tertiary);
+    }
+
+    .publication-preview-status {
+      display: inline-block;
+      margin-right: 0.5rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.625rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      background: rgba(234, 179, 8, 0.14);
+      color: #ca8a04;
     }
 
     .publication-preview-title {

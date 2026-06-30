@@ -15,13 +15,13 @@ role: "Lead (research platform)"
 institution: "Rochester Institute of Technology"
 duration: "2021–2025"
 collaborators: []
-abstract: "We.DeFake explores whether federated, open social infrastructure can support trustworthy collaboration around sensitive media: smaller silos, community norms, and tooling hooks into DeFake workflows instead of only centralized platforms. The stack builds on ActivityPub (Pleroma/Soapbox) for researchers, journalists, and fact-checkers to share verification context and collaborate on manipulated-media cases. Copy is draft — add adoption stats when publishable."
+abstract: "We.DeFake explored whether federated, open social infrastructure could support trustworthy collaboration around sensitive media — smaller, norm-governed communities with tooling that hooks into DeFake workflows, rather than relying only on centralized platforms. Built on ActivityPub (Pleroma/Soapbox), it gave researchers, journalists, and fact-checkers a space to share verification context and collaborate on manipulated-media cases, with structured posts that link out to DeFake analysis. The project is now inactive, but it surfaced concrete lessons about governance, identity, and onboarding for expert-only forensic communities — and about the limits of technical federation as a substitute for social trust."
 highlights:
-  - "ActivityPub / Pleroma / Soapbox"
-  - "Structured posts & hooks to DeFake analysis"
-  - "Expert-adjacent scope (not consumer social)"
-  - "Federation trade-offs: moderation & identity"
-  - "Pilot communities of researchers & journalists"
+  - "Built on ActivityPub / Pleroma / Soapbox"
+  - "Structured posts with hooks into DeFake analysis"
+  - "Expert-adjacent scope — not consumer social"
+  - "Explored federation trade-offs: moderation & identity"
+  - "Now inactive — lessons documented"
 artifacts:
   - label: "We.DeFake instance"
     url: "https://we.defake.app"
@@ -39,35 +39,28 @@ Investigations span organizations and time zones, but mainstream social products
 ### Constraints
 
 - Federation adds moderation, identity, and abuse-surface complexity
-- Must interoperate with existing DeFake apps without forcing a single host
-- Community size may stay small — design for depth over viral growth
+- The platform had to interoperate with existing DeFake apps without forcing a single host
+- Community size was always likely to stay small — a reason to design for depth over viral growth
 
 ### Approach
 
-Deploy and customize Pleroma/Soapbox with workflows that encourage structured posts (claims, sources, tool outputs) and cross-link to DeFake analysis where appropriate. Iterate with pilot communities of researchers and journalists.
+Deploy and customize Pleroma/Soapbox with workflows that encourage structured posts (claims, sources, tool outputs) and cross-link to DeFake analysis where appropriate. Iterate with a small group of researchers and journalists rather than chasing open registration.
 
 ### Key decisions
 
-**Use ActivityPub / Pleroma rather than a bespoke real-time-only stack** — Standards-based federation lets institutions run their own nodes and interoperate; reduces lock-in. Alternatives: closed Slack/Discord-style workspace only; greenfield custom social graph.
+**Use ActivityPub / Pleroma rather than a bespoke real-time-only stack** — Standards-based federation lets institutions run their own nodes and interoperate, reducing lock-in. Alternatives considered: a closed Slack/Discord-style workspace only; a greenfield custom social graph.
 
-**Position We.DeFake as expert-adjacent, not a consumer social network** — Keeps expectations and moderation scope aligned with forensic use. Alternatives: open registration for general public.
+**Position We.DeFake as expert-adjacent, not a consumer social network** — Keeps expectations and moderation scope aligned with forensic use. Alternative considered: open registration for the general public.
 
 ### Tech stack
 
 Pleroma, Soapbox, ActivityPub, Elixir, Docker.
 
-### Impact (draft)
+### Impact
 
-Complements DeFake.app with a place to coordinate human interpretation and peer review of suspicious media. Replace with your narrative when ready.
+We.DeFake served as a working probe for a specific question: can open, federated infrastructure host the kind of careful, evidence-centered collaboration that forensic work demands? Standing up and customizing a Pleroma/Soapbox instance for expert use showed where federation helps — institutional autonomy, no single point of control, standards-based interoperability — and where it struggles: moderation load, identity assurance, and onboarding people into forensic norms. The project is now inactive, but those findings inform how the rest of the DeFake ecosystem approaches collaboration and trust.
 
 ### Learnings
 
-- Federated communities need clear governance and onboarding for forensic norms
-- Technical federation does not automatically create trust — social design matters
-- Personalize or delete these points
-
----
-
-## Draft notes (delete or replace)
-
-Community URL: [we.defake.app](https://we.defake.app). Add code of conduct, moderation model, and integration diagrams when you want them on the portfolio.
+- Federated communities need clear governance and onboarding for forensic norms from day one
+- Technical federation does not automatically create trust — social design matters more than the protocol

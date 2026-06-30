@@ -14,15 +14,15 @@ const PAGE_SIZE = 10;
 
 const categoryLabels: Record<string, string> = {
   all: 'All',
-  milestone: 'Milestone',
-  learning: 'Learning',
-  transition: 'Transition',
   conference: 'Conference',
-  meetup: 'Meetup',
-  interview: 'Interview',
-  workshop: 'Workshop',
-  webinar: 'Webinar',
+  teaching: 'Teaching',
+  milestone: 'Milestone',
+  media: 'Media',
+  engagement: 'Engagement',
 };
+
+/** Display order for the filter bar (most-requested first). */
+const CATEGORY_ORDER = ['conference', 'media', 'teaching', 'engagement', 'milestone'];
 
 const allJourney = await getCollection('journey');
 const allSpeaking = await getCollection('speaking');
@@ -65,7 +65,9 @@ const merged: Block[] = [...journeyBlocks, ...speakingBlocks].sort(
   (a, b) => b.date.getTime() - a.date.getTime()
 );
 
-const usedCategories = [...new Set(merged.map((m) => m.category))].sort();
+const usedCategories = [...new Set(merged.map((m) => m.category))].sort(
+  (a, b) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b)
+);
 const filterOptions = [
   { value: 'all', label: 'All' },
   ...usedCategories.map((c) => ({ value: c, label: categoryLabels[c] ?? c })),
@@ -81,6 +83,7 @@ const speakingCount = speakingBlocks.length;
     title={pagesConfig.journey.title}
     description={pagesConfig.journey.description}
     type="website"
+    image="/og/journey.png"
   />
 
   <main class="page-container">
@@ -88,7 +91,7 @@ const speakingCount = speakingBlocks.length;
       <h1 class="page-title">{pagesConfig.journey.heading}</h1>
       <p class="page-intro">{pagesConfig.journey.intro}</p>
       <PageStats
-        text={`${merged.length} entries · ${journeyCount} career & learning · ${speakingCount} speaking`}
+        text={`${merged.length} entries · ${journeyCount} career timeline · ${speakingCount} talks & appearances`}
       />
     </header>
 
@@ -212,7 +215,26 @@ const speakingCount = speakingBlocks.length;
       const slots = () =>
         Array.from(list.querySelectorAll('[data-timeline-item]'));
 
-      let filter = 'all';
+      const validCategories = Array.from(
+        filterRoot.querySelectorAll('.timeline-filter')
+      ).map((b) => b.getAttribute('data-category') || 'all');
+
+      function readFilterFromUrl() {
+        const requested = new URLSearchParams(window.location.search).get('filter');
+        return requested && validCategories.includes(requested) ? requested : 'all';
+      }
+
+      function syncUrl(value) {
+        const url = new URL(window.location.href);
+        if (value && value !== 'all') {
+          url.searchParams.set('filter', value);
+        } else {
+          url.searchParams.delete('filter');
+        }
+        window.history.replaceState({}, '', url);
+      }
+
+      let filter = readFilterFromUrl();
       let visibleCount = PAGE_SIZE;
 
       function matching() {
@@ -251,11 +273,19 @@ const speakingCount = speakingBlocks.length;
         const cat = t.getAttribute('data-category') || 'all';
         filter = cat;
         visibleCount = PAGE_SIZE;
+        syncUrl(filter);
         apply();
       });
 
       loadBtn.addEventListener('click', () => {
         visibleCount += PAGE_SIZE;
+        apply();
+      });
+
+      // Keep the view in sync when navigating via browser back/forward.
+      window.addEventListener('popstate', () => {
+        filter = readFilterFromUrl();
+        visibleCount = PAGE_SIZE;
         apply();
       });
 

@@ -38,6 +38,7 @@ const total = sorted.length;
     title={pagesConfig.publications.title}
     description={pagesConfig.publications.description}
     type="website"
+    image="/og/publications.png"
   />
 
   <main class="page-container">
@@ -61,6 +62,7 @@ const total = sorted.length;
               KIND_TAG[entry.data.kind],
               ...(entry.data.tags ?? []),
             ]}
+            status={entry.data.status}
             statusNote={entry.data.statusNote}
           />
         ))}
