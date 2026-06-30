@@ -104,10 +104,10 @@ export const pagesConfig = {
   journey: {
     title: 'Journey — timeline, talks & appearances',
     description:
-      'Chronological timeline of career milestones, learning, transitions, and speaking — conferences, meetups, interviews, workshops, and webinars.',
+      'A timeline of conference talks and papers, teaching, media and press, professional engagement (standards, policy, law enforcement), and career milestones.',
     heading: 'Journey',
     intro:
-      'Career milestones, learning moments, transitions, and speaking engagements in one place.',
+      'Conferences, teaching, media, professional engagement, and career milestones in one place.',
   },
 
   /**

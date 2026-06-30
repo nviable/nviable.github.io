@@ -4,12 +4,9 @@
  */
 import Flag from '@lucide/astro/icons/flag';
 import BookOpen from '@lucide/astro/icons/book-open';
-import Briefcase from '@lucide/astro/icons/briefcase';
 import Presentation from '@lucide/astro/icons/presentation';
 import Users from '@lucide/astro/icons/users';
 import Mic from '@lucide/astro/icons/mic';
-import Wrench from '@lucide/astro/icons/wrench';
-import MonitorPlay from '@lucide/astro/icons/monitor-play';
 import ChevronDown from '@lucide/astro/icons/chevron-down';
 import ExternalLink from '@lucide/astro/icons/external-link';
 import Play from '@lucide/astro/icons/play';
@@ -19,25 +16,19 @@ import { formatTimelineDate } from '../utils/timelineDate';
 
 /** Lucide outline icons per timeline category */
 const ICON_BY_CATEGORY: Record<string, typeof Flag> = {
-  milestone: Flag,
-  learning: BookOpen,
-  transition: Briefcase,
   conference: Presentation,
-  meetup: Users,
-  interview: Mic,
-  workshop: Wrench,
-  webinar: MonitorPlay,
+  teaching: BookOpen,
+  milestone: Flag,
+  media: Mic,
+  engagement: Users,
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  milestone: 'Milestone',
-  learning: 'Learning',
-  transition: 'Transition',
   conference: 'Conference',
-  meetup: 'Meetup',
-  interview: 'Interview',
-  workshop: 'Workshop',
-  webinar: 'Webinar',
+  teaching: 'Teaching',
+  milestone: 'Milestone',
+  media: 'Media',
+  engagement: 'Engagement',
 };
 
 interface Props {
@@ -289,33 +280,21 @@ const showResourceLinks = Boolean(
   .tl-badge[data-category='milestone'] {
     --tl-accent: var(--color-accent);
   }
-  .tl-bubble[data-category='learning'],
-  .tl-badge[data-category='learning'] {
-    --tl-accent: #10b981;
-  }
-  .tl-bubble[data-category='transition'],
-  .tl-badge[data-category='transition'] {
-    --tl-accent: #f59e0b;
-  }
   .tl-bubble[data-category='conference'],
   .tl-badge[data-category='conference'] {
-    --tl-accent: var(--color-accent);
+    --tl-accent: #3b82f6;
   }
-  .tl-bubble[data-category='meetup'],
-  .tl-badge[data-category='meetup'] {
+  .tl-bubble[data-category='teaching'],
+  .tl-badge[data-category='teaching'] {
     --tl-accent: #10b981;
   }
-  .tl-bubble[data-category='interview'],
-  .tl-badge[data-category='interview'] {
+  .tl-bubble[data-category='media'],
+  .tl-badge[data-category='media'] {
     --tl-accent: #8b5cf6;
   }
-  .tl-bubble[data-category='workshop'],
-  .tl-badge[data-category='workshop'] {
+  .tl-bubble[data-category='engagement'],
+  .tl-badge[data-category='engagement'] {
     --tl-accent: #f59e0b;
-  }
-  .tl-bubble[data-category='webinar'],
-  .tl-badge[data-category='webinar'] {
-    --tl-accent: #ec4899;
   }
 
   .tl-main {

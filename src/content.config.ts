@@ -129,12 +129,11 @@ const publicationsCollection = defineCollection({
 /**
  * Journey Timeline Collection
  *
- * Career growth and learning progression timeline with milestones,
- * learning experiences, and career transitions.
+ * Career timeline entries that share the unified audience-facing categories with
+ * the speaking collection (conference, teaching, milestone, media, engagement).
  *
  * Features:
- * - Entry types: milestone, learning, transition, plus conference/meetup for
- *   professional gatherings that live in `journey/` but use speaking-style categories
+ * - Entry types: conference, teaching, milestone, media, engagement
  * - Skills/technologies per entry
  * - Optional expandable MDX body
  * - Same optional links/meta as speaking (event, location, slides, related URLs, etc.)
@@ -149,8 +148,8 @@ const journeyCollection = defineCollection({
       /** Entry title */
       title: z.string(),
 
-      /** Type of timeline entry (conference/meetup match speaking categories for filters/icons) */
-      type: z.enum(['milestone', 'learning', 'transition', 'conference', 'meetup']),
+      /** Audience-facing category — shared with the speaking collection for unified /journey filters. */
+      type: z.enum(['conference', 'teaching', 'milestone', 'media', 'engagement']),
 
       /** Brief description */
       description: z.string(),
@@ -198,10 +197,11 @@ const experienceCollection = defineCollection({
 /**
  * Speaking/Talks Collection
  *
- * Conference talks, meetup presentations, interviews, and workshops.
+ * Talks and appearances that share the unified audience-facing categories with
+ * the journey collection (conference, teaching, milestone, media, engagement).
  *
  * Features:
- * - Five talk types (conference, meetup, interview, workshop, webinar)
+ * - Five categories (conference, teaching, milestone, media, engagement)
  * - Event information and location (required)
  * - Shared optional extras with journey: url, slides, video, topics, duration,
  *   relatedPresentation / relatedPaper / relatedArticle, featured
@@ -225,8 +225,8 @@ const speakingCollection = defineCollection({
       /** Location (city, country, or "Online") */
       location: z.string(),
 
-      /** Type of speaking engagement */
-      type: z.enum(['conference', 'meetup', 'interview', 'workshop', 'webinar']),
+      /** Audience-facing category — shared with the journey collection for unified /journey filters. */
+      type: z.enum(['conference', 'teaching', 'milestone', 'media', 'engagement']),
     })
     .merge(timelineExtrasSchema),
 });

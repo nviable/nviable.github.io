@@ -14,15 +14,15 @@ const PAGE_SIZE = 10;
 
 const categoryLabels: Record<string, string> = {
   all: 'All',
-  milestone: 'Milestone',
-  learning: 'Learning',
-  transition: 'Transition',
   conference: 'Conference',
-  meetup: 'Meetup',
-  interview: 'Interview',
-  workshop: 'Workshop',
-  webinar: 'Webinar',
+  teaching: 'Teaching',
+  milestone: 'Milestone',
+  media: 'Media',
+  engagement: 'Engagement',
 };
+
+/** Display order for the filter bar (most-requested first). */
+const CATEGORY_ORDER = ['conference', 'media', 'teaching', 'engagement', 'milestone'];
 
 const allJourney = await getCollection('journey');
 const allSpeaking = await getCollection('speaking');
@@ -65,7 +65,9 @@ const merged: Block[] = [...journeyBlocks, ...speakingBlocks].sort(
   (a, b) => b.date.getTime() - a.date.getTime()
 );
 
-const usedCategories = [...new Set(merged.map((m) => m.category))].sort();
+const usedCategories = [...new Set(merged.map((m) => m.category))].sort(
+  (a, b) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b)
+);
 const filterOptions = [
   { value: 'all', label: 'All' },
   ...usedCategories.map((c) => ({ value: c, label: categoryLabels[c] ?? c })),
@@ -81,6 +83,7 @@ const speakingCount = speakingBlocks.length;
     title={pagesConfig.journey.title}
     description={pagesConfig.journey.description}
     type="website"
+    image="/og/journey.png"
   />
 
   <main class="page-container">
@@ -88,7 +91,7 @@ const speakingCount = speakingBlocks.length;
       <h1 class="page-title">{pagesConfig.journey.heading}</h1>
       <p class="page-intro">{pagesConfig.journey.intro}</p>
       <PageStats
-        text={`${merged.length} entries · ${journeyCount} career & learning · ${speakingCount} speaking`}
+        text={`${merged.length} entries · ${journeyCount} career timeline · ${speakingCount} talks & appearances`}
       />
     </header>
 
