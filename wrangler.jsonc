@@ -26,11 +26,11 @@
   //      and set PUBLIC_TURNSTILE_SITE_KEY in your build env.
   // See docs/CONTACT-FORM-SETUP.md for the full walkthrough.
   //
-  // ,"send_email": [
-  //   { "name": "CONTACT_MAILER", "destination_address": "you@verified-inbox.example" }
-  // ]
-  // ,"vars": {
-  //   "CONTACT_FROM": "website@nviable.me",
-  //   "CONTACT_TO": "you@verified-inbox.example"
-  // }
+  ,"send_email": [
+    { "name": "CONTACT_MAILER", "destination_address": "saniat.s@gmail.com" }
+  ]
+  ,"vars": {
+    "CONTACT_FROM": "contact@nviable.me",
+    "CONTACT_TO": "saniat.s@gmail.com"
+  }
 }
