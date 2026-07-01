@@ -63,6 +63,52 @@
 }
 
 /* ============================================
+   STOP&SCAN STEP STRIP (used in the STOP&SCAN case study)
+   ============================================ */
+
+.scan-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin: 2rem 0 2.5rem;
+}
+
+.scan-step {
+  margin: 0;
+  text-align: center;
+}
+
+.scan-step img {
+  display: block;
+  width: 100%;
+  max-width: 128px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.scan-step figcaption strong {
+  display: block;
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  margin-top: 0.4rem;
+}
+
+.scan-step figcaption span {
+  display: block;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+  margin-top: 0.1rem;
+}
+
+@media (max-width: 640px) {
+  .scan-steps {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem 1rem;
+  }
+}
+
+/* ============================================
    EMPTY STATE
    ============================================ */
 

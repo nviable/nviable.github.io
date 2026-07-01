@@ -9,6 +9,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SEO from '../components/SEO.astro';
 import StructuredData from '../components/StructuredData.astro';
 import ForwardLink from '../components/ForwardLink.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../config';
@@ -34,6 +35,15 @@ const featuredProjects = allProjects
  * providing immediate evidence of impact and outcomes.
  */
 const caseSnapshots = featuredProjects.slice(0, 3);
+
+/**
+ * Two more (non-featured, active) projects, shown below publications so the
+ * fuller body of work — incl. STOP&SCAN — is visible without dominating the page.
+ */
+const moreProjects = allProjects
+  .filter((project) => project.data.featured !== true && project.data.status !== 'inactive')
+  .sort((a, b) => (a.data.order || 999) - (b.data.order || 999))
+  .slice(0, 2);
 
 /**
  * Five most recent timeline rows (journey + speaking), same ordering as /journey.
@@ -62,7 +72,7 @@ const recentPublications = allPublications
     if (b.data.year !== a.data.year) return b.data.year - a.data.year;
     return (a.data.order ?? 999) - (b.data.order ?? 999);
   })
-  .slice(0, 5);
+  .slice(0, 4);
 
 const PUB_STATUS_LABELS: Record<string, string> = {
   inSubmission: 'In submission',
@@ -160,9 +170,12 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       </div>
     </section>
 
-    <section class="research-focus" aria-labelledby="research-focus-heading">
+    <section class="research-focus" aria-label="Focus and availability">
       <div class="research-focus-inner">
-        <h2 id="research-focus-heading" class="research-focus-heading">Focus</h2>
+        <a href="/contact" class="research-focus-availability">
+          <span class="availability-dot" aria-hidden="true"></span>
+          Open to new roles &amp; collaborations
+        </a>
         <p class="research-focus-body">
           I co-founded and lead the <strong>DeFake Project</strong>, an interdisciplinary initiative spanning four universities, working at the boundary of qualitative inquiry, interface design, and machine-learning deployment. Seven-plus years in HCI and ML research and four in industry UX have taught me to stay on the user&rsquo;s side of a problem while being honest about what is technically and organizationally feasible.
         </p>
@@ -225,6 +238,31 @@ const PUB_STATUS_LABELS: Record<string, string> = {
         <p class="no-publications">No publications listed yet.</p>
       )}
     </section>
+
+    <!-- More projects -->
+    {moreProjects.length > 0 && (
+      <section class="more-projects">
+        <div class="section-header">
+          <h2>More projects</h2>
+          <ForwardLink href="/projects" text="View all" variant="muted" />
+        </div>
+        <div class="card-list more-projects-grid">
+          {moreProjects.map((project) => (
+            <ProjectCard
+              title={project.data.title}
+              slug={project.id}
+              abstract={project.data.abstract}
+              role={project.data.role}
+              year={project.data.year}
+              domains={project.data.domains}
+              featured={project.data.featured}
+              status={project.data.status}
+              icon={project.data.icon}
+            />
+          ))}
+        </div>
+      </section>
+    )}
 
     <section class="cta">
       <h2>Collaborate or get in touch</h2>
@@ -314,14 +352,37 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       align-items: start;
     }
 
-    .research-focus-heading {
+    .research-focus-availability {
       grid-column: 1;
       grid-row: 1;
-      font-size: 1.125rem;
+      justify-self: start;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 0 1.25rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8125rem;
       font-weight: 600;
-      letter-spacing: -0.02em;
-      margin: 0 0 1rem;
-      color: var(--color-text);
+      color: #ca8a04;
+      background: rgba(234, 179, 8, 0.12);
+      border: 1px solid rgba(234, 179, 8, 0.35);
+      text-decoration: none;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .research-focus-availability:hover {
+      background: rgba(234, 179, 8, 0.2);
+      border-color: rgba(234, 179, 8, 0.55);
+    }
+
+    .availability-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #eab308;
+      box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.22);
+      flex-shrink: 0;
     }
 
     .research-focus-body {
@@ -603,15 +664,25 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       color: var(--color-text);
     }
 
+    .more-projects {
+      margin-bottom: 3.5rem;
+    }
+
+    .more-projects-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
     .recent-publications {
-      margin-bottom: 5rem;
+      margin-bottom: 3.5rem;
     }
 
     .section-header {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
-      margin-bottom: 2rem;
+      margin-bottom: 1.25rem;
     }
 
     .section-header h2 {
@@ -621,9 +692,9 @@ const PUB_STATUS_LABELS: Record<string, string> = {
     }
 
     .publications-preview-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      column-gap: 2.5rem;
       border-top: 1px solid var(--color-border);
     }
 
@@ -631,14 +702,15 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       display: flex;
       align-items: flex-start;
       gap: 1rem;
-      padding: 1.5rem 0;
+      padding: 1.1rem 0;
       border-bottom: 1px solid var(--color-border);
       text-decoration: none;
       color: inherit;
       outline: none;
     }
 
-    .publication-preview-item:last-child {
+    /* Drop the bottom rule on the last row (two-up grid) */
+    .publication-preview-item:nth-last-child(-n + 2) {
       border-bottom: none;
     }
 
@@ -787,6 +859,24 @@ const PUB_STATUS_LABELS: Record<string, string> = {
         gap: 2.5rem;
       }
 
+      .publications-preview-list,
+      .more-projects-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .publication-preview-item {
+        column-gap: 0;
+      }
+
+      /* Single column: only the true last item drops its rule */
+      .publication-preview-item:nth-last-child(-n + 2) {
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .publication-preview-item:last-child {
+        border-bottom: none;
+      }
+
       .hero-left {
         padding-right: 0;
       }
@@ -837,10 +927,10 @@ const PUB_STATUS_LABELS: Record<string, string> = {
         row-gap: 1rem;
       }
 
-      .research-focus-heading {
+      .research-focus-availability {
         grid-column: 1;
         grid-row: 1;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
       }
 
       .research-focus-photo {

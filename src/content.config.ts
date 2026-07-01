@@ -77,6 +77,10 @@ const projectsCollection = defineCollection({
     relatedPublications: z.array(z.string()).optional(),
     /** Optional tags for search/filter experiments (not required by templates) */
     tags: z.array(z.string()).optional(),
+    /** Optional cover/hero image URL (absolute or root-relative) for the case-study header */
+    coverImage: z.string().optional(),
+    /** Optional small icon/avatar URL shown on project cards */
+    icon: z.string().optional(),
   }),
 });
 

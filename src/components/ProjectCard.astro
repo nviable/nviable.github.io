@@ -17,6 +17,7 @@ interface Props {
   domains?: string[];
   featured?: boolean;
   status?: 'completed' | 'ongoing' | 'archived' | 'inactive';
+  icon?: string;
 }
 
 const {
@@ -28,6 +29,7 @@ const {
   domains = [],
   featured = false,
   status = 'completed',
+  icon,
 } = Astro.props;
 
 const preview = truncateForPreview(abstract);
@@ -45,6 +47,9 @@ const statusInfo = statusConfig[status];
 
 <BaseCard href={`/projects/${slug}`} class="project-card">
   <div slot="badge" class="card-badges">
+    {icon && (
+      <img src={icon} alt="" class="project-icon" width="28" height="28" loading="lazy" decoding="async" />
+    )}
     {featured && (
       <span class="featured-badge">
         <Star size={12} aria-hidden="true" />
@@ -127,6 +132,14 @@ const statusInfo = statusConfig[status];
   .status--inactive {
     background: rgba(234, 179, 8, 0.12);
     color: #ca8a04;
+  }
+
+  .project-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
   }
 
   .tag-more {

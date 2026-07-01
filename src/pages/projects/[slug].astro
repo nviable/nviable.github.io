@@ -52,6 +52,7 @@ const {
   relatedProjects,
   relatedPublications,
   status,
+  coverImage,
 } = project.data;
 
 const metaDescription =
@@ -132,6 +133,12 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
       </div>
     </header>
 
+    {coverImage && (
+      <figure class="case-study-cover">
+        <img src={coverImage} alt={`${title} illustration`} loading="eager" decoding="async" />
+      </figure>
+    )}
+
     <ProjectAbstractCard abstract={abstract} />
 
     <ProjectCollaborators collaborators={collaborators} />
@@ -165,6 +172,23 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
       margin-bottom: 1.5rem;
       padding-bottom: 1.5rem;
       border-bottom: 1px solid var(--color-border);
+    }
+
+    .case-study-cover {
+      margin: 0 0 2rem;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-bg-secondary);
+      overflow: hidden;
+    }
+
+    .case-study-cover img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 360px;
+      object-fit: contain;
+      margin: 0 auto;
     }
 
     .header-badges {
