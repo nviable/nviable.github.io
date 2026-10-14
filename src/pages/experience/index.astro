@@ -16,7 +16,7 @@ import Users from '@lucide/astro/icons/users';
 import Brain from '@lucide/astro/icons/brain';
 import Scale from '@lucide/astro/icons/scale';
 import Sparkles from '@lucide/astro/icons/sparkles';
-import FileDown from '@lucide/astro/icons/file-down';
+import File from '@lucide/astro/icons/file';
 import { cvPdfPath } from '../../config';
 
 const all = await getCollection('experience');
@@ -69,7 +69,7 @@ const resumePdfUrl = cvPdfPath;
               rel="noopener noreferrer"
               download
             >
-              <FileDown size={18} stroke-width={2} aria-hidden="true" />
+              <File size={18} stroke-width={2} aria-hidden="true" />
               CV (PDF)
             </a>
           )
@@ -81,12 +81,14 @@ const resumePdfUrl = cvPdfPath;
         ))}
       </div>
       <p class="experience-hub__about-link">
-        <a href="/experience/about" class="exp-text-link">More about me</a>
-        <ArrowRight class="exp-text-link__arrow arrow-icon" size={16} aria-hidden="true" />
+        <a href="/experience/about" class="btn btn-tertiary">
+          More about me
+          <ArrowRight class="arrow-icon" size={16} stroke-width={2} aria-hidden="true" />
+        </a>
       </p>
     </header>
 
-    <section class="exp-block" aria-labelledby="exp-interests-heading">
+    <section class="exp-block exp-block--wide" aria-labelledby="exp-interests-heading">
       <h2 id="exp-interests-heading" class="exp-block__heading">Research interests</h2>
       <ul class="exp-interests exp-interests--icons">
         {
@@ -114,8 +116,11 @@ const resumePdfUrl = cvPdfPath;
       <div class="exp-card-list">
         {
           jobs.map((job) => (
-            <article class="exp-card">
-              <h3 class="exp-card__title">{job.data.title}</h3>
+            <a class="exp-card" href={`/experience/${job.id}`}>
+              <span class="exp-card__title-row">
+                <h3 class="exp-card__title">{job.data.title}</h3>
+                <ArrowRight class="exp-card__arrow" size={16} stroke-width={2} aria-hidden="true" />
+              </span>
               {job.data.subtitle && <p class="exp-card__subtitle">{job.data.subtitle}</p>}
               {job.data.metaLine && <p class="exp-card__meta">{job.data.metaLine}</p>}
               {job.data.homeBullets && job.data.homeBullets.length > 0 && (
@@ -132,11 +137,7 @@ const resumePdfUrl = cvPdfPath;
                   ))}
                 </ul>
               )}
-              <a class="btn btn-tertiary exp-readmore" href={`/experience/${job.id}`}>
-                <span>Read more</span>
-                <ArrowRight class="arrow-icon" size={18} stroke-width={2} aria-hidden="true" />
-              </a>
-            </article>
+            </a>
           ))
         }
       </div>
@@ -147,8 +148,11 @@ const resumePdfUrl = cvPdfPath;
       <div class="exp-card-list">
         {
           education.map((edu) => (
-            <article class="exp-card">
-              <h3 class="exp-card__title">{edu.data.title}</h3>
+            <a class="exp-card" href={`/experience/${edu.id}`}>
+              <span class="exp-card__title-row">
+                <h3 class="exp-card__title">{edu.data.title}</h3>
+                <ArrowRight class="exp-card__arrow" size={16} stroke-width={2} aria-hidden="true" />
+              </span>
               {edu.data.subtitle && <p class="exp-card__subtitle">{edu.data.subtitle}</p>}
               {edu.data.metaLine && <p class="exp-card__meta">{edu.data.metaLine}</p>}
               {edu.data.homeBullets && edu.data.homeBullets.length > 0 && (
@@ -165,64 +169,186 @@ const resumePdfUrl = cvPdfPath;
                   ))}
                 </ul>
               )}
-              <a class="btn btn-tertiary exp-readmore" href={`/experience/${edu.id}`}>
-                <span>Read more</span>
-                <ArrowRight class="arrow-icon" size={18} stroke-width={2} aria-hidden="true" />
-              </a>
-            </article>
+            </a>
           ))
         }
       </div>
     </section>
 
-    <section class="exp-block" aria-labelledby="exp-teaching-heading">
+    <section class="exp-block exp-block--record" aria-labelledby="exp-teaching-heading">
       <h2 id="exp-teaching-heading" class="exp-block__heading">Teaching</h2>
-      <ul class="exp-compact">
-        <li>Instructor of record, Spring 2025 — CSEC 520/620, Cyberanalytics &amp; Machine Learning, Rochester Institute of Technology.</li>
-        <li>Guest lecture, 2023–2025 — Introduction to AI: Media Manipulation and Deepfakes, CSE 440 (annual), Michigan State University.</li>
-        <li>Guest lecture, 2024 — Deepfakes and Ethics, SWEN 559, with Y. K. Wu, Rochester Institute of Technology.</li>
-        <li>Guest lecture, 2022 — Deepfakes: Anarchy Loading, Software Engineering Ethics, Rochester Institute of Technology.</li>
-      </ul>
+      <h3 class="exp-subhead">Instructor of record</h3>
+      <dl class="exp-rows">
+        <div class="exp-row">
+          <dt>Spring 2025</dt>
+          <dd>
+            <span class="exp-row__title">CSEC 520/620, Cyberanalytics &amp; Machine Learning</span>
+            <span class="exp-row__meta">Rochester Institute of Technology</span>
+          </dd>
+        </div>
+      </dl>
+      <h3 class="exp-subhead">Guest lectures</h3>
+      <dl class="exp-rows">
+        <div class="exp-row">
+          <dt>2023–2025</dt>
+          <dd>
+            <span class="exp-row__title">Introduction to AI: Media Manipulation and Deepfakes, CSE 440 (annual)</span>
+            <span class="exp-row__meta">Michigan State University</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2024</dt>
+          <dd>
+            <span class="exp-row__title">Deepfakes and Ethics, SWEN 559, with Y. K. Wu</span>
+            <span class="exp-row__meta">Rochester Institute of Technology</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2022</dt>
+          <dd>
+            <span class="exp-row__title">Deepfakes: Anarchy Loading, Software Engineering Ethics</span>
+            <span class="exp-row__meta">Rochester Institute of Technology</span>
+          </dd>
+        </div>
+      </dl>
     </section>
 
-    <section class="exp-block" aria-labelledby="exp-mentorship-heading">
+    <section class="exp-block exp-block--record" aria-labelledby="exp-mentorship-heading">
       <h2 id="exp-mentorship-heading" class="exp-block__heading">Mentorship</h2>
-      <p class="exp-compact-note">
-        Capstone teams and research assistants at RIT, 2023–2027, on biometric deepfake detection, the vocabulary of AI-manipulated media, privacy and security behavior around AI plugins, dataset curation, explainable detection, and related verification tools.
-      </p>
+      <dl class="exp-rows">
+        <div class="exp-row">
+          <dt>2023–2027</dt>
+          <dd>
+            <span class="exp-row__title">Capstone teams and research assistants, Rochester Institute of Technology</span>
+            <span class="exp-row__meta">Biometric deepfake detection, the vocabulary of AI-manipulated media, privacy and security behavior around AI plugins, dataset curation, explainable detection, and related verification tools.</span>
+          </dd>
+        </div>
+      </dl>
     </section>
 
-    <section class="exp-block" aria-labelledby="exp-grants-heading">
+    <section class="exp-block exp-block--record" aria-labelledby="exp-grants-heading">
       <h2 id="exp-grants-heading" class="exp-block__heading">Grants</h2>
-      <ul class="exp-compact">
-        <li>2024–2027. ReDDDoT Phase 2: VARUNA: A User-Centered All-in-One Media Forensics Platform. National Science Foundation.</li>
-        <li>2024–2026. Usable Tools for Deepfake Identification and Mitigation. Omidyar Network.</li>
-        <li>2023–2025. Building an Analyst-Centered Deepfake Detection Tool. U.S. Department of Defense.</li>
-        <li>2021–2024. Collaborative Research: SaTC: CORE: Small: DeFake: Deploying a Tool for Robust Deepfake Detection. National Science Foundation.</li>
-        <li>2020–2022. DeFake Detection Tool. Knight Foundation.</li>
-        <li>2019–2021. Robustly Detecting DeepFakes. The Miami Foundation.</li>
-      </ul>
+      <dl class="exp-rows">
+        <div class="exp-row">
+          <dt>2024–2027</dt>
+          <dd>
+            <span class="exp-row__title">ReDDDoT Phase 2: VARUNA: A User-Centered All-in-One Media Forensics Platform</span>
+            <span class="exp-row__meta">National Science Foundation</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2024–2026</dt>
+          <dd>
+            <span class="exp-row__title">Usable Tools for Deepfake Identification and Mitigation</span>
+            <span class="exp-row__meta">Omidyar Network</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2023–2025</dt>
+          <dd>
+            <span class="exp-row__title">Building an Analyst-Centered Deepfake Detection Tool</span>
+            <span class="exp-row__meta">U.S. Department of Defense</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2021–2024</dt>
+          <dd>
+            <span class="exp-row__title">Collaborative Research: SaTC: CORE: Small: DeFake: Deploying a Tool for Robust Deepfake Detection</span>
+            <span class="exp-row__meta">National Science Foundation</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2020–2022</dt>
+          <dd>
+            <span class="exp-row__title">DeFake Detection Tool</span>
+            <span class="exp-row__meta">Knight Foundation</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2019–2021</dt>
+          <dd>
+            <span class="exp-row__title">Robustly Detecting DeepFakes</span>
+            <span class="exp-row__meta">The Miami Foundation</span>
+          </dd>
+        </div>
+      </dl>
     </section>
 
-    <section class="exp-block" aria-labelledby="exp-service-heading">
+    <section class="exp-block exp-block--record" aria-labelledby="exp-service-heading">
       <h2 id="exp-service-heading" class="exp-block__heading">Service</h2>
-      <ul class="exp-compact">
-        <li>Reviewer, ACM CHI, 2023–2026.</li>
-        <li>Reviewer, ICWSM, 2024–2026.</li>
-        <li>Poster jury, SOUPS, 2023–2026.</li>
-        <li>Member, Scientific Working Group on Digital Evidence (SWGDE), and founding member of its ad-hoc AI committee, 2024–present.</li>
-        <li>Contributing analyst, Deepfake Analysis Unit, Misinformation Combat Alliance, 2024–present.</li>
-        <li>Young Researcher Associate, ITU AI for Good AMAS collaboration, 2026–present.</li>
-      </ul>
+      <h3 class="exp-subhead">Reviewing</h3>
+      <dl class="exp-rows">
+        <div class="exp-row">
+          <dt>2023–2026</dt>
+          <dd>
+            <span class="exp-row__title">ACM CHI</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2024–2026</dt>
+          <dd>
+            <span class="exp-row__title">ICWSM</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2023–2026</dt>
+          <dd>
+            <span class="exp-row__title">SOUPS</span>
+            <span class="exp-row__meta">Poster jury</span>
+          </dd>
+        </div>
+      </dl>
+      <h3 class="exp-subhead">Roles</h3>
+      <dl class="exp-rows">
+        <div class="exp-row">
+          <dt>2024–present</dt>
+          <dd>
+            <span class="exp-row__title">Scientific Working Group on Digital Evidence (SWGDE)</span>
+            <span class="exp-row__meta">Member, and founding member of its ad-hoc AI committee</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2024–present</dt>
+          <dd>
+            <span class="exp-row__title">Deepfake Analysis Unit, Misinformation Combat Alliance</span>
+            <span class="exp-row__meta">Contributing analyst</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2026–present</dt>
+          <dd>
+            <span class="exp-row__title">ITU AI for Good AMAS collaboration</span>
+            <span class="exp-row__meta">Young Researcher Associate</span>
+          </dd>
+        </div>
+      </dl>
     </section>
 
-    <section class="exp-block" aria-labelledby="exp-awards-heading">
+    <section class="exp-block exp-block--record" aria-labelledby="exp-awards-heading">
       <h2 id="exp-awards-heading" class="exp-block__heading">Awards</h2>
-      <ul class="exp-compact">
-        <li>2026. Fram Award, Imagine RIT, for “What Do You Mean by Fake? An Interactive Exploration of Synthetic Media.”</li>
-        <li>2025. Third prize, poster competition, DFRWS USA, for “It’s About Time We Untangle Digital Media Forensics.”</li>
-        <li>2022. Winner, oral presentation category, RIT Graduate Showcase, for Dungeons &amp; Deepfakes.</li>
-      </ul>
+      <dl class="exp-rows">
+        <div class="exp-row">
+          <dt>2026</dt>
+          <dd>
+            <span class="exp-row__title">Fram Award, Imagine RIT</span>
+            <span class="exp-row__meta">“What Do You Mean by Fake? An Interactive Exploration of Synthetic Media.”</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2025</dt>
+          <dd>
+            <span class="exp-row__title">Third prize, poster competition, DFRWS USA</span>
+            <span class="exp-row__meta">“It’s About Time We Untangle Digital Media Forensics.”</span>
+          </dd>
+        </div>
+        <div class="exp-row">
+          <dt>2022</dt>
+          <dd>
+            <span class="exp-row__title">Winner, oral presentation category, RIT Graduate Showcase</span>
+            <span class="exp-row__meta">Dungeons &amp; Deepfakes</span>
+          </dd>
+        </div>
+      </dl>
     </section>
 
     {
@@ -271,36 +397,21 @@ const resumePdfUrl = cvPdfPath;
   }
 
   .experience-hub__about-link {
-    margin: 0.25rem 0 0;
-    max-width: 65ch;
-  }
-
-  .exp-text-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-accent);
-    text-decoration: none;
-  }
-
-  .exp-text-link:hover {
-    color: var(--color-accent-hover);
-  }
-
-  .exp-text-link__arrow {
-    flex-shrink: 0;
-    margin-top: 1px;
-    transition: transform var(--arrow-duration) ease;
-  }
-
-  .exp-text-link:hover .exp-text-link__arrow {
-    transform: translateX(var(--arrow-shift));
+    margin: 0.5rem 0 0;
   }
 
   .experience-hub .exp-block {
     margin-bottom: 2.5rem;
+  }
+
+  .experience-hub .exp-block--wide {
+    width: min(var(--max-width-wide), calc(100vw - 2rem));
+    max-width: var(--max-width-wide);
+    margin-left: calc((100% - min(var(--max-width-wide), 100vw - 2rem)) / 2);
+  }
+
+  .experience-hub .exp-block--record {
+    margin-bottom: 2rem;
   }
 
   .experience-hub .exp-block__heading {
@@ -311,21 +422,57 @@ const resumePdfUrl = cvPdfPath;
     letter-spacing: 0.02em;
   }
 
-  .experience-hub .exp-compact,
-  .experience-hub .exp-compact-note {
+  .experience-hub .exp-subhead {
+    margin: 1.15rem 0 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .experience-hub .exp-rows {
     margin: 0;
-    max-width: 68ch;
+  }
+
+  .experience-hub .exp-row {
+    display: grid;
+    grid-template-columns: 6.75rem minmax(0, 1fr);
+    gap: 0.35rem 0.85rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .experience-hub .exp-row:last-child {
+    border-bottom: none;
+  }
+
+  .experience-hub .exp-row dt {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .experience-hub .exp-row dd {
+    margin: 0;
+    min-width: 0;
+  }
+
+  .experience-hub .exp-row__title {
+    display: block;
+    font-size: 0.9375rem;
+    line-height: 1.4;
     color: var(--color-text);
-    font-size: 0.975rem;
-    line-height: 1.55;
   }
 
-  .experience-hub .exp-compact {
-    padding-left: 1.15rem;
-  }
-
-  .experience-hub .exp-compact li + li {
-    margin-top: 0.45rem;
+  .experience-hub .exp-row__meta {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--color-text-muted);
   }
 
   .experience-hub .exp-block__note {
@@ -346,17 +493,26 @@ const resumePdfUrl = cvPdfPath;
   }
 
   .experience-hub .exp-interests--icons {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.85rem 2.5rem;
     list-style: none;
     margin: 0;
     padding: 0;
-    max-width: 65ch;
+    max-width: none;
+  }
+
+  @media (min-width: 769px) {
+    .experience-hub .exp-block--wide .exp-interests--icons {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   .experience-hub .exp-interests__row {
     display: flex;
     gap: 0.75rem;
     align-items: flex-start;
-    margin-bottom: 0.85rem;
+    margin: 0;
     font-size: 0.9375rem;
     line-height: 1.65;
     color: var(--color-text-secondary);
@@ -378,18 +534,64 @@ const resumePdfUrl = cvPdfPath;
   }
 
   .experience-hub .exp-card {
-    padding: 1.25rem 1.35rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-md);
-    background: var(--color-bg-secondary);
+    --card-pad-y: 1.25rem;
+    --card-lip: 3px;
+    display: block;
+    padding: var(--card-pad-y) 1.35rem;
+    background: var(--color-card);
+    border: none;
+    border-bottom: var(--card-lip) solid var(--color-card-edge);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      background-color var(--transition-base),
+      transform var(--transition-fast);
+  }
+
+  .experience-hub .exp-card:hover {
+    background: var(--color-card-hover);
+    color: inherit;
+  }
+
+  .experience-hub .exp-card:active {
+    border-bottom-width: 0;
+    padding-bottom: calc(var(--card-pad-y) + var(--card-lip));
+    transform: translateY(var(--card-lip));
+  }
+
+  .experience-hub .exp-card__title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
   }
 
   .experience-hub .exp-card__title {
-    margin: 0 0 0.25rem;
+    margin: 0;
     font-size: 1.0625rem;
     font-weight: 600;
     line-height: 1.35;
     color: var(--color-text);
+    transition: color var(--transition-base);
+  }
+
+  .experience-hub .exp-card__arrow {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    color: var(--color-accent);
+    transition:
+      color var(--transition-base),
+      transform var(--arrow-duration) ease;
+  }
+
+  .experience-hub .exp-card:hover .exp-card__title,
+  .experience-hub .exp-card:hover .exp-card__arrow {
+    color: var(--color-accent-hover);
+  }
+
+  .experience-hub .exp-card:hover .exp-card__arrow {
+    transform: translateX(var(--arrow-shift));
   }
 
   .experience-hub .exp-card__subtitle {
@@ -425,7 +627,7 @@ const resumePdfUrl = cvPdfPath;
     flex-wrap: wrap;
     gap: 0.4rem;
     list-style: none;
-    margin: 0 0 1rem;
+    margin: 0;
     padding: 0;
   }
 
@@ -447,6 +649,20 @@ const resumePdfUrl = cvPdfPath;
 
   .experience-hub .exp-readmore {
     margin-top: 0.15rem;
+  }
+
+  @media (max-width: 520px) {
+    .experience-hub .exp-row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.15rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .experience-hub .exp-card:active,
+    .experience-hub .exp-card__arrow {
+      transition: none;
+    }
   }
 
   .experience-hub .exp-personal {

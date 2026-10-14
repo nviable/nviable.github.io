@@ -269,7 +269,9 @@ a:hover {
   --btn-border-hover: var(--color-text-muted);
 }
 
-.btn .arrow-icon {
+.btn .arrow-icon,
+.leave-icon {
+  flex-shrink: 0;
   transition: transform var(--arrow-duration) ease;
 }
 
@@ -277,9 +279,16 @@ a:hover {
   transform: translateX(var(--arrow-shift));
 }
 
+/* Leaves the site: a short up-right nudge, not the in-site push. */
+.btn:hover .leave-icon,
+a:hover > .leave-icon {
+  transform: translate(0.15rem, -0.15rem);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .btn:active,
-  .btn .arrow-icon {
+  .btn .arrow-icon,
+  .leave-icon {
     transition: none;
   }
 }

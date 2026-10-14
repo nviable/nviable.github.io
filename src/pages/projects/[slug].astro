@@ -21,7 +21,7 @@ import RelatedContent from '../../components/RelatedContent.astro';
 import ProjectHighlightStrip from '../../components/ProjectHighlightStrip.astro';
 import ProjectCollaborators from '../../components/ProjectCollaborators.astro';
 import ProjectArtifactButtons from '../../components/ProjectArtifactButtons.astro';
-import ExternalLink from '@lucide/astro/icons/external-link';
+import ArrowUpRight from '@lucide/astro/icons/arrow-up-right';
 import { getCollection, getEntry, render } from 'astro:content';
 import { calculateReadingTime, formatReadingTime } from '../../utils/readingTime';
 import { projectCoverKind } from '../../utils/projectImage';
@@ -159,7 +159,7 @@ const showContents = contents.length >= 3;
               rel="noopener noreferrer"
             >
               {primaryArtifact.label}
-              <ExternalLink class="arrow-icon" size={14} stroke-width={2} aria-hidden="true" />
+              <ArrowUpRight class="leave-icon" size={14} stroke-width={2} aria-hidden="true" />
             </a>
           )}
           <p class="case-study-abstract">{abstract}</p>

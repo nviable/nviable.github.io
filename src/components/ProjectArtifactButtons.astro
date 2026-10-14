@@ -1,4 +1,6 @@
 ---
+import ArrowUpRight from '@lucide/astro/icons/arrow-up-right';
+
 type ArtifactType = 'demo' | 'code' | 'dataset' | 'paper' | 'website' | 'other';
 
 interface Artifact {
@@ -19,7 +21,10 @@ const { artifacts } = Astro.props;
     <ul>
       {artifacts.map((a) => (
         <li>
-          <a href={a.url} target="_blank" rel="noopener noreferrer">{a.label}</a>
+          <a href={a.url} target="_blank" rel="noopener noreferrer">
+            {a.label}
+            <ArrowUpRight class="leave-icon" size={14} stroke-width={2} aria-hidden="true" />
+          </a>
         </li>
       ))}
     </ul>
@@ -42,6 +47,9 @@ const { artifacts } = Astro.props;
   }
 
   .project-artifacts a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
     font-size: 0.9375rem;
     text-decoration: underline;
     text-underline-offset: 2px;

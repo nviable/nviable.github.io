@@ -14,6 +14,7 @@ import Flag from '@lucide/astro/icons/flag';
 import Presentation from '@lucide/astro/icons/presentation';
 import Users from '@lucide/astro/icons/users';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
+import File from '@lucide/astro/icons/file';
 import { getCollection } from 'astro:content';
 import { cvPdfPath, publishedName, siteConfig } from '../config';
 import { truncateForPreview } from '../utils/preview';
@@ -37,31 +38,36 @@ const homeProjects = homeProjectIds
   .filter((project): project is (typeof allProjects)[number] => Boolean(project));
 
 /** Compact now-slice. Same Lucide icons as /journey, no year in the date. */
-const nowEntries = [
+type NowTone = 'primary' | 'secondary';
+
+const nowStatic = [
   {
     icon: Flag,
-    tone: 'primary' as const,
+    tone: 'primary' as NowTone,
     date: 'Dec 6',
     datetime: '2025-12-06',
     text: 'Postdoctoral researcher at RIT’s ESL Global Cybersecurity Institute.',
   },
   {
     icon: Users,
-    tone: 'primary' as const,
+    tone: 'primary' as NowTone,
     date: 'Mar 6',
     datetime: '2026-03-06',
     text: 'Leading the DeFake Project, and co-leading STOP&SCAN with the ITU AI for Good AMAS programme.',
   },
+];
+
+const nowDynamic = [
   {
     icon: Presentation,
-    tone: 'secondary' as const,
+    tone: 'secondary' as NowTone,
     date: 'Oct 20',
     datetime: '2026-10-20',
     text: 'Upcoming talk: STOP&SCAN at IPTC.',
   },
   {
     icon: Presentation,
-    tone: 'secondary' as const,
+    tone: 'secondary' as NowTone,
     date: 'Oct 28',
     datetime: '2026-10-28',
     text: 'Upcoming talk: STOP&SCAN at JPEG Trust.',
@@ -116,9 +122,18 @@ const recentPublications = allPublications
             I work on usable systems for internet safety: digital media forensics, content verification, and media literacy. The tools are for journalists, analysts, and investigators; the public pieces, like STOP&amp;SCAN, are for anyone deciding what to trust online.
           </p>
           <div class="hero-cta">
-            <a href="/projects" class="btn btn-primary">Selected work</a>
-            <a href={cvPdfPath} class="btn btn-secondary">CV (PDF)</a>
-            <a href="/contact" class="btn btn-tertiary">Contact</a>
+            <a href="/projects" class="btn btn-primary">
+              Selected work
+              <ArrowRight class="arrow-icon" size={16} stroke-width={2} aria-hidden="true" />
+            </a>
+            <a href={cvPdfPath} class="btn btn-secondary">
+              <File size={16} stroke-width={2} aria-hidden="true" />
+              CV (PDF)
+            </a>
+            <a href="/contact" class="btn btn-tertiary">
+              Contact
+              <ArrowRight class="arrow-icon" size={16} stroke-width={2} aria-hidden="true" />
+            </a>
           </div>
         </div>
 
@@ -135,24 +150,44 @@ const recentPublications = allPublications
     </section>
 
     <section class="now-list" aria-labelledby="now-list-label">
-      <div class="now-list-header">
-        <p id="now-list-label" class="now-list-label">Now</p>
-        <ForwardLink href="/journey" text="Journey" variant="muted" class="now-list-view-all" />
+      <div class="now-columns">
+        <div class="now-col">
+          <p id="now-list-label" class="now-list-label">Now</p>
+          <ul class="now-entries">
+            {nowStatic.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li>
+                  <span class:list={['now-icon', item.tone === 'secondary' && 'now-icon--secondary']} aria-hidden="true">
+                    <Icon size={15} stroke-width={2} />
+                  </span>
+                  <time datetime={item.datetime}>{item.date}</time>
+                  <span>{item.text}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        <div class="now-col">
+          <div class="now-col-header">
+            <ForwardLink href="/journey" text="Journey" variant="muted" class="now-list-view-all" />
+          </div>
+          <ul class="now-entries">
+            {nowDynamic.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li>
+                  <span class:list={['now-icon', item.tone === 'secondary' && 'now-icon--secondary']} aria-hidden="true">
+                    <Icon size={15} stroke-width={2} />
+                  </span>
+                  <time datetime={item.datetime}>{item.date}</time>
+                  <span>{item.text}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
-      <ul class="now-entries">
-        {nowEntries.map((item) => {
-          const Icon = item.icon;
-          return (
-            <li>
-              <span class:list={['now-icon', item.tone === 'secondary' && 'now-icon--secondary']} aria-hidden="true">
-                <Icon size={15} stroke-width={2} />
-              </span>
-              <time datetime={item.datetime}>{item.date}</time>
-              <span>{item.text}</span>
-            </li>
-          );
-        })}
-      </ul>
     </section>
 
     <section class="home-projects" id="projects" aria-labelledby="home-projects-heading">
@@ -217,8 +252,14 @@ const recentPublications = allPublications
         Academic and industry. Email <a href={`mailto:${siteConfig.author.email}`}>{siteConfig.author.email}</a>, or use the contact form.
       </p>
       <div class="cta-buttons">
-        <a href="/contact" class="btn btn-primary">Contact</a>
-        <a href={cvPdfPath} class="btn btn-secondary">CV (PDF)</a>
+        <a href="/contact" class="btn btn-primary">
+          Contact
+          <ArrowRight class="arrow-icon" size={16} stroke-width={2} aria-hidden="true" />
+        </a>
+        <a href={cvPdfPath} class="btn btn-secondary">
+          <File size={16} stroke-width={2} aria-hidden="true" />
+          CV (PDF)
+        </a>
       </div>
     </section>
   </main>
@@ -438,16 +479,21 @@ const recentPublications = allPublications
       border-top: 1px solid var(--color-border);
     }
 
-    .now-list-header {
+    .now-columns {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.35rem;
+    }
+
+    .now-list-label,
+    .now-col-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      margin: 0 0 0.5rem;
+      min-height: 1.25rem;
+      margin: 0 0 0.85rem;
     }
 
     .now-list-label {
-      margin: 0;
       font-size: 0.6875rem;
       font-weight: 600;
       text-transform: uppercase;
@@ -455,8 +501,7 @@ const recentPublications = allPublications
       color: var(--color-text-muted);
     }
 
-    .now-list-header :global(.now-list-view-all) {
-      flex-shrink: 0;
+    .now-col-header :global(.now-list-view-all) {
       font-size: 0.75rem;
     }
 
@@ -464,10 +509,17 @@ const recentPublications = allPublications
       display: flex;
       flex-direction: column;
       gap: 0.7rem;
-      margin: 0.85rem 0 0;
+      margin: 0;
       padding: 0;
       list-style: none;
-      max-width: 46rem;
+    }
+
+    @media (min-width: 769px) {
+      .now-columns {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        column-gap: 2.75rem;
+        align-items: start;
+      }
     }
 
     .now-entries li {
