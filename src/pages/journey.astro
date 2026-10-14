@@ -191,7 +191,7 @@ const speakingCount = speakingBlocks.length;
         </div>
 
         <div class="timeline-load-wrap">
-          <button type="button" class="timeline-load-more" id="timeline-load-more" hidden>
+          <button type="button" class="btn btn-tertiary timeline-load-more" id="timeline-load-more" hidden>
             Load 10 more
           </button>
           <p class="timeline-end-note" id="timeline-end-note" hidden>
@@ -323,7 +323,7 @@ const speakingCount = speakingBlocks.length;
       font-size: 0.8125rem;
       font-weight: 500;
       padding: 0.35rem 0.75rem;
-      border-radius: 999px;
+      border-radius: var(--border-radius-pill);
       border: 1px solid var(--color-border);
       background: transparent;
       color: var(--color-text-secondary);
@@ -341,7 +341,7 @@ const speakingCount = speakingBlocks.length;
 
     .timeline-filter.is-active {
       border-color: var(--color-accent);
-      background: rgba(59, 130, 246, 0.12);
+      background: var(--color-accent-muted);
       color: var(--color-accent);
     }
 
@@ -365,24 +365,8 @@ const speakingCount = speakingBlocks.length;
       margin: 2rem 0 1rem;
     }
 
-    .timeline-load-more {
-      font-family: inherit;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      padding: 0.65rem 1.25rem;
-      border-radius: 8px;
-      border: 1px solid var(--color-border);
-      background: var(--color-bg-secondary);
-      color: var(--color-text);
-      cursor: pointer;
-      transition:
-        border-color 0.15s ease,
-        background 0.15s ease;
-    }
-
-    .timeline-load-more:hover {
-      border-color: var(--color-accent);
-      background: rgba(255, 255, 255, 0.04);
+    .timeline-load-more[hidden] {
+      display: none;
     }
 
     .timeline-end-note {

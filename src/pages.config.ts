@@ -59,7 +59,7 @@ export const pagesConfig = {
   home: {
     title: 'Home',
     description:
-      'HCI and digital media forensics research: usable deepfake detection, expert workflows, and the DeFake Project.',
+      'I work on usable systems for internet safety: digital media forensics, content verification, and media literacy.',
   },
 
   /**
@@ -70,7 +70,7 @@ export const pagesConfig = {
     description:
       'Research programs and systems for usable media verification, deepfake detection, and training—documented as case studies with methods, tools, and outcomes.',
     heading: 'Research projects',
-    intro: 'Programs I lead or co-lead at the intersection of HCI, digital media forensics, and machine learning—including the DeFake initiative and related platforms. Each entry summarizes the problem, approach, and impact; details are in the case study.',
+    intro: 'Programs I lead or co-lead in usable media verification, digital media forensics, and machine learning—including the DeFake initiative and related platforms. Each entry summarizes the problem, approach, and impact; details are in the case study.',
   },
 
   /**
@@ -80,7 +80,8 @@ export const pagesConfig = {
     title: 'Publications',
     description: 'Research publications in human–computer interaction, digital media forensics, and usable AI for media verification.',
     heading: 'Publications',
-    intro: 'Peer-reviewed papers, book chapters, and dissertation. Links open the venue or preprint page where available; fuller pages on this site may be added later.',
+    intro:
+      'Peer-reviewed papers, book chapters, and dissertation. The author name on papers is Saniat Javid Sohrawardi (S. J. Sohrawardi). Links open the venue or preprint page where available; fuller pages on this site may be added later.',
   },
 
   /**
@@ -89,12 +90,10 @@ export const pagesConfig = {
   experience: {
     title: 'Experience — background, roles & education',
     description:
-      'Human-centered HCI and digital media forensics researcher: DeFake Project, mixed-methods work with experts, and industry UX — with room to go deeper on each chapter.',
+      'Postdoctoral researcher at RIT’s ESL Global Cybersecurity Institute and Young Researcher Associate with the ITU AI for Good AMAS collaboration.',
     heading: 'Experience',
     introParagraphs: [
-      'I want the technologies we build to be designed with humans in mind — not the other way around. With years of work across AI, product development, and HCI, I try to stay on the user’s side of the problem while still being honest about what is technically and organizationally feasible.',
-      'On the digital forensics side, that same instinct shows up as a push for tools and workflows that give people real autonomy in verifying content themselves, instead of asking them to simply trust someone else’s word. We live in a crowded information space where many “authorities” act in their own self-interest; I care about designs that make evidence and reasoning legible so users can decide for themselves.',
-      'My research and the systems I help build are meant to reflect that stance.',
+      'John Sohrawardi (Saniat Javid Sohrawardi) is a postdoctoral researcher at Rochester Institute of Technology’s ESL Global Cybersecurity Institute, and a Young Researcher Associate with the ITU AI for Good AMAS collaboration. He studies how people verify media when they are short on time, and builds the interfaces, training, and public methods that make that possible. He is open to new roles and collaborations, in academia and in industry.',
     ],
   },
 
@@ -114,9 +113,9 @@ export const pagesConfig = {
    * Contact page (/contact)
    */
   contact: {
-    title: 'Contact — research partnerships, talks & inquiries',
-    description: 'Get in touch about research partnerships, invited talks, student inquiries, or media requests on deepfakes, media forensics, and human-centered verification.',
-    heading: 'Let’s talk',
+    title: 'Contact',
+    description: 'Email John Sohrawardi about new roles and collaborations, in academia and in industry.',
+    heading: 'Contact',
   },
 } as const;
 

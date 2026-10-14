@@ -9,83 +9,93 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SEO from '../components/SEO.astro';
 import StructuredData from '../components/StructuredData.astro';
 import ForwardLink from '../components/ForwardLink.astro';
-import ProjectCard from '../components/ProjectCard.astro';
+import PublicationRows from '../components/PublicationRows.astro';
+import Flag from '@lucide/astro/icons/flag';
+import Presentation from '@lucide/astro/icons/presentation';
+import Users from '@lucide/astro/icons/users';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
 import { getCollection } from 'astro:content';
-import { siteConfig } from '../config';
+import { cvPdfPath, publishedName, siteConfig } from '../config';
 import { truncateForPreview } from '../utils/preview';
-import { formatTimelineDate } from '../utils/timelineDate';
+import { projectCoverKind } from '../utils/projectImage';
 
-/**
- * Queries and filters featured projects for hero section
- * 
- * Retrieves all projects, filters for featured ones, sorts by custom order
- * (if specified), and limits to top 2 for the hero snapshots.
- */
 const allProjects = await getCollection('projects');
-const featuredProjects = allProjects
-  .filter(project => project.data.featured === true)
-  .sort((a, b) => (a.data.order || 999) - (b.data.order || 999))
-  .slice(0, 2);
 
 /**
- * Case snapshots for hero display
- * 
- * Takes up to 3 featured projects to showcase in the hero section,
- * providing immediate evidence of impact and outcomes.
+ * One project group on the homepage. DeFake first, then Dungeons & Deepfakes,
+ * STOP&SCAN, and Varuna. Inactive work (We.DeFake) stays off this page.
  */
-const caseSnapshots = featuredProjects.slice(0, 3);
+const homeProjectIds = [
+  'defake-app',
+  'dungeons-and-deepfakes',
+  'stop-and-scan',
+  'varuna',
+] as const;
+
+const homeProjects = homeProjectIds
+  .map((id) => allProjects.find((project) => project.id === id))
+  .filter((project): project is (typeof allProjects)[number] => Boolean(project));
+
+/** Compact now-slice. Same Lucide icons as /journey, no year in the date. */
+const nowEntries = [
+  {
+    icon: Flag,
+    tone: 'primary' as const,
+    date: 'Dec 6',
+    datetime: '2025-12-06',
+    text: 'Postdoctoral researcher at RIT’s ESL Global Cybersecurity Institute.',
+  },
+  {
+    icon: Users,
+    tone: 'primary' as const,
+    date: 'Mar 6',
+    datetime: '2026-03-06',
+    text: 'Leading the DeFake Project, and co-leading STOP&SCAN with the ITU AI for Good AMAS programme.',
+  },
+  {
+    icon: Presentation,
+    tone: 'secondary' as const,
+    date: 'Oct 20',
+    datetime: '2026-10-20',
+    text: 'Upcoming talk: STOP&SCAN at IPTC.',
+  },
+  {
+    icon: Presentation,
+    tone: 'secondary' as const,
+    date: 'Oct 28',
+    datetime: '2026-10-28',
+    text: 'Upcoming talk: STOP&SCAN at JPEG Trust.',
+  },
+];
 
 /**
- * Two more (non-featured, active) projects, shown below publications so the
- * fuller body of work — incl. STOP&SCAN — is visible without dominating the page.
- */
-const moreProjects = allProjects
-  .filter((project) => project.data.featured !== true && project.data.status !== 'inactive')
-  .sort((a, b) => (a.data.order || 999) - (b.data.order || 999))
-  .slice(0, 2);
-
-/**
- * Five most recent timeline rows (journey + speaking), same ordering as /journey.
- */
-const journeyForHero = await getCollection('journey');
-const speakingForHero = await getCollection('speaking');
-const heroJourneyFeed = [
-  ...journeyForHero.map((e) => ({
-    date: e.data.date,
-    title: e.data.title,
-  })),
-  ...speakingForHero.map((e) => ({
-    date: e.data.date,
-    title: e.data.title,
-  })),
-]
-  .sort((a, b) => b.date.getTime() - a.date.getTime())
-  .slice(0, 5);
-
-/**
- * Recent publications for homepage preview (newest by year, then order).
+ * Homepage slice is selected work (CHI, CCS, journal, dissertation, book chapter),
+ * not under-review papers or earlier ICDIM items.
  */
 const allPublications = await getCollection('publications');
 const recentPublications = allPublications
+  .filter((pub) => {
+    const venue = pub.data.venue.toLowerCase();
+    const selectedVenue =
+      venue.includes('chi') ||
+      venue.includes('ccs') ||
+      pub.data.kind === 'journal' ||
+      pub.data.kind === 'dissertation';
+    const underReview = pub.data.status === 'underReview' || pub.data.status === 'inSubmission';
+    return selectedVenue && !underReview && !venue.includes('icdim');
+  })
   .sort((a, b) => {
     if (b.data.year !== a.data.year) return b.data.year - a.data.year;
     return (a.data.order ?? 999) - (b.data.order ?? 999);
   })
   .slice(0, 4);
-
-const PUB_STATUS_LABELS: Record<string, string> = {
-  inSubmission: 'In submission',
-  underReview: 'Under review',
-  inPreparation: 'In preparation',
-};
 ---
 
 <BaseLayout>
   <SEO
     slot="head"
-    title={siteConfig.title}
-    description={siteConfig.description}
+    title={`${siteConfig.author.name} (${publishedName})`}
+    description={`${siteConfig.author.name} (${publishedName}) works on usable systems for internet safety: digital media forensics, content verification, and media literacy.`}
     type="website"
     image="/og/home.png"
     noSuffix
@@ -98,180 +108,117 @@ const PUB_STATUS_LABELS: Record<string, string> = {
   <main class="home-page">
     <section class="hero">
       <div class="hero-grid">
-        <div class="hero-left">
-          <h1 class="hero-title">
-            <span class="hero-title-small">Research at the intersection of</span><br/>
-            <span class="hero-title-emphasis">human factors, usability, and AI‑assisted media verification.</span>
-          </h1>
-          <p class="hero-sub">
-            I study how journalists, analysts, and investigators work with <strong>deepfakes and manipulated media</strong>—and how to build <strong>explainable, trustworthy tools</strong> that support human judgment instead of replacing it.
-          </p>
-          <p class="hero-meta">
-            {siteConfig.author.name} · {siteConfig.author.title}
-          </p>
-          <p class="hero-affiliation">
-            ESL Global Cybersecurity Institute, Rochester Institute of Technology
+        <div class="hero-copy">
+          <h1 class="hero-name">{siteConfig.author.name}</h1>
+          <p class="hero-published">Published as {publishedName}</p>
+          <p class="hero-role">{siteConfig.author.title}</p>
+          <p class="hero-lead">
+            I work on usable systems for internet safety: digital media forensics, content verification, and media literacy. The tools are for journalists, analysts, and investigators; the public pieces, like STOP&amp;SCAN, are for anyone deciding what to trust online.
           </p>
           <div class="hero-cta">
-            <a href="/projects" class="btn-primary">Research projects</a>
-            <a href="/publications" class="btn-secondary">Publications</a>
+            <a href="/projects" class="btn btn-primary">Selected work</a>
+            <a href={cvPdfPath} class="btn btn-secondary">CV (PDF)</a>
+            <a href="/contact" class="btn btn-tertiary">Contact</a>
           </div>
         </div>
 
-        <div class="hero-right">
-          <div class="case-snapshots">
-            {caseSnapshots.map((project) => (
-              <a href={`/projects/${project.id}`} class="case-snapshot">
-                <span class="case-label">Research · {project.data.role}</span>
-                <span class="case-title">{project.data.title}</span>
-                <span class="case-outcome">{truncateForPreview(project.data.abstract)}</span>
-              </a>
-            ))}
-          </div>
-
-          {heroJourneyFeed.length > 0 && (
-            <div
-              class="hero-journey-ticker"
-              id="hero-journey-ticker"
-              data-count={heroJourneyFeed.length}
-              aria-labelledby="hero-journey-updates-label"
-            >
-              <div class="hero-journey-header">
-                <p id="hero-journey-updates-label" class="hero-journey-label">Latest updates</p>
-                <ForwardLink href="/journey" text="View all" variant="muted" class="hero-journey-view-all" />
-              </div>
-              <div class="hero-journey-viewport">
-                {heroJourneyFeed.map((row, i) => (
-                  <a
-                    href="/journey"
-                    class:list={['hero-journey-slide', i === 0 && 'is-active']}
-                    data-slide-index={i}
-                  >
-                    <time class="hero-journey-date" datetime={row.date.toISOString()}>
-                      {formatTimelineDate(row.date)}
-                    </time>
-                    <span class="hero-journey-slide-title">{row.title}</span>
-                  </a>
-                ))}
-              </div>
-              {heroJourneyFeed.length > 1 && (
-                <div class="hero-journey-dots" aria-hidden="true">
-                  {heroJourneyFeed.map((_, i) => (
-                    <span
-                      class:list={['hero-journey-dot', i === 0 && 'is-active']}
-                      data-dot-index={i}
-                    ></span>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-
-    <section class="research-focus" aria-label="Focus and availability">
-      <div class="research-focus-inner">
-        <a href="/contact" class="research-focus-availability">
-          <span class="availability-dot" aria-hidden="true"></span>
-          Open to new roles &amp; collaborations
-        </a>
-        <p class="research-focus-body">
-          I co-founded and lead the <strong>DeFake Project</strong>, an interdisciplinary initiative spanning four universities, working at the boundary of qualitative inquiry, interface design, and machine-learning deployment. Seven-plus years in HCI and ML research and four in industry UX have taught me to stay on the user&rsquo;s side of a problem while being honest about what is technically and organizationally feasible.
-        </p>
-        <p class="research-focus-themes">
-          Usable deepfake detection · Digital media forensics (vision, audio, metadata, identity) · Mixed-methods HCI with expert practitioners · Explainable AI and automation bias · Simulation-based training for verification
-        </p>
-        <figure class="research-focus-photo">
+        <figure class="hero-photo">
           <img
             src="/images/john.jpg"
-            alt={`Portrait of ${siteConfig.author.name}`}
-            width="800"
-            height="1000"
-            loading="lazy"
+            alt="John Sohrawardi"
+            width="1204"
+            height="1089"
             decoding="async"
           />
         </figure>
       </div>
     </section>
 
+    <section class="now-list" aria-labelledby="now-list-label">
+      <div class="now-list-header">
+        <p id="now-list-label" class="now-list-label">Now</p>
+        <ForwardLink href="/journey" text="Journey" variant="muted" class="now-list-view-all" />
+      </div>
+      <ul class="now-entries">
+        {nowEntries.map((item) => {
+          const Icon = item.icon;
+          return (
+            <li>
+              <span class:list={['now-icon', item.tone === 'secondary' && 'now-icon--secondary']} aria-hidden="true">
+                <Icon size={15} stroke-width={2} />
+              </span>
+              <time datetime={item.datetime}>{item.date}</time>
+              <span>{item.text}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+
+    <section class="home-projects" id="projects" aria-labelledby="home-projects-heading">
+      <div class="section-header">
+        <h2 id="home-projects-heading">Projects</h2>
+        <ForwardLink href="/projects" text="View all" variant="muted" />
+      </div>
+      <div class="home-projects-grid">
+        {homeProjects.map((project) => (
+          <a href={`/projects/${project.id}`} class="case-snapshot">
+            {project.data.coverImage && projectCoverKind(project.data.coverImage) && (
+              <img
+                src={project.data.coverImage}
+                alt=""
+                class="project-thumb"
+                loading="lazy"
+                decoding="async"
+                onerror="this.remove()"
+              />
+            )}
+            <span class="case-label">Research · {project.data.role}</span>
+            <span class="case-title-row">
+              <span class="case-title">{project.data.title}</span>
+              <ArrowRight class="case-arrow" size={16} stroke-width={2} aria-hidden="true" />
+            </span>
+            <span class="case-outcome">{truncateForPreview(project.data.abstract)}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="research-focus" aria-label="Focus and availability">
+      <a href="/contact" class="research-focus-availability">
+        <span class="availability-dot" aria-hidden="true"></span>
+        Open to new roles &amp; collaborations
+      </a>
+      <p class="research-focus-body">
+        I started and lead the <strong>DeFake Project</strong>: detection that shows evidence instead of hiding it behind a score, with about 18 researchers across four universities. <strong>Dungeons &amp; Deepfakes</strong> is the training side. With the ITU AMAS programme I co-lead <strong>STOP&amp;SCAN</strong>, a short public method for checking media.
+      </p>
+    </section>
+
     <!-- Recent publications -->
     <section class="recent-publications">
       <div class="section-header">
-        <h2>Recent publications</h2>
+        <h2>Selected publications</h2>
         <ForwardLink href="/publications" text="View all" variant="muted" />
       </div>
 
       {recentPublications.length > 0 ? (
-        <div class="publications-preview-list">
-          {recentPublications.map((pub) => {
-            const href = pub.data.url ?? '/publications';
-            const external = Boolean(pub.data.url);
-            return (
-              <a
-                href={href}
-                class="publication-preview-item"
-                target={external ? '_blank' : undefined}
-                rel={external ? 'noopener noreferrer' : undefined}
-              >
-                <div class="publication-preview-main">
-                  <span class="publication-preview-meta">
-                    {pub.data.status && pub.data.status !== 'published' && (
-                      <span class="publication-preview-status">{PUB_STATUS_LABELS[pub.data.status]}</span>
-                    )}
-                    {pub.data.year}
-                    {pub.data.tags && pub.data.tags.length > 0 && (
-                      <> · {pub.data.tags.slice(0, 3).join(' · ')}</>
-                    )}
-                    <span class="publication-preview-quality">{pub.data.quality && ` · ${pub.data.quality}`}</span>
-                  </span>
-                  <h3 class="publication-preview-title">{pub.data.title}</h3>
-                  <p class="publication-preview-authors">{pub.data.authors}</p>
-                  <p class="publication-preview-venue">{pub.data.venue}</p>
-                </div>
-                <ArrowRight class="publication-preview-arrow" size={14} aria-hidden="true" />
-              </a>
-            );
-          })}
-        </div>
+        <PublicationRows
+          entries={recentPublications.map((pub) => pub.data)}
+          fallbackHref="/publications"
+        />
       ) : (
         <p class="no-publications">No publications listed yet.</p>
       )}
     </section>
 
-    <!-- More projects -->
-    {moreProjects.length > 0 && (
-      <section class="more-projects">
-        <div class="section-header">
-          <h2>More projects</h2>
-          <ForwardLink href="/projects" text="View all" variant="muted" />
-        </div>
-        <div class="card-list more-projects-grid">
-          {moreProjects.map((project) => (
-            <ProjectCard
-              title={project.data.title}
-              slug={project.id}
-              abstract={project.data.abstract}
-              role={project.data.role}
-              year={project.data.year}
-              domains={project.data.domains}
-              featured={project.data.featured}
-              status={project.data.status}
-              icon={project.data.icon}
-            />
-          ))}
-        </div>
-      </section>
-    )}
-
     <section class="cta">
-      <h2>Collaborate or get in touch</h2>
+      <h2>Open to new roles and collaborations</h2>
       <p>
-        Open to research partnerships, invited talks, and conversations about usable verification tools, synthetic media, and human-centered security. Reach out if our work aligns.
+        Academic and industry. Email <a href={`mailto:${siteConfig.author.email}`}>{siteConfig.author.email}</a>, or use the contact form.
       </p>
       <div class="cta-buttons">
-        <a href="/publications" class="btn-primary">Publications</a>
-        <a href="/contact" class="btn-secondary">Contact</a>
+        <a href="/contact" class="btn btn-primary">Contact</a>
+        <a href={cvPdfPath} class="btn btn-secondary">CV (PDF)</a>
       </div>
     </section>
   </main>
@@ -284,203 +231,138 @@ const PUB_STATUS_LABELS: Record<string, string> = {
     }
 
     .hero {
-      padding: 4rem 0 5rem;
-      border-bottom: 1px solid var(--color-border);
-      margin-bottom: 4rem;
+      padding: 3.5rem 0 0;
     }
 
     .hero-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: start;
+      grid-template-columns: minmax(0, 1fr) minmax(200px, 300px);
+      column-gap: 3rem;
+      align-items: stretch;
     }
 
-    .hero-left {
-      padding-right: 2rem;
-    }
-
-    .hero-title {
+    .hero-name {
       font-size: 2.25rem;
-      line-height: 1.3;
+      line-height: 1.2;
       font-weight: 600;
       letter-spacing: -0.02em;
-      margin-bottom: 1.5rem;
+      margin: 0 0 0.35rem;
       color: var(--color-text);
     }
 
-    .hero-title-emphasis {
-      color: var(--color-text-secondary);
-    }
-
-    .hero-title-small {
-      font-size: 1.125rem;
-    }
-
-    .hero-sub {
-      font-size: 1.125rem;
-      color: var(--color-text-secondary);
-      margin-bottom: 1.5rem;
-      line-height: 1.6;
-    }
-
-    .hero-meta {
-      font-size: 0.875rem;
-      color: var(--color-text-muted);
-      margin-bottom: 0.35rem;
-      letter-spacing: 0.01em;
-    }
-
-    .hero-affiliation {
-      font-size: 0.8125rem;
-      color: var(--color-text-muted);
-      margin: 0 0 2rem;
+    .hero-published {
+      margin: 0 0 0.85rem;
+      font-size: 0.9375rem;
       line-height: 1.45;
+      color: var(--color-text-secondary);
+    }
+
+    .hero-role {
+      font-size: 1.0625rem;
+      line-height: 1.45;
+      color: var(--color-text);
+      margin: 0 0 1.25rem;
+    }
+
+    .hero-photo {
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-secondary);
+      min-height: 0;
+    }
+
+    .hero-photo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 20%;
+    }
+
+    .hero-lead {
+      font-size: 1.125rem;
+      color: var(--color-text);
+      margin: 0 0 1.75rem;
+      line-height: 1.6;
+      max-width: 40rem;
     }
 
     .research-focus {
-      margin-bottom: 4rem;
-      padding-bottom: 3rem;
+      margin-bottom: 3.5rem;
+      padding-bottom: 2.5rem;
       border-bottom: 1px solid var(--color-border);
     }
 
-    .research-focus-inner {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(200px, 300px);
-      column-gap: 2.75rem;
-      row-gap: 0;
-      align-items: start;
-    }
-
     .research-focus-availability {
-      grid-column: 1;
-      grid-row: 1;
       justify-self: start;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       margin: 0 0 1.25rem;
       padding: 0.35rem 0.75rem;
-      border-radius: 999px;
+      border-radius: var(--border-radius-pill);
       font-size: 0.8125rem;
       font-weight: 600;
-      color: #ca8a04;
-      background: rgba(234, 179, 8, 0.12);
-      border: 1px solid rgba(234, 179, 8, 0.35);
+      color: var(--color-text);
+      background: var(--color-control-fill);
+      border: 1px solid var(--color-border);
       text-decoration: none;
-      transition: background 0.2s ease, border-color 0.2s ease;
+      transition: background var(--transition-base), border-color var(--transition-base);
     }
 
     .research-focus-availability:hover {
-      background: rgba(234, 179, 8, 0.2);
-      border-color: rgba(234, 179, 8, 0.55);
+      background: var(--color-card-hover);
+      border-color: var(--color-border);
+      color: var(--color-text);
     }
 
     .availability-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #eab308;
-      box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.22);
+      background: var(--color-status-ongoing);
       flex-shrink: 0;
     }
 
     .research-focus-body {
-      grid-column: 1;
-      grid-row: 2;
       font-size: 1.0625rem;
       line-height: 1.75;
       color: var(--color-text-secondary);
-      margin: 0 0 1.25rem;
-    }
-
-    .research-focus-themes {
-      grid-column: 1;
-      grid-row: 3;
-      font-size: 0.9375rem;
-      line-height: 1.65;
-      color: var(--color-text-muted);
       margin: 0;
-    }
-
-    .research-focus-photo {
-      grid-column: 2;
-      grid-row: 1 / 4;
-      margin: 0;
-      align-self: start;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--color-border);
-      background: var(--color-bg-secondary);
-    }
-
-    .research-focus-photo img {
-      display: block;
-      width: 100%;
-      height: auto;
+      max-width: 46rem;
     }
 
     .hero-cta {
       display: flex;
-      gap: 1rem;
-    }
-
-    .btn-primary {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background: var(--color-text);
-      color: var(--color-bg);
-      font-weight: 600;
-      font-size: 0.9375rem;
-      text-decoration: none;
-      border-radius: 6px;
-      transition: opacity 0.2s ease;
-    }
-
-    .btn-primary:hover {
-      opacity: 0.85;
-    }
-
-    .btn-secondary {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background: transparent;
-      color: var(--color-text);
-      font-weight: 500;
-      font-size: 0.9375rem;
-      text-decoration: none;
-      border: 1px solid var(--color-border);
-      border-radius: 6px;
-      transition: border-color 0.2s ease;
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--color-text-secondary);
-    }
-
-    .hero-right {
-      padding-top: 0.5rem;
-    }
-
-    .case-snapshots {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
     }
 
     .case-snapshot {
+      --card-pad-y: 1.25rem;
+      --card-lip: 3px;
       display: block;
-      padding: 1.25rem 1.5rem;
-      background: var(--color-bg-secondary);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
+      padding: var(--card-pad-y) 1.5rem;
+      background: var(--color-card);
+      border: none;
+      border-bottom: var(--card-lip) solid var(--color-card-edge);
+      color: inherit;
       text-decoration: none;
-      transition: border-color 0.2s ease, background 0.2s ease;
+      transition:
+        background-color var(--transition-base),
+        transform var(--transition-fast);
     }
 
     .case-snapshot:hover {
-      border-color: var(--color-text-muted);
-      background: var(--color-bg-elevated);
+      background: var(--color-card-hover);
+      color: inherit;
+    }
+
+    .case-snapshot:active {
+      border-bottom-width: 0;
+      padding-bottom: calc(var(--card-pad-y) + var(--card-lip));
+      transform: translateY(var(--card-lip));
     }
 
     .case-label {
@@ -493,13 +375,39 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       margin-bottom: 0.375rem;
     }
 
+    .case-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
     .case-title {
       display: block;
       font-size: 1rem;
       font-weight: 600;
       color: var(--color-text);
-      margin-bottom: 0.5rem;
       line-height: 1.4;
+      transition: color var(--transition-base);
+    }
+
+    .case-arrow {
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+      color: var(--color-accent);
+      transition:
+        color var(--transition-base),
+        transform var(--arrow-duration) ease;
+    }
+
+    .case-snapshot:hover .case-title,
+    .case-snapshot:hover .case-arrow {
+      color: var(--color-accent-hover);
+    }
+
+    .case-snapshot:hover .case-arrow {
+      transform: translateX(var(--arrow-shift));
     }
 
     .case-outcome {
@@ -509,12 +417,28 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       line-height: 1.5;
     }
 
-    /* Recent timeline — auto slider, no card (under project snapshots) */
-    .hero-journey-ticker {
-      margin-top: 1.25rem;
+    .home-projects {
+      margin: 3rem 0 3.5rem;
     }
 
-    .hero-journey-header {
+    .home-projects-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .home-projects-grid .case-snapshot {
+      height: 100%;
+    }
+
+    .now-list {
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .now-list-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -522,7 +446,7 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       margin: 0 0 0.5rem;
     }
 
-    .hero-journey-label {
+    .now-list-label {
       margin: 0;
       font-size: 0.6875rem;
       font-weight: 600;
@@ -531,121 +455,48 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       color: var(--color-text-muted);
     }
 
-    .hero-journey-header :global(.hero-journey-view-all) {
+    .now-list-header :global(.now-list-view-all) {
       flex-shrink: 0;
       font-size: 0.75rem;
     }
 
-    .hero-journey-header :global(.hero-journey-view-all .arrow-icon) {
-      width: 12px;
-      height: 12px;
-    }
-
-    .hero-journey-viewport {
-      position: relative;
-      min-height: 4.25rem;
-    }
-
-    .hero-journey-slide {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
+    .now-entries {
       display: flex;
       flex-direction: column;
-      gap: 0.2rem;
-      text-decoration: none;
-      color: inherit;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition:
-        opacity 0.45s ease,
-        visibility 0.45s ease;
-      outline: none;
+      gap: 0.7rem;
+      margin: 0.85rem 0 0;
+      padding: 0;
+      list-style: none;
+      max-width: 46rem;
     }
 
-    .hero-journey-slide.is-active {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      z-index: 1;
-    }
-
-    .hero-journey-slide:focus-visible {
-      border-radius: 4px;
-      box-shadow: 0 0 0 2px var(--color-accent);
-    }
-
-    .hero-journey-date {
-      font-size: 0.75rem;
-      font-weight: 500;
-      font-variant-numeric: tabular-nums;
-      color: var(--color-text-muted);
-      letter-spacing: 0.02em;
-    }
-
-    .hero-journey-slide-title {
+    .now-entries li {
+      display: grid;
+      grid-template-columns: 1rem 3.4rem minmax(0, 1fr);
+      gap: 0.55rem;
+      align-items: start;
       font-size: 0.875rem;
       line-height: 1.45;
-      color: var(--color-text-secondary);
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      overflow: hidden;
+      color: var(--color-text);
       margin: 0;
     }
 
-    .hero-journey-slide:hover .hero-journey-slide-title {
-      color: var(--color-accent);
-    }
-
-    .hero-journey-dots {
+    .now-icon {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 0.35rem;
-      margin-top: 0.65rem;
+      color: var(--color-accent);
+      margin-top: 0.1rem;
     }
 
-    .hero-journey-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--color-text-muted);
-      opacity: 0.35;
-      transition: opacity 0.25s ease;
+    .now-icon--secondary {
+      color: var(--color-text-muted);
     }
 
-    .hero-journey-dot.is-active {
-      opacity: 1;
-      background: var(--color-accent);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .hero-journey-viewport {
-        min-height: 0;
-      }
-
-      .hero-journey-slide {
-        position: relative !important;
-        left: auto;
-        top: auto;
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: auto !important;
-        transition: none;
-        padding: 0.45rem 0;
-        border-bottom: 1px solid var(--color-border);
-      }
-
-      .hero-journey-slide:last-of-type {
-        border-bottom: none;
-      }
-
-      .hero-journey-dots {
-        display: none;
-      }
+    .now-entries time {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text-secondary);
+      letter-spacing: 0.01em;
     }
 
     .introduction {
@@ -664,16 +515,6 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       color: var(--color-text);
     }
 
-    .more-projects {
-      margin-bottom: 3.5rem;
-    }
-
-    .more-projects-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-    }
-
     .recent-publications {
       margin-bottom: 3.5rem;
     }
@@ -689,111 +530,6 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       font-size: 1.25rem;
       font-weight: 600;
       letter-spacing: -0.01em;
-    }
-
-    .publications-preview-list {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      column-gap: 2.5rem;
-      border-top: 1px solid var(--color-border);
-    }
-
-    .publication-preview-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 1.1rem 0;
-      border-bottom: 1px solid var(--color-border);
-      text-decoration: none;
-      color: inherit;
-      outline: none;
-    }
-
-    /* Drop the bottom rule on the last row (two-up grid) */
-    .publication-preview-item:nth-last-child(-n + 2) {
-      border-bottom: none;
-    }
-
-    .publication-preview-item:focus-visible {
-      outline: 2px solid var(--color-accent);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
-
-    .publication-preview-main {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .publication-preview-meta {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--color-text-muted);
-      margin-bottom: 0.5rem;
-    }
-
-    .publication-preview-quality {
-      color: var(--color-tertiary);
-    }
-
-    .publication-preview-status {
-      display: inline-block;
-      margin-right: 0.5rem;
-      padding: 0.1rem 0.45rem;
-      border-radius: 4px;
-      font-size: 0.625rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      background: rgba(234, 179, 8, 0.14);
-      color: #ca8a04;
-    }
-
-    .publication-preview-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      line-height: 1.3;
-      color: var(--color-text);
-      margin-bottom: 0.35rem;
-      transition: color 0.2s ease;
-    }
-
-    .publication-preview-arrow {
-      flex-shrink: 0;
-      align-self: center;
-      color: var(--color-text-muted);
-      transition:
-        color 0.2s ease,
-        transform 0.2s ease;
-    }
-
-    .publication-preview-arrow :global(svg) {
-      display: block;
-    }
-
-    .publication-preview-item:hover .publication-preview-title,
-    .publication-preview-item:hover .publication-preview-arrow {
-      color: var(--color-accent);
-    }
-
-    .publication-preview-item:hover .publication-preview-arrow {
-      transform: translateX(0.25rem);
-    }
-
-    .publication-preview-authors,
-    .publication-preview-venue {
-      font-size: 0.875rem;
-      line-height: 1.5;
-      color: var(--color-text-secondary);
-      margin: 0;
-    }
-
-    .publication-preview-venue {
-      margin-top: 0.25rem;
-      font-size: 0.8125rem;
-      color: var(--color-text-muted);
     }
 
     .no-publications {
@@ -851,52 +587,42 @@ const PUB_STATUS_LABELS: Record<string, string> = {
       }
 
       .hero {
-        padding: 2.5rem 0 3rem;
+        padding: 2.25rem 0 0;
       }
 
       .hero-grid {
         grid-template-columns: 1fr;
-        gap: 2.5rem;
+        row-gap: 1.5rem;
+        align-items: start;
       }
 
-      .publications-preview-list,
-      .more-projects-grid {
+      .hero-photo {
+        max-width: min(260px, 72vw);
+        justify-self: start;
+        height: auto;
+      }
+
+      .hero-photo img {
+        height: auto;
+        aspect-ratio: 1204 / 1089;
+        object-fit: cover;
+      }
+
+      .home-projects-grid {
         grid-template-columns: 1fr;
       }
 
-      .publication-preview-item {
-        column-gap: 0;
-      }
-
-      /* Single column: only the true last item drops its rule */
-      .publication-preview-item:nth-last-child(-n + 2) {
-        border-bottom: 1px solid var(--color-border);
-      }
-
-      .publication-preview-item:last-child {
-        border-bottom: none;
-      }
-
-      .hero-left {
-        padding-right: 0;
-      }
-
-      .hero-title {
+      .hero-name {
         font-size: 1.75rem;
       }
 
       .hero-cta {
-        flex-direction: column;
-      }
-
-      .btn-primary,
-      .btn-secondary {
-        text-align: center;
-        width: 100%;
+        flex-wrap: wrap;
       }
 
       .case-snapshot {
-        padding: 1rem 1.25rem;
+        --card-pad-y: 1rem;
+        padding: var(--card-pad-y) 1.25rem;
       }
 
       .introduction {
@@ -917,86 +643,20 @@ const PUB_STATUS_LABELS: Record<string, string> = {
         flex-direction: column;
       }
 
-      .cta-buttons .btn-primary,
-      .cta-buttons .btn-secondary {
+      .cta-buttons .btn {
         width: 100%;
-      }
-
-      .research-focus-inner {
-        grid-template-columns: 1fr;
-        row-gap: 1rem;
       }
 
       .research-focus-availability {
-        grid-column: 1;
-        grid-row: 1;
         margin-bottom: 0.75rem;
       }
+    }
 
-      .research-focus-photo {
-        grid-column: 1;
-        grid-row: 2;
-        max-width: min(280px, 85vw);
-        width: 100%;
-        justify-self: center;
-        margin: 0.25rem 0 0.25rem;
-      }
-
-      .research-focus-body {
-        grid-column: 1;
-        grid-row: 3;
-      }
-
-      .research-focus-themes {
-        grid-column: 1;
-        grid-row: 4;
+    @media (prefers-reduced-motion: reduce) {
+      .case-snapshot:active,
+      .case-arrow {
+        transition: none;
       }
     }
   </style>
-
-  <script is:inline>
-    (function () {
-      var root = document.getElementById('hero-journey-ticker');
-      if (!root) return;
-      var slides = root.querySelectorAll('.hero-journey-slide');
-      var dots = root.querySelectorAll('.hero-journey-dot');
-      if (slides.length < 2) return;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-      var i = 0;
-      var n = slides.length;
-      var timer;
-
-      function go(index) {
-        i = ((index % n) + n) % n;
-        slides.forEach(function (el, j) {
-          el.classList.toggle('is-active', j === i);
-        });
-        dots.forEach(function (el, j) {
-          el.classList.toggle('is-active', j === i);
-        });
-      }
-
-      function tick() {
-        go(i + 1);
-      }
-
-      function start() {
-        clearInterval(timer);
-        timer = setInterval(tick, 5000);
-      }
-
-      function stop() {
-        clearInterval(timer);
-      }
-
-      start();
-      root.addEventListener('mouseenter', stop);
-      root.addEventListener('mouseleave', start);
-      root.addEventListener('focusin', stop);
-      root.addEventListener('focusout', function (e) {
-        if (!root.contains(e.relatedTarget)) start();
-      });
-    })();
-  </script>
 </BaseLayout>

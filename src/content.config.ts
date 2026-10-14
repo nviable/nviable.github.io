@@ -125,6 +125,8 @@ const publicationsCollection = defineCollection({
     statusNote: z.string().optional(),
     /** Optional DOI (e.g. 10.1145/xxxxxxx) — rendered as a resolvable link */
     doi: z.string().optional(),
+    /** Stored BibTeX. A copy button is shown only when this is non-empty. */
+    bibtex: z.string().optional(),
     /** Sort order within the same year and kind (lower first) */
     order: z.number().optional(),
   }),

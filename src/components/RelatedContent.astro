@@ -16,9 +16,8 @@
  * ```
  */
 
-import BookOpen from '@lucide/astro/icons/book-open';
-import FolderOpen from '@lucide/astro/icons/folder-open';
 import { getCollection } from 'astro:content';
+import PublicationRows from './PublicationRows.astro';
 
 interface Props {
   /** Array of project slugs to display */
@@ -51,161 +50,118 @@ const publications = relatedPublications
   .filter((p): p is NonNullable<typeof p> => p !== undefined);
 
 const hasRelated = projects.length > 0 || publications.length > 0;
+const soleProject = projects.length === 1 && publications.length === 0;
 ---
 
 {hasRelated && (
   <aside class="related-content">
-    <h2 class="related-title">{title}</h2>
-    
-    <div class="related-grid">
-      {projects.length > 0 && (
-        <div class="related-section">
-          <h3 class="related-section-title">
-            <FolderOpen size={14} aria-hidden="true" />
-            Case Studies
-          </h3>
-          <ul class="related-list">
-            {projects.map((project) => (
-              <li>
-                <a href={`/projects/${project.id}`} class="related-item">
-                  <span class="related-item-meta">{project.data.role} · {project.data.year}</span>
-                  <span class="related-item-title">{project.data.title}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      
-      {publications.length > 0 && (
-        <div class="related-section">
-          <h3 class="related-section-title">
-            <BookOpen size={14} aria-hidden="true" />
-            Publications
-          </h3>
-          <ul class="related-list">
-            {publications.map((pub) => (
-              <li>
-                {pub.data.url ? (
-                  <a
-                    href={pub.data.url}
-                    class="related-item"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span class="related-item-meta">{pub.data.year} · {pub.data.venue}</span>
-                    <span class="related-item-title">{pub.data.title}</span>
-                  </a>
-                ) : (
-                  <div class="related-item related-item--static">
-                    <span class="related-item-meta">{pub.data.year} · {pub.data.venue}</span>
-                    <span class="related-item-title">{pub.data.title}</span>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
+    <h2 class="related-title">{soleProject ? 'Related' : title}</h2>
+
+    {projects.length > 0 && (
+      <div class="related-section">
+        {!soleProject && <h3 class="related-section-title">Projects</h3>}
+        <ul class="related-list">
+          {projects.map((project) => (
+            <li>
+              <a href={`/projects/${project.id}`} class="related-line">
+                <span class="related-token">{project.data.year}</span>
+                <span class="related-line__title">{project.data.title}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {publications.length > 0 && (
+      <div class="related-section">
+        <h3 class="related-section-title">Publications</h3>
+        <PublicationRows entries={publications.map((pub) => pub.data)} columns={2} />
+      </div>
+    )}
   </aside>
 )}
 
 <style>
   .related-content {
-    margin-top: 3rem;
-    padding-top: 2rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--color-border);
   }
 
   .related-title {
-    font-size: 1.25rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    margin-bottom: 1.5rem;
-    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin: 0 0 0.75rem;
   }
 
-  .related-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
+  .related-section + .related-section {
+    margin-top: 1.25rem;
   }
 
   .related-section-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--color-text-muted);
-    margin-bottom: 1rem;
-  }
-
-  .related-section-title svg {
-    opacity: 0.7;
+    margin: 0 0 0.35rem;
   }
 
   .related-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 2.5rem;
   }
 
-  .related-item {
+  .related-line {
     display: block;
-    padding: 1rem 1.25rem;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    text-decoration: none;
-    transition: border-color 0.2s ease, background 0.2s ease;
-  }
-
-  .related-item:hover {
-    border-color: var(--color-text-muted);
-    background: var(--color-bg-elevated);
-  }
-
-  .related-item--static {
-    cursor: default;
-  }
-
-  .related-item--static:hover {
-    border-color: var(--color-border);
-    background: var(--color-bg-secondary);
-  }
-
-  .related-item-meta {
-    display: block;
-    font-size: 0.6875rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-text-muted);
-    margin-bottom: 0.25rem;
-  }
-
-  .related-item-title {
-    display: block;
-    font-size: 0.9375rem;
-    font-weight: 500;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--color-border);
     color: var(--color-text);
-    line-height: 1.4;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    text-decoration: none;
+  }
+
+  .related-line--static {
+    margin: 0;
+  }
+
+  .related-token {
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+  }
+
+  .related-token::after {
+    content: " · ";
+  }
+
+  .related-token:nth-last-child(2)::after {
+    content: " — ";
+  }
+
+  .related-line__title {
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  a.related-line:hover .related-line__title {
+    color: var(--color-accent-hover);
+    text-decoration-thickness: 2px;
   }
 
   @media (max-width: 640px) {
-    .related-grid {
+    .related-list {
       grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .related-item {
-      padding: 0.875rem 1rem;
     }
   }
 </style>

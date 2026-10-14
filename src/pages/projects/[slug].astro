@@ -1,7 +1,13 @@
 ---
 /**
- * Project detail page — structured frontmatter (abstract, highlights, collaborators,
- * artifacts) plus MDX body; related papers via relatedPublications.
+ * Project detail page — structured frontmatter plus MDX body.
+ *
+ * Header (wider than the prose): title, status, primary link, and abstract
+ * on one side; dates, classification, and the cover on the other.
+ * Team is a compact block under the highlights.
+ * Covers render at their own aspect. Logos stay small on gray; figures can be larger.
+ * Body (65ch, centered): the MDX story only. The abstract lives in the header.
+ * Related items sit in a wider two-column block after the story.
  *
  * Route: /projects/[slug]
  */
@@ -12,12 +18,13 @@ import StructuredData from '../../components/StructuredData.astro';
 import ScrollToTop from '../../components/ScrollToTop.astro';
 import BackLink from '../../components/BackLink.astro';
 import RelatedContent from '../../components/RelatedContent.astro';
-import ProjectAbstractCard from '../../components/ProjectAbstractCard.astro';
 import ProjectHighlightStrip from '../../components/ProjectHighlightStrip.astro';
 import ProjectCollaborators from '../../components/ProjectCollaborators.astro';
 import ProjectArtifactButtons from '../../components/ProjectArtifactButtons.astro';
+import ExternalLink from '@lucide/astro/icons/external-link';
 import { getCollection, getEntry, render } from 'astro:content';
 import { calculateReadingTime, formatReadingTime } from '../../utils/readingTime';
+import { projectCoverKind } from '../../utils/projectImage';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -33,13 +40,11 @@ if (!project) {
   return Astro.redirect('/404');
 }
 
-const { Content } = await render(project);
+const { Content, headings } = await render(project);
 
 const {
   title,
   subtitle,
-  role,
-  institution,
   year,
   duration,
   abstract,
@@ -66,9 +71,54 @@ const statusConfig = {
   inactive: { label: 'Inactive', class: 'status--inactive' },
 };
 const statusInfo = statusConfig[status || 'completed'];
+const showStatus = Boolean(status && status !== 'completed');
+
+const TYPE_LABELS: Record<string, string> = {
+  'research-project': 'Research project',
+  tool: 'Tool',
+  collaboration: 'Collaboration',
+  course: 'Course',
+};
+
+const METHOD_LABELS: Record<string, string> = {
+  qualitative: 'Qualitative',
+  quantitative: 'Quantitative',
+  mixed: 'Mixed methods',
+  systems: 'Systems',
+  design: 'Design',
+};
+
+function humanLabel(value: string, labels: Record<string, string>): string {
+  return labels[value] ?? value;
+}
+
+const typeLabel = humanLabel(classificationType, TYPE_LABELS);
+const methodLabel = humanLabel(methodologyClass, METHOD_LABELS);
+
+/** Duration once, without a status word the badge already shows. */
+function dateLabel(value: string | undefined, projectYear: number): string {
+  const stripped = (value ?? '')
+    .replace(/\s*\((?:ongoing|inactive|archived|completed)\)/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return stripped || String(projectYear);
+}
+
+const dates = dateLabel(duration, year);
 
 const allText = [abstract, ...highlights, project.body || ''].join(' ');
-const readingTime = formatReadingTime(calculateReadingTime(allText));
+const readingMinutes = calculateReadingTime(allText);
+const readingTime = formatReadingTime(readingMinutes);
+/** Short pages don't get "3 min read" chrome. Dungeons & Deepfakes is the long page. */
+const showReadingTime = readingMinutes >= 8;
+
+const primaryArtifact = artifacts[0];
+const secondaryArtifacts = artifacts.slice(1);
+
+const coverKind = projectCoverKind(coverImage);
+
+const contents = headings.filter((heading) => heading.depth === 2);
+const showContents = contents.length >= 3;
 ---
 
 <BaseLayout>
@@ -92,127 +142,190 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
 
   <main class="case-study">
     <header class="case-study-header">
-      <div class="header-badges">
-        {status && status !== 'completed' && (
-          <span class:list={['status-badge', statusInfo.class]}>
-            {statusInfo.label}
-          </span>
-        )}
+      <div class="case-study-top">
+        <div class="case-study-lead">
+          <h1>{title}</h1>
+          {subtitle && <p class="case-study-subtitle">{subtitle}</p>}
+          {showStatus && (
+            <span class:list={['status-badge', statusInfo.class]}>
+              {statusInfo.label}
+            </span>
+          )}
+          {primaryArtifact && (
+            <a
+              class="btn btn-primary case-study-primary"
+              href={primaryArtifact.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {primaryArtifact.label}
+              <ExternalLink class="arrow-icon" size={14} stroke-width={2} aria-hidden="true" />
+            </a>
+          )}
+          <p class="case-study-abstract">{abstract}</p>
+        </div>
+
+        <div class="case-study-aside">
+          <p class="case-study-meta-line"><span class="meta-part">{dates}</span>{showReadingTime && <span class="meta-part">{readingTime}</span>}</p>
+          <div class="case-study-classification">
+            <span class="classification-type">{typeLabel}</span>
+            {domains.length > 0 && (
+              <span class="classification-domains">
+                {domains.map((d) => (
+                  <span class="domain-chip">{d}</span>
+                ))}
+              </span>
+            )}
+            <span class="classification-method">{methodLabel}</span>
+          </div>
+          {coverImage && coverKind && (
+            <figure class:list={['case-study-cover', `case-study-cover--${coverKind}`]}>
+              <img
+                src={coverImage}
+                alt={coverKind === 'figure' ? title : ''}
+                loading="eager"
+                decoding="async"
+                onerror="this.closest('figure')?.remove()"
+              />
+            </figure>
+          )}
+        </div>
       </div>
-      <h1>{title}</h1>
-      {subtitle && <p class="case-study-subtitle">{subtitle}</p>}
 
       <ProjectHighlightStrip highlights={highlights} />
-
-      <div class="case-study-meta">
-        <span class="meta-item">{role}</span>
-        <span class="meta-separator">·</span>
-        <span class="meta-item">{institution}</span>
-        <span class="meta-separator">·</span>
-        <span class="meta-item">{year}</span>
-        {duration && (
-          <>
-            <span class="meta-separator">·</span>
-            <span class="meta-item">{duration}</span>
-          </>
-        )}
-        <span class="meta-separator">·</span>
-        <span class="meta-item">{readingTime}</span>
-      </div>
-
-      <div class="case-study-classification">
-        <span class="classification-type">{classificationType}</span>
-        {domains.length > 0 && (
-          <span class="classification-domains">
-            {domains.map((d) => (
-              <span class="domain-chip">{d}</span>
-            ))}
-          </span>
-        )}
-        <span class="classification-method">{methodologyClass}</span>
-      </div>
+      <ProjectCollaborators collaborators={collaborators} />
     </header>
 
-    {coverImage && (
-      <figure class="case-study-cover">
-        <img src={coverImage} alt={`${title} illustration`} loading="eager" decoding="async" />
-      </figure>
-    )}
-
-    <ProjectAbstractCard abstract={abstract} />
-
-    <ProjectCollaborators collaborators={collaborators} />
-
-    {Content && (
+    <div class="case-study-body">
       <section class="case-study-content">
-        <Content />
+        {showContents && (
+          <nav class="case-study-contents" aria-label="Contents">
+            <ol>
+              {contents.map((heading) => (
+                <li><a href={`#${heading.slug}`}>{heading.text}</a></li>
+              ))}
+            </ol>
+          </nav>
+        )}
+        {Content && <Content />}
       </section>
-    )}
 
-    <ProjectArtifactButtons artifacts={artifacts} />
+      <ProjectArtifactButtons artifacts={secondaryArtifacts} />
+    </div>
 
-    <RelatedContent
-      relatedProjects={relatedProjects}
-      relatedPublications={relatedPublications}
-    />
-
-    <BackLink href="/projects" text="All projects" />
+    <div class="case-study-related">
+      <RelatedContent
+        relatedProjects={relatedProjects}
+        relatedPublications={relatedPublications}
+      />
+      <BackLink href="/projects" text="All projects" />
+    </div>
   </main>
 
   <ScrollToTop />
 
   <style>
     .case-study {
-      max-width: 800px;
+      max-width: var(--max-width-wide);
       margin: 0 auto;
-      padding: 2rem 1.5rem;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    .case-study-body {
+      max-width: var(--max-width-prose);
+      margin: 0 auto;
+    }
+
+    .case-study-related {
+      max-width: 100%;
+      margin-top: 2.5rem;
     }
 
     .case-study-header {
-      margin-bottom: 1.5rem;
-      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.75rem;
       border-bottom: 1px solid var(--color-border);
     }
 
+    .case-study-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.8fr);
+      gap: 1.5rem 2.75rem;
+      align-items: start;
+    }
+
+    .case-study-lead {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      min-width: 0;
+    }
+
+    .case-study-primary {
+      --btn-pad-y: 0.4rem;
+      --btn-pad-x: 0.8rem;
+      align-self: flex-start;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+    }
+
+    .case-study-abstract {
+      margin: 1.15rem 0 0;
+      font-size: 1.0625rem;
+      line-height: 1.7;
+      color: var(--color-text-secondary);
+      text-align: start;
+    }
+
+    .case-study-aside {
+      min-width: 0;
+    }
+
     .case-study-cover {
-      margin: 0 0 2rem;
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      background: var(--color-bg-secondary);
-      overflow: hidden;
+      margin: 1.1rem 0 0;
     }
 
     .case-study-cover img {
       display: block;
-      width: 100%;
+      width: auto;
       height: auto;
-      max-height: 360px;
+      max-width: 100%;
+    }
+
+    .case-study-cover--logo {
+      display: inline-block;
+      max-width: 100%;
+      padding: 0.75rem 0.9rem;
+      background: var(--color-card);
+    }
+
+    .case-study-cover--logo img {
+      max-width: 11rem;
+      max-height: 4.25rem;
       object-fit: contain;
-      margin: 0 auto;
+      object-position: left center;
     }
 
-    .header-badges {
-      margin-bottom: 0.75rem;
-    }
-
-    .header-badges:empty {
-      display: none;
+    .case-study-cover--figure img {
+      max-width: min(100%, 18rem);
     }
 
     .status-badge {
       display: inline-flex;
+      align-self: flex-start;
       align-items: center;
+      margin-top: 0.75rem;
       font-size: 0.6875rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       padding: 0.3rem 0.625rem;
-      border-radius: 4px;
+      border-radius: var(--border-radius-pill);
     }
 
     .status--ongoing {
-      background: rgba(34, 197, 94, 0.15);
-      color: #22c55e;
+      background: color-mix(in srgb, var(--color-quaternary) 18%, transparent);
+      color: var(--color-status-ongoing);
     }
 
     .status--archived {
@@ -221,8 +334,8 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
     }
 
     .status--inactive {
-      background: rgba(234, 179, 8, 0.12);
-      color: #ca8a04;
+      background: var(--color-tertiary-surface);
+      color: var(--color-status-caution);
     }
 
     .case-study-header h1 {
@@ -237,7 +350,22 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
       font-size: 1.25rem;
       line-height: 1.45;
       color: var(--color-text-secondary);
-      margin: 0 0 1rem;
+      margin: 0;
+    }
+
+    .case-study-meta-line {
+      margin: 0;
+      font-size: 0.9375rem;
+      line-height: 1.45;
+      color: var(--color-text-muted);
+    }
+
+    .case-study-meta-line + .case-study-meta-line {
+      margin-top: 0.15rem;
+    }
+
+    .meta-part:not(:last-child)::after {
+      content: " · ";
     }
 
     .case-study-classification {
@@ -245,12 +373,16 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
       flex-wrap: wrap;
       align-items: center;
       gap: 0.5rem 0.75rem;
-      margin-bottom: 1rem;
+      margin-top: 0.85rem;
+      min-width: 0;
+      max-width: 100%;
       font-size: 0.875rem;
       color: var(--color-text-muted);
     }
 
     .classification-type {
+      min-width: 0;
+      max-width: 100%;
       font-weight: 600;
       color: var(--color-text-secondary);
     }
@@ -264,8 +396,8 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
     .domain-chip {
       font-size: 0.75rem;
       padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--border-radius-pill);
+      background: var(--color-bg-secondary);
       border: 1px solid var(--color-border);
     }
 
@@ -277,21 +409,7 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
     @media (min-width: 640px) {
       .classification-method {
         flex-basis: auto;
-        margin-left: 0;
       }
-    }
-
-    .case-study-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 0.9375rem;
-      color: var(--color-text-secondary);
-    }
-
-    .meta-separator {
-      opacity: 0.5;
     }
 
     .case-study-content {
@@ -299,6 +417,54 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
       font-size: 1.0625rem;
       line-height: 1.7;
       color: var(--color-text-secondary);
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .case-study-content :global(h2),
+    .case-study-content :global(h3),
+    .case-study-contents,
+    .case-study-content :global(ul),
+    .case-study-content :global(ol),
+    .case-study-content :global(figure),
+    .case-study-content :global(table) {
+      text-align: start;
+    }
+
+    .case-study-content :global(a) {
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    .case-study-content :global(a):hover {
+      text-decoration-thickness: 2px;
+    }
+
+    .case-study-contents {
+      margin: 0 0 1.75rem;
+      font-size: 0.9375rem;
+    }
+
+    .case-study-contents ol {
+      margin: 0;
+      padding-left: 1.25rem;
+      list-style-position: outside;
+    }
+
+    .case-study-contents li {
+      margin: 0.2rem 0;
+    }
+
+    /* Paragraphs under "Key decisions" only, until the next heading. */
+    .case-study-content :global(h3#key-decisions) ~ :global(p) {
+      border-left: 2px solid var(--color-border);
+      padding-left: 0.875rem;
+    }
+
+    .case-study-content :global(h3#key-decisions) ~ :global(*:not(p)) ~ :global(p) {
+      border-left: 0;
+      padding-left: 0;
     }
 
     .case-study-content :global(h2) {
@@ -341,9 +507,15 @@ const readingTime = formatReadingTime(calculateReadingTime(allText));
       text-align: left;
     }
 
+    @media (max-width: 800px) {
+      .case-study-top {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 768px) {
       .case-study {
-        padding: 1.5rem 1rem;
+        padding: 1.5rem 1rem 2.5rem;
       }
 
       .case-study-header h1 {

@@ -63,7 +63,7 @@ const Tag = href ? 'a' : 'span';
     font-size: 0.875rem;
     font-weight: 500;
     text-decoration: none;
-    transition: color 0.2s ease, opacity 0.2s ease;
+    transition: color var(--transition-base);
   }
 
   .arrow-link--accent {
@@ -81,12 +81,16 @@ const Tag = href ? 'a' : 'span';
   .arrow-icon {
     width: 14px;
     height: 14px;
-    transition: transform 0.2s ease;
+    transition: transform var(--arrow-duration) ease;
   }
 
-  .arrow-link:hover .arrow-icon,
-  :global(.card:hover) .arrow-link .arrow-icon,
-  :global(a:hover) .arrow-link .arrow-icon {
-    transform: translateX(3px);
+  .arrow-link:hover .arrow-icon {
+    transform: translateX(var(--arrow-shift));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arrow-icon {
+      transition: none;
+    }
   }
 </style>

@@ -43,8 +43,11 @@ const pageTitle = '404 - Page Not Found';
         --color-text: #e5e5e5;
         --color-text-secondary: #a3a3a3;
         --color-text-muted: #737373;
-        --color-accent: #3b82f6;
-        --color-accent-hover: #2563eb;
+        --color-accent: #7E84D0;
+        --color-accent-hover: #B9BDFF;
+        --color-on-primary: #0a0a0a;
+        --color-primary-edge: #43489C;
+        --color-primary-fill-hover: #B9BDFF;
       }
 
       [data-theme="light"] {
@@ -52,8 +55,11 @@ const pageTitle = '404 - Page Not Found';
         --color-text: #171717;
         --color-text-secondary: #525252;
         --color-text-muted: #737373;
-        --color-accent: #2563eb;
-        --color-accent-hover: #1d4ed8;
+        --color-accent: #43489C;
+        --color-accent-hover: #32368A;
+        --color-on-primary: #ffffff;
+        --color-primary-edge: #32368A;
+        --color-primary-fill-hover: #5A60B8;
       }
 
       * {
@@ -113,19 +119,34 @@ const pageTitle = '404 - Page Not Found';
       }
 
       .home-button {
-        display: inline-block;
-        padding: 0.875rem 2rem;
-        background: var(--color-text);
-        color: var(--color-bg);
+        --btn-lip: 3px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.7rem 1.25rem;
+        background: var(--color-accent);
+        color: var(--color-on-primary);
         font-weight: 600;
-        font-size: 1rem;
+        font-size: 0.9375rem;
+        line-height: 1.2;
         text-decoration: none;
-        border-radius: 6px;
-        transition: opacity 0.2s ease;
+        border: 1px solid var(--color-primary-edge);
+        border-bottom-width: var(--btn-lip);
+        transition:
+          transform 150ms ease,
+          background-color 200ms ease,
+          border-color 200ms ease;
       }
 
       .home-button:hover {
-        opacity: 0.85;
+        background: var(--color-primary-fill-hover);
+        color: var(--color-on-primary);
+      }
+
+      .home-button:active {
+        border-bottom-width: 0;
+        padding-bottom: calc(0.7rem + var(--btn-lip));
+        transform: translateY(var(--btn-lip));
       }
 
       @media (max-width: 640px) {
@@ -177,7 +198,7 @@ const pageTitle = '404 - Page Not Found';
         The page you're looking for doesn't exist or has been moved. Let's get you back on track.
       </p>
 
-      <a href="/" class="home-button">Back to Home</a>
+      <a href="/" class="home-button btn-primary">Back to Home</a>
     </div>
   </body>
 </html>

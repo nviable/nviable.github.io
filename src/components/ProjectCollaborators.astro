@@ -1,4 +1,10 @@
 ---
+/**
+ * Team block shared by every project page.
+ * The site owner is one member, with only the name set in bold.
+ */
+import { siteConfig } from '../config';
+
 interface Collaborator {
   name: string;
   role?: string;
@@ -10,34 +16,41 @@ interface Props {
 }
 
 const { collaborators } = Astro.props;
+const ownerName = siteConfig.author.name;
 
-function tooltip(c: Collaborator): string {
-  const parts = [c.role, c.affiliation].filter(Boolean);
-  return parts.length ? parts.join(' · ') : c.name;
+function roleLine(c: Collaborator): string {
+  return [c.role, c.affiliation].filter(Boolean).join(', ');
 }
 ---
 
 {collaborators.length > 0 && (
-  <section class="project-collaborators" aria-labelledby="collaborators-heading">
-    <h2 id="collaborators-heading" class="project-collaborators__title">Collaborators</h2>
+  <section class="project-collaborators" aria-labelledby="team-heading">
+    <h2 id="team-heading" class="project-collaborators__title">Team</h2>
     <ul class="project-collaborators__list">
-      {collaborators.map((c) => (
-        <li class="project-collaborators__chip" title={tooltip(c)}>
-          <span class="project-collaborators__name">{c.name}</span>
-          {(c.role || c.affiliation) && (
-            <span class="project-collaborators__meta">
-              {[c.role, c.affiliation].filter(Boolean).join(' · ')}
-            </span>
-          )}
-        </li>
-      ))}
+      {collaborators.map((c) => {
+        const meta = roleLine(c);
+        const isOwner = c.name === ownerName;
+        return (
+          <li class="project-collaborators__person">
+            {isOwner ? (
+              <strong class="project-collaborators__name">{c.name}</strong>
+            ) : (
+              <span class="project-collaborators__name">{c.name}</span>
+            )}
+            {meta && <span class="project-collaborators__meta">{meta}</span>}
+          </li>
+        );
+      })}
     </ul>
   </section>
 )}
 
 <style>
+  /* Shared team block */
   .project-collaborators {
-    margin-bottom: 2rem;
+    margin: 1.25rem 0 0;
+    padding: 0.9rem 1rem;
+    background: var(--color-card);
   }
 
   .project-collaborators__title {
@@ -53,32 +66,35 @@ function tooltip(c: Collaborator): string {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 16rem));
+    gap: 0.85rem 1.25rem;
   }
 
-  .project-collaborators__chip {
-    display: inline-flex;
+  .project-collaborators__person {
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 0.125rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
-    border: 1px solid var(--color-border);
-    background: var(--color-bg-secondary);
-    max-width: 100%;
+    min-width: 0;
+    max-width: 16rem;
   }
 
   .project-collaborators__name {
     font-size: 0.9375rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--color-text);
+    overflow-wrap: anywhere;
+  }
+
+  strong.project-collaborators__name {
+    font-weight: 700;
   }
 
   .project-collaborators__meta {
     font-size: 0.8125rem;
     color: var(--color-text-muted);
     line-height: 1.35;
+    overflow-wrap: anywhere;
   }
 </style>

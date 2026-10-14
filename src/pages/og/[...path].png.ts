@@ -16,10 +16,9 @@ export async function getStaticPaths() {
     {
       params: { path: 'home' },
       props: {
-        eyebrow: 'HCI · Digital Media Forensics',
+        eyebrow: 'Usable systems for internet safety',
         title: siteConfig.author.name,
-        subtitle:
-          'Usable, trustworthy deepfake detection for journalists, analysts, and investigators.',
+        subtitle: siteConfig.description,
       },
     },
     {
@@ -46,8 +45,8 @@ export async function getStaticPaths() {
       params: { path: 'contact' },
       props: {
         eyebrow: 'Get in touch',
-        title: 'Let’s talk',
-        subtitle: 'Research partnerships, invited talks, and student inquiries.',
+        title: 'Contact',
+        subtitle: 'Open to new roles and collaborations, in academia and in industry.',
       },
     },
   ];

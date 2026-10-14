@@ -102,7 +102,7 @@ export default defineConfig({
    * 
    * Set SITE_URL in your .env file (e.g., https://example.com)
    */
-  site: SITE_URL || 'https://example.com',
+  site: SITE_URL || 'https://nviable.me',
 
   /**
    * Environment variables schema (Astro v5+)
@@ -118,26 +118,26 @@ export default defineConfig({
   env: {
     schema: {
       // Site configuration
-      SITE_URL: envField.string({ context: 'client', access: 'public', default: 'https://example.com' }),
+      SITE_URL: envField.string({ context: 'client', access: 'public', default: 'https://nviable.me' }),
       SITE_LANGUAGE: envField.string({ context: 'client', access: 'public', default: 'en' }),
-      SITE_TITLE: envField.string({ context: 'client', access: 'public', default: 'Saniat Sohrawardi — HCI & Digital Media Forensics Researcher' }),
+      SITE_TITLE: envField.string({ context: 'client', access: 'public', default: 'John Sohrawardi' }),
       SITE_DESCRIPTION: envField.string({
         context: 'client',
         access: 'public',
         default:
-          'Human–computer interaction and digital media forensics researcher focused on building usable, trustworthy deepfake detection tools for journalists, intelligence analysts, and law enforcement. Founder and lead of the DeFake Project — an interdisciplinary initiative across four universities. Over 7 years of HCI and ML research experience; 4 years of UX and product-facing industry work.',
+          'I work on usable systems for internet safety: digital media forensics, content verification, and media literacy.',
       }),
       
       // Author information
-      SITE_AUTHOR_NAME: envField.string({ context: 'client', access: 'public', default: 'Saniat Sohrawardi' }),
-      SITE_AUTHOR_TITLE: envField.string({ context: 'client', access: 'public', default: 'Postdoctoral Researcher · HCI & Digital Media Forensics' }),
+      SITE_AUTHOR_NAME: envField.string({ context: 'client', access: 'public', default: 'John Sohrawardi' }),
+      SITE_AUTHOR_TITLE: envField.string({ context: 'client', access: 'public', default: 'Postdoctoral researcher, ESL Global Cybersecurity Institute, RIT' }),
       SITE_AUTHOR_BIO: envField.string({
         context: 'client',
         access: 'public',
         default:
-          'Human–computer interaction and digital media forensics researcher focused on building usable, trustworthy deepfake detection tools for journalists, intelligence analysts, and law enforcement. Founder and lead of the DeFake Project — an interdisciplinary initiative across four universities. Over 7 years of HCI and ML research experience; 4 years of UX and product-facing industry work.',
+          'I work on usable systems for internet safety: digital media forensics, content verification, and media literacy.',
       }),
-      SITE_AUTHOR_EMAIL: envField.string({ context: 'client', access: 'public', default: 'hello@example.com' }),
+      SITE_AUTHOR_EMAIL: envField.string({ context: 'client', access: 'public', default: 'john.sohrawardi@rit.edu' }),
       SITE_AUTHOR_LOCATION: envField.string({ context: 'client', access: 'public', default: '' }),
       
       // Social media links (empty string = hidden)
@@ -146,8 +146,8 @@ export default defineConfig({
       SOCIAL_TWITTER: envField.string({ context: 'client', access: 'public', default: '' }),
       SOCIAL_MASTODON: envField.string({ context: 'client', access: 'public', default: '' }),
       SOCIAL_BLUESKY: envField.string({ context: 'client', access: 'public', default: '' }),
-      SOCIAL_ORCID: envField.string({ context: 'client', access: 'public', default: '' }),
-      SOCIAL_SCHOLAR: envField.string({ context: 'client', access: 'public', default: '' }),
+      SOCIAL_ORCID: envField.string({ context: 'client', access: 'public', default: 'https://orcid.org/0000-0002-4707-7035' }),
+      SOCIAL_SCHOLAR: envField.string({ context: 'client', access: 'public', default: 'https://scholar.google.com/citations?user=12j0HoYAAAAJ&hl=en' }),
 
       /** Public base URL for R2 (or other CDN) images — same origin you use in `<Image src={...} />` (no trailing path required) */
       PUBLIC_ASSETS_URL: envField.string({ context: 'client', access: 'public', default: '' }),

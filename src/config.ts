@@ -33,6 +33,19 @@ const getEnv = (key: string, fallback: string = ''): string => {
   return import.meta.env[key] ?? fallback;
 };
 
+/** One public bio. Homepage, SEO, and build defaults should use this sentence. */
+export const siteBio =
+  'I work on usable systems for internet safety: digital media forensics, content verification, and media literacy.';
+
+/** Name on papers. John Sohrawardi stays the lead public name. */
+export const publishedName = 'Saniat Javid Sohrawardi';
+
+/** Short author credit used on publications. */
+export const publishedCitation = 'S. J. Sohrawardi';
+
+/** October 2026 CV, served from this site so the link does not depend on the CDN env var. */
+export const cvPdfPath = '/pdf/sohrawardi-cv-2026-10.pdf';
+
 /**
  * Site configuration object
  * 
@@ -48,7 +61,7 @@ export const siteConfig = {
    * Should be the full production URL without trailing slash.
    * Example: 'https://example.com'
    */
-  url: getEnv('SITE_URL', 'https://example.com'),
+  url: getEnv('SITE_URL', 'https://nviable.me'),
   
   /**
    * Site language (ISO 639-1 code)
@@ -63,17 +76,14 @@ export const siteConfig = {
    * 
    * Used as fallback when page-specific title is not provided.
    */
-  title: getEnv('SITE_TITLE', 'Saniat Sohrawardi — HCI & Digital Media Forensics Researcher'),
+  title: getEnv('SITE_TITLE', 'John Sohrawardi'),
   
   /**
    * Site description
    * 
    * Default meta description for SEO and social sharing.
    */
-  description: getEnv(
-    'SITE_DESCRIPTION',
-    'Human–computer interaction and digital media forensics researcher focused on building usable, trustworthy deepfake detection tools for journalists, intelligence analysts, and law enforcement. Founder and lead of the DeFake Project — an interdisciplinary initiative across four universities. Over 7 years of HCI and ML research experience; 4 years of UX and product-facing industry work.'
-  ),
+  description: getEnv('SITE_DESCRIPTION', siteBio),
   
   /**
    * Author information
@@ -83,19 +93,16 @@ export const siteConfig = {
    */
   author: {
     /** Full name */
-    name: getEnv('SITE_AUTHOR_NAME', 'Saniat Sohrawardi'),
+    name: getEnv('SITE_AUTHOR_NAME', 'John Sohrawardi'),
     
     /** Professional title or role */
-    title: getEnv('SITE_AUTHOR_TITLE', 'Postdoctoral Researcher · HCI & Digital Media Forensics'),
+    title: getEnv('SITE_AUTHOR_TITLE', 'Postdoctoral researcher, ESL Global Cybersecurity Institute, RIT'),
     
     /** Short biography or professional summary */
-    bio: getEnv(
-      'SITE_AUTHOR_BIO',
-      'Human–computer interaction and digital media forensics researcher focused on building usable, trustworthy deepfake detection tools for journalists, intelligence analysts, and law enforcement. Founder and lead of the DeFake Project — an interdisciplinary initiative across four universities. Over 7 years of HCI and ML research experience; 4 years of UX and product-facing industry work.'
-    ),
+    bio: getEnv('SITE_AUTHOR_BIO', siteBio),
     
     /** Contact email address */
-    email: getEnv('SITE_AUTHOR_EMAIL', 'hello@example.com'),
+    email: getEnv('SITE_AUTHOR_EMAIL', 'john.sohrawardi@rit.edu'),
     
     /** Location (optional, empty string to hide) */
     location: getEnv('SITE_AUTHOR_LOCATION', ''),
@@ -124,10 +131,10 @@ export const siteConfig = {
     bluesky: getEnv('SOCIAL_BLUESKY', ''),
 
     /** ORCID profile URL */
-    orcid: getEnv('SOCIAL_ORCID', ''),
+    orcid: getEnv('SOCIAL_ORCID', 'https://orcid.org/0000-0002-4707-7035'),
 
     /** Scholar profile URL */
-    scholar: getEnv('SOCIAL_SCHOLAR', ''),
+    scholar: getEnv('SOCIAL_SCHOLAR', 'https://scholar.google.com/citations?user=12j0HoYAAAAJ&hl=en'),
   },
   
   /**

@@ -1,0 +1,240 @@
+---
+/**
+ * Shared publication rows used on the homepage, the publications index,
+ * and project pages. Spacing, type, borders, owner emphasis, and the
+ * compact BibTeX control live here so those surfaces stay one block.
+ */
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+import BibtexCopy from './BibtexCopy.astro';
+import { emphasizeOwner } from '../utils/authors';
+
+interface PublicationRowData {
+  title: string;
+  authors: string;
+  venue: string;
+  year: number;
+  quality?: string;
+  url?: string;
+  tags?: string[];
+  status?: 'published' | 'inSubmission' | 'inPreparation' | 'underReview';
+  bibtex?: string;
+}
+
+interface Props {
+  entries: PublicationRowData[];
+  /** Two columns when the viewport has room. One column on a narrow screen. A single row stays in the first cell. */
+  columns?: 1 | 2;
+  /** Used when an entry has no venue URL (homepage falls back to /publications). */
+  fallbackHref?: string;
+}
+
+const { entries, columns = 2, fallbackHref } = Astro.props;
+
+const STATUS_LABELS: Record<string, string> = {
+  inSubmission: 'In submission',
+  underReview: 'Under review',
+  inPreparation: 'In preparation',
+};
+---
+
+{
+  entries.length > 0 && (
+    <div class:list={['publication-rows', columns === 2 && 'publication-rows--two']}>
+      {entries.map((entry) => {
+        const href = entry.url || fallbackHref;
+        const external = Boolean(entry.url);
+        const bibtex = entry.bibtex?.trim() ?? '';
+        const tags = entry.tags?.slice(0, 3) ?? [];
+        const statusLabel =
+          entry.status && entry.status !== 'published' ? STATUS_LABELS[entry.status] : undefined;
+        const row = (
+          <>
+            <div class="publication-row-main">
+              <span class="publication-row-meta">
+                {statusLabel && <span class="publication-row-status">{statusLabel}</span>}
+                {entry.year}
+                {tags.length > 0 && <> · {tags.join(' · ')}</>}
+                {entry.quality && (
+                  <span class="publication-row-quality">{` · ${entry.quality}`}</span>
+                )}
+              </span>
+              <h3 class="publication-row-title">{entry.title}</h3>
+              <p class="publication-row-authors" set:html={emphasizeOwner(entry.authors)} />
+              <p class="publication-row-venue">{entry.venue}</p>
+            </div>
+            {href && <ArrowRight class="publication-row-arrow" size={14} aria-hidden="true" />}
+          </>
+        );
+        return (
+          <div class:list={['publication-row', bibtex && 'publication-row--has-bibtex']}>
+            {href ? (
+              <a
+                href={href}
+                class="publication-row-link"
+                target={external ? '_blank' : undefined}
+                rel={external ? 'noopener noreferrer' : undefined}
+              >
+                {row}
+              </a>
+            ) : (
+              <div class="publication-row-link">{row}</div>
+            )}
+            {bibtex && <BibtexCopy bibtex={bibtex} />}
+          </div>
+        );
+      })}
+    </div>
+  )
+}
+
+<style>
+  .publication-rows {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .publication-rows--two {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 2.5rem;
+  }
+
+  .publication-row {
+    position: relative;
+    border-bottom: 1px solid var(--color-border);
+    min-width: 0;
+  }
+
+  .publication-row-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.1rem 0;
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+  }
+
+  .publication-rows--two .publication-row:last-child,
+  .publication-rows--two .publication-row:nth-last-child(2):nth-child(odd) {
+    border-bottom: none;
+  }
+
+  .publication-rows:not(.publication-rows--two) .publication-row:last-child {
+    border-bottom: none;
+  }
+
+  .publication-row-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .publication-row-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .publication-row-meta {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .publication-row-quality {
+    color: var(--color-tertiary-text);
+  }
+
+  .publication-row-status {
+    display: inline-block;
+    margin-right: 0.5rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: var(--border-radius-pill);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: var(--color-tertiary-surface);
+    color: var(--color-status-caution);
+  }
+
+  .publication-row-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-text);
+    margin-bottom: 0.35rem;
+    transition: color 0.2s ease;
+    overflow-wrap: anywhere;
+  }
+
+  .publication-row-arrow {
+    flex-shrink: 0;
+    align-self: center;
+    color: var(--color-accent);
+    transition:
+      color var(--transition-base),
+      transform var(--arrow-duration) ease;
+  }
+
+  .publication-row-arrow :global(svg) {
+    display: block;
+  }
+
+  .publication-row:hover .publication-row-title,
+  .publication-row:hover .publication-row-arrow {
+    color: var(--color-accent-hover);
+  }
+
+  .publication-row:hover .publication-row-arrow {
+    transform: translateX(var(--arrow-shift));
+  }
+
+  .publication-row-authors,
+  .publication-row-venue {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .publication-row-venue {
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  .publication-row--has-bibtex .publication-row-venue {
+    padding-right: 4.75rem;
+  }
+
+  .publication-row--has-bibtex :global(.bibtex-copy) {
+    position: absolute;
+    right: calc(1rem + 14px);
+    bottom: 1.1rem;
+    z-index: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .publication-row-arrow {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .publication-rows--two {
+      grid-template-columns: 1fr;
+    }
+
+    .publication-rows--two .publication-row:last-child,
+    .publication-rows--two .publication-row:nth-last-child(2):nth-child(odd) {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .publication-rows--two .publication-row:last-child {
+      border-bottom: none;
+    }
+  }
+</style>

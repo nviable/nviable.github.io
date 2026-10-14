@@ -4,9 +4,10 @@
  */
 
 import Star from '@lucide/astro/icons/star';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
 import BaseCard from './BaseCard.astro';
-import ForwardLink from './ForwardLink.astro';
 import { truncateForPreview } from '../utils/preview';
+import { projectCoverKind } from '../utils/projectImage';
 
 interface Props {
   title: string;
@@ -18,6 +19,7 @@ interface Props {
   featured?: boolean;
   status?: 'completed' | 'ongoing' | 'archived' | 'inactive';
   icon?: string;
+  coverImage?: string;
 }
 
 const {
@@ -30,7 +32,11 @@ const {
   featured = false,
   status = 'completed',
   icon,
+  coverImage,
 } = Astro.props;
+
+const thumb = coverImage || icon;
+const thumbKind = projectCoverKind(thumb);
 
 const preview = truncateForPreview(abstract);
 const displayDomains = domains.slice(0, 4);
@@ -43,13 +49,23 @@ const statusConfig = {
   inactive: { label: 'Inactive', class: 'status--inactive' },
 };
 const statusInfo = statusConfig[status];
+const showBadges = featured || status !== 'completed';
 ---
 
-<BaseCard href={`/projects/${slug}`} class="project-card">
-  <div slot="badge" class="card-badges">
-    {icon && (
-      <img src={icon} alt="" class="project-icon" width="28" height="28" loading="lazy" decoding="async" />
-    )}
+<BaseCard href={`/projects/${slug}`} class="project-card project-tile">
+  <div slot="badge">
+  {thumb && thumbKind && (
+    <img
+      src={thumb}
+      alt=""
+      class="project-thumb"
+      loading="lazy"
+      decoding="async"
+      onerror="this.remove()"
+    />
+  )}
+  {showBadges && (
+  <div class="card-badges">
     {featured && (
       <span class="featured-badge">
         <Star size={12} aria-hidden="true" />
@@ -62,9 +78,16 @@ const statusInfo = statusConfig[status];
       </span>
     )}
   </div>
+  )}
+  </div>
 
   <Fragment slot="meta">{role} · {year}</Fragment>
-  <Fragment slot="title">{title}</Fragment>
+  <Fragment slot="title">
+    <span class="title-row">
+      <span class="title-row__text">{title}</span>
+      <ArrowRight class="arrow-icon" size={16} stroke-width={2} aria-hidden="true" />
+    </span>
+  </Fragment>
   <Fragment slot="description">{preview}</Fragment>
 
   {displayDomains.length > 0 && (
@@ -78,7 +101,6 @@ const statusInfo = statusConfig[status];
     </div>
   )}
 
-  <ForwardLink text="View details" />
 </BaseCard>
 
 <style>
@@ -116,12 +138,12 @@ const statusInfo = statusConfig[status];
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    border-radius: var(--border-radius-pill);
   }
 
   .status--ongoing {
-    background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
+    background: color-mix(in srgb, var(--color-quaternary) 18%, transparent);
+    color: var(--color-status-ongoing);
   }
 
   .status--archived {
@@ -130,16 +152,28 @@ const statusInfo = statusConfig[status];
   }
 
   .status--inactive {
-    background: rgba(234, 179, 8, 0.12);
-    color: #ca8a04;
+    background: var(--color-tertiary-surface);
+    color: var(--color-status-caution);
   }
 
-  .project-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    object-fit: cover;
+  .title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .title-row__text {
+    min-width: 0;
+  }
+
+  .arrow-icon {
     flex-shrink: 0;
+    margin-top: 0.15rem;
+    color: var(--color-accent);
+    transition:
+      color var(--transition-base),
+      transform var(--arrow-duration) ease;
   }
 
   .tag-more {

@@ -1,35 +1,53 @@
 ---
 /**
- * Publications index — single list sorted by year (newest first); document kind shown as a tag.
+ * Publications index — same open rows as the homepage list, grouped quietly.
  * Route: /publications
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SEO from '../../components/SEO.astro';
-import PublicationCard from '../../components/PublicationCard.astro';
 import PageStats from '../../components/PageStats.astro';
+import PublicationRows from '../../components/PublicationRows.astro';
 import { getCollection } from 'astro:content';
 import { pagesConfig } from '../../pages.config';
 
-const KIND_TAG: Record<
-  'bookChapter' | 'journal' | 'conference' | 'dissertation',
-  string
-> = {
-  bookChapter: 'Book chapter',
-  journal: 'Journal article',
-  conference: 'Conference',
-  dissertation: 'Dissertation',
-};
-
 const allPublications = await getCollection('publications');
 
-const sorted = [...allPublications].sort((a, b) => {
-  if (b.data.year !== a.data.year) {
-    return b.data.year - a.data.year;
-  }
+const byYear = (a: (typeof allPublications)[number], b: (typeof allPublications)[number]) => {
+  if (b.data.year !== a.data.year) return b.data.year - a.data.year;
   return (a.data.order ?? 999) - (b.data.order ?? 999);
-});
+};
 
-const total = sorted.length;
+const isUnpublished = (status: string | undefined) =>
+  status === 'underReview' || status === 'inSubmission' || status === 'inPreparation';
+
+const published = allPublications.filter((entry) => !isUnpublished(entry.data.status));
+
+function publicationGroup(entry: (typeof published)[number]): 'earlier' | 'selected' | 'other' {
+  if (entry.data.venue.toLowerCase().includes('icdim') || entry.data.year <= 2014) {
+    return 'earlier';
+  }
+  const venue = entry.data.venue.toLowerCase();
+  const selected =
+    venue.includes('chi') ||
+    venue.includes('ccs') ||
+    entry.data.kind === 'journal' ||
+    entry.data.kind === 'dissertation';
+  return selected ? 'selected' : 'other';
+}
+
+const groups: { id: string; heading: string; items: typeof published }[] = [
+  { id: 'selected', heading: 'Selected work', items: [] },
+  { id: 'other', heading: 'Other publications', items: [] },
+  { id: 'earlier', heading: 'Earlier work', items: [] },
+];
+
+for (const entry of published) {
+  const group = groups.find((g) => g.id === publicationGroup(entry));
+  group?.items.push(entry);
+}
+for (const group of groups) group.items.sort(byYear);
+
+const total = published.length;
 ---
 
 <BaseLayout>
@@ -41,34 +59,46 @@ const total = sorted.length;
     image="/og/publications.png"
   />
 
-  <main class="page-container">
-    <header class="page-header">
+  <main class="page-container publications-page">
+    <header class="page-header publications-page__header">
       <h1 class="page-title">{pagesConfig.publications.heading}</h1>
       <p class="page-intro">{pagesConfig.publications.intro}</p>
       <PageStats text={`${total} publication${total === 1 ? '' : 's'}`} />
     </header>
 
     {total > 0 ? (
-      <div class="card-list card-list--compact">
-        {sorted.map((entry) => (
-          <PublicationCard
-            title={entry.data.title}
-            authors={entry.data.authors}
-            venue={entry.data.venue}
-            year={entry.data.year}
-            quality={entry.data.quality as 'A*' | 'A' | 'B' | 'C' | undefined}
-            url={entry.data.url}
-            tags={[
-              KIND_TAG[entry.data.kind],
-              ...(entry.data.tags ?? []),
-            ]}
-            status={entry.data.status}
-            statusNote={entry.data.statusNote}
-          />
-        ))}
-      </div>
+      groups.filter((group) => group.items.length > 0).map((group) => (
+        <section class="pub-group" aria-labelledby={`pub-group-${group.id}`}>
+          <h2 id={`pub-group-${group.id}`} class="pub-group__heading">{group.heading}</h2>
+          <PublicationRows entries={group.items.map((entry) => entry.data)} />
+        </section>
+      ))
     ) : (
       <p class="empty-state">No publications listed yet.</p>
     )}
   </main>
 </BaseLayout>
+
+<style>
+  .publications-page {
+    max-width: 1100px;
+  }
+
+  .publications-page__header {
+    max-width: var(--max-width-prose);
+    margin-inline: auto;
+  }
+
+  .pub-group {
+    margin-top: 2.75rem;
+  }
+
+  .pub-group__heading {
+    margin: 0 0 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+  }
+</style>
