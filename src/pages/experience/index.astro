@@ -17,7 +17,7 @@ import Brain from '@lucide/astro/icons/brain';
 import Scale from '@lucide/astro/icons/scale';
 import Sparkles from '@lucide/astro/icons/sparkles';
 import FileDown from '@lucide/astro/icons/file-down';
-import { PUBLIC_ASSETS_URL } from 'astro:env/client';
+import { cvPdfPath } from '../../config';
 
 const all = await getCollection('experience');
 
@@ -44,8 +44,7 @@ const interestIcons: Record<
   sparkles: Sparkles,
 };
 
-const assetsBase = PUBLIC_ASSETS_URL.trim().replace(/\/$/, '');
-const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : '';
+const resumePdfUrl = cvPdfPath;
 ---
 
 <BaseLayout>
@@ -65,13 +64,13 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
           resumePdfUrl && (
             <a
               href={resumePdfUrl}
-              class="experience-hub__resume-btn"
+              class="btn btn-secondary experience-hub__resume-btn"
               target="_blank"
               rel="noopener noreferrer"
               download
             >
               <FileDown size={18} stroke-width={2} aria-hidden="true" />
-              Download Resume (PDF)
+              CV (PDF)
             </a>
           )
         }
@@ -83,7 +82,7 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
       </div>
       <p class="experience-hub__about-link">
         <a href="/experience/about" class="exp-text-link">More about me</a>
-        <ArrowRight class="exp-text-link__arrow" size={16} aria-hidden="true" />
+        <ArrowRight class="exp-text-link__arrow arrow-icon" size={16} aria-hidden="true" />
       </p>
     </header>
 
@@ -133,9 +132,9 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
                   ))}
                 </ul>
               )}
-              <a class="exp-readmore" href={`/experience/${job.id}`}>
+              <a class="btn btn-tertiary exp-readmore" href={`/experience/${job.id}`}>
                 <span>Read more</span>
-                <ArrowRight size={18} stroke-width={2} aria-hidden="true" />
+                <ArrowRight class="arrow-icon" size={18} stroke-width={2} aria-hidden="true" />
               </a>
             </article>
           ))
@@ -166,14 +165,64 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
                   ))}
                 </ul>
               )}
-              <a class="exp-readmore" href={`/experience/${edu.id}`}>
+              <a class="btn btn-tertiary exp-readmore" href={`/experience/${edu.id}`}>
                 <span>Read more</span>
-                <ArrowRight size={18} stroke-width={2} aria-hidden="true" />
+                <ArrowRight class="arrow-icon" size={18} stroke-width={2} aria-hidden="true" />
               </a>
             </article>
           ))
         }
       </div>
+    </section>
+
+    <section class="exp-block" aria-labelledby="exp-teaching-heading">
+      <h2 id="exp-teaching-heading" class="exp-block__heading">Teaching</h2>
+      <ul class="exp-compact">
+        <li>Instructor of record, Spring 2025 — CSEC 520/620, Cyberanalytics &amp; Machine Learning, Rochester Institute of Technology.</li>
+        <li>Guest lecture, 2023–2025 — Introduction to AI: Media Manipulation and Deepfakes, CSE 440 (annual), Michigan State University.</li>
+        <li>Guest lecture, 2024 — Deepfakes and Ethics, SWEN 559, with Y. K. Wu, Rochester Institute of Technology.</li>
+        <li>Guest lecture, 2022 — Deepfakes: Anarchy Loading, Software Engineering Ethics, Rochester Institute of Technology.</li>
+      </ul>
+    </section>
+
+    <section class="exp-block" aria-labelledby="exp-mentorship-heading">
+      <h2 id="exp-mentorship-heading" class="exp-block__heading">Mentorship</h2>
+      <p class="exp-compact-note">
+        Capstone teams and research assistants at RIT, 2023–2027, on biometric deepfake detection, the vocabulary of AI-manipulated media, privacy and security behavior around AI plugins, dataset curation, explainable detection, and related verification tools.
+      </p>
+    </section>
+
+    <section class="exp-block" aria-labelledby="exp-grants-heading">
+      <h2 id="exp-grants-heading" class="exp-block__heading">Grants</h2>
+      <ul class="exp-compact">
+        <li>2024–2027. ReDDDoT Phase 2: VARUNA: A User-Centered All-in-One Media Forensics Platform. National Science Foundation.</li>
+        <li>2024–2026. Usable Tools for Deepfake Identification and Mitigation. Omidyar Network.</li>
+        <li>2023–2025. Building an Analyst-Centered Deepfake Detection Tool. U.S. Department of Defense.</li>
+        <li>2021–2024. Collaborative Research: SaTC: CORE: Small: DeFake: Deploying a Tool for Robust Deepfake Detection. National Science Foundation.</li>
+        <li>2020–2022. DeFake Detection Tool. Knight Foundation.</li>
+        <li>2019–2021. Robustly Detecting DeepFakes. The Miami Foundation.</li>
+      </ul>
+    </section>
+
+    <section class="exp-block" aria-labelledby="exp-service-heading">
+      <h2 id="exp-service-heading" class="exp-block__heading">Service</h2>
+      <ul class="exp-compact">
+        <li>Reviewer, ACM CHI, 2023–2026.</li>
+        <li>Reviewer, ICWSM, 2024–2026.</li>
+        <li>Poster jury, SOUPS, 2023–2026.</li>
+        <li>Member, Scientific Working Group on Digital Evidence (SWGDE), and founding member of its ad-hoc AI committee, 2024–present.</li>
+        <li>Contributing analyst, Deepfake Analysis Unit, Misinformation Combat Alliance, 2024–present.</li>
+        <li>Young Researcher Associate, ITU AI for Good AMAS collaboration, 2026–present.</li>
+      </ul>
+    </section>
+
+    <section class="exp-block" aria-labelledby="exp-awards-heading">
+      <h2 id="exp-awards-heading" class="exp-block__heading">Awards</h2>
+      <ul class="exp-compact">
+        <li>2026. Fram Award, Imagine RIT, for “What Do You Mean by Fake? An Interactive Exploration of Synthetic Media.”</li>
+        <li>2025. Third prize, poster competition, DFRWS USA, for “It’s About Time We Untangle Digital Media Forensics.”</li>
+        <li>2022. Winner, oral presentation category, RIT Graduate Showcase, for Dungeons &amp; Deepfakes.</li>
+      </ul>
     </section>
 
     {
@@ -182,9 +231,9 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
           <h2 id="exp-personal-heading" class="exp-block__heading">Personal</h2>
           <div class="exp-personal">
             {personal.data.hubParagraphs?.map((para) => <p>{para}</p>)}
-            <a class="exp-readmore" href={`/experience/${personal.id}`}>
+            <a class="btn btn-tertiary exp-readmore" href={`/experience/${personal.id}`}>
               <span>Read more</span>
-              <ArrowRight size={18} stroke-width={2} aria-hidden="true" />
+              <ArrowRight class="arrow-icon" size={18} stroke-width={2} aria-hidden="true" />
             </a>
           </div>
         </section>
@@ -210,36 +259,7 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
   }
 
   .experience-hub__resume-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
     flex-shrink: 0;
-    padding: 0.5rem 1rem;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-    background: var(--color-bg-secondary);
-    color: var(--color-accent);
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-decoration: none;
-    font-family: inherit;
-    line-height: 1.2;
-    transition:
-      border-color 0.15s ease,
-      background 0.15s ease,
-      color 0.15s ease;
-  }
-
-  .experience-hub__resume-btn:hover {
-    border-color: var(--color-accent);
-    background: rgba(67, 72, 156, 0.1);
-    color: var(--color-accent-hover);
-  }
-
-  .experience-hub__resume-btn:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 3px;
   }
 
   .experience-hub__intro p {
@@ -266,12 +286,17 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
   }
 
   .exp-text-link:hover {
-    text-decoration: underline;
+    color: var(--color-accent-hover);
   }
 
   .exp-text-link__arrow {
     flex-shrink: 0;
     margin-top: 1px;
+    transition: transform var(--arrow-duration) ease;
+  }
+
+  .exp-text-link:hover .exp-text-link__arrow {
+    transform: translateX(var(--arrow-shift));
   }
 
   .experience-hub .exp-block {
@@ -284,6 +309,23 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
     margin: 0 0 1rem;
     color: var(--color-text);
     letter-spacing: 0.02em;
+  }
+
+  .experience-hub .exp-compact,
+  .experience-hub .exp-compact-note {
+    margin: 0;
+    max-width: 68ch;
+    color: var(--color-text);
+    font-size: 0.975rem;
+    line-height: 1.55;
+  }
+
+  .experience-hub .exp-compact {
+    padding-left: 1.15rem;
+  }
+
+  .experience-hub .exp-compact li + li {
+    margin-top: 0.45rem;
   }
 
   .experience-hub .exp-block__note {
@@ -300,7 +342,7 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
   }
 
   .experience-hub .exp-block__note a:hover {
-    text-decoration: underline;
+    color: var(--color-accent-hover);
   }
 
   .experience-hub .exp-interests--icons {
@@ -393,7 +435,7 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
     letter-spacing: 0.04em;
     text-transform: uppercase;
     padding: 0.25rem 0.55rem;
-    border-radius: 999px;
+    border-radius: var(--border-radius-pill);
     border: 1px solid var(--color-border);
     color: var(--color-text-muted);
     background: var(--color-bg);
@@ -404,27 +446,7 @@ const resumePdfUrl = assetsBase ? `${assetsBase}/pdf/sohrawardi-resume.pdf` : ''
   }
 
   .experience-hub .exp-readmore {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
     margin-top: 0.15rem;
-    padding: 0.5rem 1rem;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-    background: var(--color-bg);
-    color: var(--color-accent);
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition:
-      border-color var(--transition-fast),
-      background var(--transition-fast),
-      color var(--transition-fast);
-  }
-
-  .experience-hub .exp-readmore:hover {
-    border-color: var(--color-accent);
-    background: rgba(67, 72, 156, 0.08);
   }
 
   .experience-hub .exp-personal {

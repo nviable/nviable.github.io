@@ -271,7 +271,7 @@ const showResourceLinks = Boolean(
     min-height: 1.5rem;
     margin-top: 0.5rem;
     background: var(--color-border);
-    border-radius: 1px;
+    border-radius: 0;
     opacity: 0.9;
   }
 
@@ -323,7 +323,7 @@ const showResourceLinks = Boolean(
     text-transform: uppercase;
     letter-spacing: 0.06em;
     padding: 0.2rem 0.5rem;
-    border-radius: 4px;
+    border-radius: var(--border-radius-pill);
     border: 1px solid var(--tl-accent, var(--color-border));
     color: var(--tl-accent, var(--color-text-muted));
     background: transparent;
@@ -378,8 +378,7 @@ const showResourceLinks = Boolean(
   }
 
   .tl-meta__link:hover {
-    color: var(--color-accent);
-    border-bottom-color: var(--color-accent);
+    color: var(--color-accent-hover);
   }
 
   .tl-pills {
@@ -394,7 +393,7 @@ const showResourceLinks = Boolean(
   .tl-pills li {
     font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
-    border-radius: 4px;
+    border-radius: var(--border-radius-pill);
     border: 1px solid var(--color-border);
     color: var(--color-text-muted);
     font-weight: 500;
@@ -422,7 +421,7 @@ const showResourceLinks = Boolean(
   }
 
   .tl-link:hover {
-    text-decoration: underline;
+    color: var(--color-accent-hover);
   }
 
   .tl-expand-btn {

@@ -9,7 +9,7 @@
  * @param type - Schema.org type
  * @param data - Data object containing the structured data fields
  */
-import { siteConfig } from '../config';
+import { publishedName, siteConfig } from '../config';
 
 interface Props {
   type: 'WebSite' | 'Project' | 'Article' | 'Person' | 'BreadcrumbList';
@@ -97,7 +97,7 @@ function generateStructuredData(type: string, data: Record<string, any>) {
         '@context': baseContext,
         '@type': 'Person',
         name: data.name || siteConfig.author.name,
-        alternateName: data.alternateName || 'John Sohrawardi',
+        alternateName: data.alternateName || publishedName,
         jobTitle: data.jobTitle || siteConfig.author.title,
         description: data.description || siteConfig.author.bio,
         url: data.url || siteURL,

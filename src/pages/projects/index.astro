@@ -74,8 +74,8 @@ const featuredCount = sortedProjects.filter(p => p.data.featured).length;
     image="/og/projects.png"
   />
 
-  <main class="page-container">
-    <header class="page-header">
+  <main class="page-container projects-archive">
+    <header class="page-header projects-archive__header">
       <h1 class="page-title">{pagesConfig.projects.heading}</h1>
       <p class="page-intro">
         {pagesConfig.projects.intro}
@@ -96,6 +96,7 @@ const featuredCount = sortedProjects.filter(p => p.data.featured).length;
             featured={project.data.featured}
             status={project.data.status}
             icon={project.data.icon}
+            coverImage={project.data.coverImage}
           />
         ))}
       </div>
@@ -104,3 +105,14 @@ const featuredCount = sortedProjects.filter(p => p.data.featured).length;
     )}
   </main>
 </BaseLayout>
+
+<style>
+  .projects-archive {
+    max-width: var(--max-width-wide);
+  }
+
+  .projects-archive__header {
+    max-width: var(--max-width-prose);
+    margin-inline: auto;
+  }
+</style>

@@ -7,12 +7,12 @@
   --color-bg-elevated: #1a1a1a;
   --color-text: #e5e5e5;
   --color-text-secondary: #a3a3a3;
-  --color-text-muted: #737373;
+  --color-text-muted: #808080;
   --color-border: #262626;
   --color-border-subtle: #1f1f1f;
-  --color-accent: #43489C;
+  --color-accent: #7E84D0;
   --color-accent-hover: #B9BDFF;
-  --color-accent-muted: 1E2047(59, 130, 246, 0.15);
+  --color-accent-muted: rgba(126, 132, 208, 0.18);
   --color-accent-glow: rgba(67, 72, 156, 0.25);
   --color-secondary: #FF2F72;
   --color-secondary-hover: #FFCADB;
@@ -29,7 +29,7 @@
   
   /* Gradient Colors */
   --gradient-text: linear-gradient(135deg, #e5e5e5 0%, #a3a3a3 100%);
-  --gradient-accent: linear-gradient(135deg, #43489C 0%, #B9BDFF 100%);
+  --gradient-accent: linear-gradient(135deg, #7E84D0 0%, #B9BDFF 100%);
   --gradient-card: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
   --gradient-border: linear-gradient(135deg, rgba(59, 130, 246, 0.5) 0%, rgba(139, 92, 246, 0.5) 100%);
   
@@ -65,12 +65,38 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
   
-  /* Layout */
+  /* Layout — square by default; pills opt into --border-radius-pill */
   --max-width-prose: 65ch;
+  --max-width-wide: 68rem;
   --max-width-content: 1200px;
-  --border-radius-sm: 0.25rem;
-  --border-radius-md: 0.5rem;
-  --border-radius-lg: 1rem;
+  --border-radius-sm: 0;
+  --border-radius-md: 0;
+  --border-radius-lg: 0;
+  --border-radius-pill: 999px;
+
+  /*
+   * primary   = indigo. Button fill, links, title hover.
+   * secondary = pink. Hover accent on quiet buttons only, not a resting fill.
+   * tertiary  = gold. Hover wash on filled quiet buttons, and small status labels.
+   * Cards and the nav highlight rest on gray.
+   * --color-secondary-text stays on the pink hue, darkened in light mode for AA.
+   */
+  --color-on-primary: #0a0a0a;
+  --color-primary-edge: #43489c;
+  --color-primary-fill-hover: #B9BDFF;
+  --color-secondary-text: var(--color-secondary);
+  --color-tertiary-text: var(--color-tertiary);
+  --color-tertiary-edge: var(--color-tertiary);
+  --color-tertiary-surface: color-mix(in srgb, var(--color-tertiary) 16%, var(--color-bg-secondary));
+  --color-status-ongoing: var(--color-quaternary);
+  --color-status-caution: var(--color-tertiary);
+  --color-card: #1a1a1a;
+  --color-card-hover: #262626;
+  --color-card-edge: #000000;
+  --color-nav-highlight: #1f1f1f;
+  --color-control-fill: #1c1c1c;
+  --arrow-shift: 0.25rem;
+  --arrow-duration: 180ms;
   
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -91,13 +117,27 @@
   --color-bg-elevated: #fafafa;
   --color-text: #171717;
   --color-text-secondary: #525252;
-  --color-text-muted: #a3a3a3;
+  --color-text-muted: #737373;
   --color-border: #e5e5e5;
   --color-border-subtle: #f0f0f0;
   --color-accent: #43489C;
-  --color-accent-hover: #B9BDFF;
+  --color-accent-hover: #32368A;
   --color-accent-muted: rgba(21, 22, 47, 0.1);
   --color-accent-glow: rgba(67, 72, 156, 0.15);
+  --color-on-primary: #ffffff;
+  --color-primary-edge: #32368A;
+  --color-primary-fill-hover: #5A60B8;
+  --color-secondary-text: var(--color-secondary-muted);
+  --color-tertiary-text: color-mix(in srgb, var(--color-tertiary) 48%, var(--color-text));
+  --color-tertiary-edge: color-mix(in srgb, var(--color-tertiary) 48%, var(--color-text));
+  --color-tertiary-surface: color-mix(in srgb, var(--color-tertiary) 22%, var(--color-bg-secondary));
+  --color-status-ongoing: var(--color-quaternary-muted);
+  --color-status-caution: var(--color-tertiary-edge);
+  --color-card: #e8e8e8;
+  --color-card-hover: #f4f4f4;
+  --color-card-edge: #b5b5b5;
+  --color-nav-highlight: #e6e6e6;
+  --color-control-fill: #efefef;
   
   /* Light mode gradients */
   --gradient-text: linear-gradient(135deg, #171717 0%, #525252 100%);
@@ -117,6 +157,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  border-radius: 0;
 }
 
 html {
@@ -134,15 +175,113 @@ body {
   min-height: 100vh;
 }
 
-/* Links */
+/* Links — primary for inline links */
 a {
   color: var(--color-accent);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--transition-base);
 }
 
 a:hover {
   color: var(--color-accent-hover);
+}
+
+/* Buttons — same shape, three color levels, 3px lip that presses in */
+.btn {
+  --btn-pad-y: 0.7rem;
+  --btn-pad-x: 1.25rem;
+  --btn-lip: 3px;
+  --btn-bg: transparent;
+  --btn-bg-hover: transparent;
+  --btn-fg: var(--color-text);
+  --btn-fg-hover: var(--color-text);
+  --btn-border: var(--color-border);
+  --btn-border-hover: var(--color-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  box-sizing: border-box;
+  margin: 0;
+  padding: var(--btn-pad-y) var(--btn-pad-x);
+  border-style: solid;
+  border-width: 1px 1px var(--btn-lip) 1px;
+  border-color: var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    background-color var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.btn:hover {
+  background: var(--btn-bg-hover);
+  color: var(--btn-fg-hover);
+  border-color: var(--btn-border-hover);
+}
+
+.btn:active {
+  border-bottom-width: 0;
+  padding-bottom: calc(var(--btn-pad-y) + var(--btn-lip));
+  transform: translateY(var(--btn-lip));
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  --btn-bg: var(--color-accent);
+  --btn-bg-hover: var(--color-primary-fill-hover);
+  --btn-fg: var(--color-on-primary);
+  --btn-fg-hover: var(--color-on-primary);
+  --btn-border: var(--color-primary-edge);
+  --btn-border-hover: var(--color-primary-edge);
+}
+
+/* Quiet outline: gray at rest, pink text and border on hover. */
+.btn-secondary {
+  --btn-bg: transparent;
+  --btn-bg-hover: transparent;
+  --btn-fg: var(--color-text-secondary);
+  --btn-fg-hover: var(--color-secondary-text);
+  --btn-border: var(--color-text-muted);
+  --btn-border-hover: var(--color-secondary-text);
+}
+
+/* Filled quiet control: gray at rest, a light gold wash on hover. Text stays neutral so the wash still clears AA. */
+.btn-tertiary {
+  --btn-bg: var(--color-control-fill);
+  --btn-bg-hover: color-mix(in srgb, var(--color-tertiary) 20%, var(--color-control-fill));
+  --btn-fg: var(--color-text);
+  --btn-fg-hover: var(--color-text);
+  --btn-border: var(--color-text-muted);
+  --btn-border-hover: var(--color-text-muted);
+}
+
+.btn .arrow-icon {
+  transition: transform var(--arrow-duration) ease;
+}
+
+.btn:hover .arrow-icon {
+  transform: translateX(var(--arrow-shift));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active,
+  .btn .arrow-icon {
+    transition: none;
+  }
 }
 
 a:focus-visible {
@@ -182,6 +321,19 @@ pre {
 pre code {
   background-color: transparent;
   padding: 0;
+}
+
+/* Shared thumbnail box on homepage and project-index cards.
+   Logos sit inside it; missing covers are omitted, not framed. */
+.project-thumb {
+  display: block;
+  width: 11rem;
+  max-width: min(11rem, 100%);
+  height: 4rem;
+  max-height: 4rem;
+  object-fit: contain;
+  object-position: left center;
+  margin: 0 0 0.85rem;
 }
 
 /* Utility Classes */

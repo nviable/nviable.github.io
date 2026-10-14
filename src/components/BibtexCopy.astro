@@ -1,0 +1,125 @@
+---
+/**
+ * Compact copy control for a publication's stored BibTeX.
+ * Renders only when a caller has a non-empty string. Does not add a text line of its own.
+ */
+import Copy from '@lucide/astro/icons/copy';
+
+interface Props {
+  bibtex: string;
+}
+
+const { bibtex } = Astro.props;
+---
+
+<button type="button" class="bibtex-copy" data-bibtex={bibtex} aria-label="Copy BibTeX">
+  <Copy size={13} aria-hidden="true" />
+  <span class="bibtex-copy-labels">
+    <span class="bibtex-copy-label">BibTeX</span>
+    <span class="bibtex-copy-done">Copied</span>
+  </span>
+</button>
+
+<script>
+  const root = document.documentElement;
+  if (root.dataset.bibtexCopyBound !== 'true') {
+    root.dataset.bibtexCopyBound = 'true';
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const button = target.closest('.bibtex-copy');
+      if (!(button instanceof HTMLButtonElement)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const text = button.dataset.bibtex ?? '';
+      const finish = () => {
+        button.classList.add('is-copied');
+        button.setAttribute('aria-label', 'Copied');
+        window.setTimeout(() => {
+          button.classList.remove('is-copied');
+          button.setAttribute('aria-label', 'Copy BibTeX');
+        }, 1600);
+      };
+
+      const fallback = () => {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.left = '-9999px';
+        document.body.append(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+      };
+
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(finish).catch(() => {
+          fallback();
+          finish();
+        });
+      } else {
+        fallback();
+        finish();
+      }
+    });
+  }
+</script>
+
+<style>
+  .bibtex-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .bibtex-copy:hover,
+  .bibtex-copy:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .bibtex-copy:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 0;
+  }
+
+  .bibtex-copy :global(svg) {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .bibtex-copy-labels {
+    display: grid;
+  }
+
+  .bibtex-copy-labels > span {
+    grid-area: 1 / 1;
+  }
+
+  .bibtex-copy-done {
+    visibility: hidden;
+  }
+
+  .bibtex-copy.is-copied .bibtex-copy-label {
+    visibility: hidden;
+  }
+
+  .bibtex-copy.is-copied .bibtex-copy-done {
+    visibility: visible;
+  }
+</style>

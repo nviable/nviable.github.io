@@ -18,7 +18,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SEO from '../components/SEO.astro';
-import { siteConfig } from '../config';
+import { cvPdfPath, siteConfig } from '../config';
 import { pagesConfig } from '../pages.config';
 
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
@@ -35,7 +35,7 @@ const TOPICS = [
 ];
 
 const socialLinks = Object.entries(siteConfig.social)
-  .filter(([, url]) => url)
+  .filter(([platform, url]) => url && platform !== 'orcid' && platform !== 'scholar')
   .map(([platform, url]) => ({
     platform: platform.charAt(0).toUpperCase() + platform.slice(1),
     url,
@@ -173,10 +173,17 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
   <main class="contact-page">
     <section class="primary-zone">
       <h1>{pagesConfig.contact.heading}</h1>
-      <p class="lead">
-        I’m open to <strong>research partnerships</strong>, <strong>invited talks and panels</strong>,
-        student inquiries, and press on deepfakes, media forensics, and human-centered verification.
-      </p>
+      <p class="lead">I’m open to new roles and collaborations, in academia and in industry.</p>
+      <ul class="contact-lines">
+        <li><a href={`mailto:${siteConfig.author.email}`}>{siteConfig.author.email}</a></li>
+        {siteConfig.social.orcid && (
+          <li><a href={siteConfig.social.orcid} target="_blank" rel="noopener noreferrer">ORCID</a></li>
+        )}
+        {siteConfig.social.scholar && (
+          <li><a href={siteConfig.social.scholar} target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
+        )}
+        <li><a href={cvPdfPath}>CV (PDF)</a></li>
+      </ul>
     </section>
 
     {banner && (
@@ -185,8 +192,7 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
       </p>
     )}
 
-    {mailerConfigured ? (
-      <section class="form-zone">
+    <section class="form-zone">
         <form method="POST" action="/contact" class="contact-form">
           <div class="field">
             <label for="name">Name</label>
@@ -217,16 +223,10 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
             <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="auto"></div>
           )}
 
-          <button type="submit" class="submit-btn">Send message</button>
+          <button type="submit" class="btn btn-primary submit-btn">Send message</button>
         </form>
 
-        <p class="form-alt">
-          Prefer not to use a form? Email <a href={`mailto:${siteConfig.author.email}`}>{siteConfig.author.email}</a>.
-        </p>
-      </section>
-    ) : (
-      <section class="mailto-zone">
-        <p class="mailto-intro">Pick the closest topic to start an email with the subject pre-filled:</p>
+        <p class="mailto-intro">Or start an email with a topic filled in:</p>
         <div class="mailto-buttons">
           {TOPICS.map((t) => (
             <a class="mailto-btn" href={`mailto:${siteConfig.author.email}?subject=${encodeURIComponent(t)}`}>
@@ -234,10 +234,7 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
             </a>
           ))}
         </div>
-        <a href={`mailto:${siteConfig.author.email}`} class="email-link">{siteConfig.author.email}</a>
-        <p class="context">I read every email. Expect a reply within a few days.</p>
       </section>
-    )}
 
     {socialLinks.length > 0 && (
       <section class="secondary-zone">
@@ -284,14 +281,23 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
     .lead {
       font-size: 1.0625rem;
       line-height: 1.7;
-      color: var(--color-text-secondary);
+      color: var(--color-text);
+      margin: 0 0 1rem;
+    }
+
+    .contact-lines {
       margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 1rem;
+      font-size: 0.975rem;
     }
 
     .form-banner {
       margin: 0 0 1.75rem;
       padding: 0.85rem 1rem;
-      border-radius: 8px;
       font-size: 0.9375rem;
       line-height: 1.5;
       border: 1px solid var(--color-border);
@@ -335,7 +341,6 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
       color: var(--color-text);
       background: var(--color-bg-secondary);
       border: 1px solid var(--color-border);
-      border-radius: 8px;
       padding: 0.65rem 0.85rem;
       width: 100%;
       transition: border-color 0.15s ease;
@@ -363,20 +368,6 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
 
     .submit-btn {
       align-self: flex-start;
-      font-family: inherit;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      background: var(--color-text);
-      color: var(--color-bg);
-      cursor: pointer;
-      transition: opacity 0.2s ease;
-    }
-
-    .submit-btn:hover {
-      opacity: 0.85;
     }
 
     .form-alt {
@@ -407,7 +398,7 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
       font-weight: 500;
       padding: 0.55rem 1rem;
       border: 1px solid var(--color-border);
-      border-radius: 999px;
+      border-radius: var(--border-radius-pill);
       color: var(--color-text-secondary);
       text-decoration: none;
       transition: border-color 0.15s ease, color 0.15s ease;

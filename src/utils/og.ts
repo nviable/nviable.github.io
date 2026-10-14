@@ -89,7 +89,7 @@ export function ogSvg({ eyebrow, title, subtitle }: OgCard): string {
   <text y="${titleTop}" font-family="sans-serif" font-size="${titleSize}" font-weight="700" fill="${COLOR.title}">${titleTspans}</text>
   ${subLines.length ? `<text y="${subTop}" font-family="sans-serif" font-size="38" font-weight="400" fill="${COLOR.subtitle}">${subTspans}</text>` : ''}
   <rect x="80" y="520" width="1040" height="2" fill="${COLOR.rule}"/>
-  <text x="80" y="573" font-family="sans-serif" font-size="30" font-weight="600" fill="${COLOR.footer}">Saniat Sohrawardi</text>
+  <text x="80" y="573" font-family="sans-serif" font-size="30" font-weight="600" fill="${COLOR.footer}">John Sohrawardi</text>
   <text x="1120" y="573" text-anchor="end" font-family="sans-serif" font-size="28" font-weight="500" fill="${COLOR.muted}">nviable.me</text>
 </svg>`;
 }

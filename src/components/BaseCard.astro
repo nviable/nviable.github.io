@@ -75,19 +75,58 @@ const linkTarget = external ? '_blank' : undefined;
 
 <style>
   .base-card {
+    --card-pad-y: 1.5rem;
+    --card-pad-x: 1.75rem;
+    --card-lip: 3px;
     display: block;
     position: relative;
-    padding: 1.5rem 1.75rem;
+    padding: var(--card-pad-y) var(--card-pad-x);
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
-    border-radius: 8px;
     text-decoration: none;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition:
+      border-color var(--transition-base),
+      background-color var(--transition-base),
+      transform var(--transition-fast);
+  }
+
+  .base-card:not(.base-card--static) {
+    border-bottom-width: var(--card-lip);
   }
 
   .base-card:hover {
     border-color: var(--color-text-muted);
     background: var(--color-bg-elevated);
+  }
+
+  .base-card:not(.base-card--static):hover .card-title {
+    color: var(--color-accent-hover);
+  }
+
+  .base-card:not(.base-card--static):hover :global(.arrow-icon) {
+    color: var(--color-accent-hover);
+    transform: translateX(var(--arrow-shift));
+  }
+
+  .base-card:not(.base-card--static):active {
+    border-bottom-width: 0;
+    padding-bottom: calc(var(--card-pad-y) + var(--card-lip));
+    transform: translateY(var(--card-lip));
+  }
+
+  .base-card.project-tile {
+    --card-pad-y: 1.25rem;
+    --card-pad-x: 1.5rem;
+    height: 100%;
+    background: var(--color-card);
+    border-style: solid;
+    border-width: 0 0 var(--card-lip) 0;
+    border-color: var(--color-card-edge);
+  }
+
+  .base-card.project-tile:hover {
+    background: var(--color-card-hover);
+    border-color: var(--color-card-edge);
   }
 
   .base-card--static {
@@ -116,6 +155,7 @@ const linkTarget = external ? '_blank' : undefined;
     color: var(--color-text);
     margin-bottom: 0.625rem;
     line-height: 1.4;
+    transition: color var(--transition-base);
   }
 
   .card-description {
@@ -126,9 +166,22 @@ const linkTarget = external ? '_blank' : undefined;
     margin-bottom: 1rem;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .base-card:active,
+    .base-card :global(.arrow-icon) {
+      transition: none;
+    }
+  }
+
   @media (max-width: 640px) {
     .base-card {
-      padding: 1.25rem 1.5rem;
+      --card-pad-y: 1.25rem;
+      --card-pad-x: 1.5rem;
+    }
+
+    .base-card.project-tile {
+      --card-pad-y: 1rem;
+      --card-pad-x: 1.25rem;
     }
 
     .card-title {

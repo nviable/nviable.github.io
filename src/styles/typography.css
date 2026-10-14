@@ -157,12 +157,11 @@ small {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
-  transition: all 0.2s ease;
+  transition: color var(--transition-base);
 }
 
 .prose a:hover {
   color: var(--color-accent-hover);
-  text-decoration-thickness: 2px;
 }
 
 /* Subtle "open to work" / availability note (used on the About page) */
@@ -170,7 +169,7 @@ small {
   border-left: 3px solid var(--color-accent);
   background: var(--color-accent-glow);
   padding: 0.85rem 1.15rem;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0;
   margin: var(--space-lg) 0;
   font-size: 1rem;
   line-height: 1.6;
