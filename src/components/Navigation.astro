@@ -245,7 +245,7 @@ const isActive = (href: string) => {
     );
   }
 
-  function placeNavHighlight(animate, explicitLink) {
+  function placeNavHighlight(animate: boolean, explicitLink?: HTMLElement) {
     const list = document.querySelector('.nav-list');
     const highlight = document.querySelector('[data-nav-highlight]');
     if (!(list instanceof HTMLElement) || !(highlight instanceof HTMLElement)) return;
