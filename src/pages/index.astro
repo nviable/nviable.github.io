@@ -38,17 +38,19 @@ const homeProjects = homeProjectIds
   .filter((project): project is (typeof allProjects)[number] => Boolean(project));
 
 /** Compact now-slice. Same Lucide icons as /journey, no year in the date. */
+type NowTone = 'primary' | 'secondary';
+
 const nowStatic = [
   {
     icon: Flag,
-    tone: 'primary' as const,
+    tone: 'primary' as NowTone,
     date: 'Dec 6',
     datetime: '2025-12-06',
     text: 'Postdoctoral researcher at RIT’s ESL Global Cybersecurity Institute.',
   },
   {
     icon: Users,
-    tone: 'primary' as const,
+    tone: 'primary' as NowTone,
     date: 'Mar 6',
     datetime: '2026-03-06',
     text: 'Leading the DeFake Project, and co-leading STOP&SCAN with the ITU AI for Good AMAS programme.',
@@ -58,14 +60,14 @@ const nowStatic = [
 const nowDynamic = [
   {
     icon: Presentation,
-    tone: 'secondary' as const,
+    tone: 'secondary' as NowTone,
     date: 'Oct 20',
     datetime: '2026-10-20',
     text: 'Upcoming talk: STOP&SCAN at IPTC.',
   },
   {
     icon: Presentation,
-    tone: 'secondary' as const,
+    tone: 'secondary' as NowTone,
     date: 'Oct 28',
     datetime: '2026-10-28',
     text: 'Upcoming talk: STOP&SCAN at JPEG Trust.',
