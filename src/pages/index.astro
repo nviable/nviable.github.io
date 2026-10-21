@@ -17,7 +17,9 @@ import Users from '@lucide/astro/icons/users';
 import Mic from '@lucide/astro/icons/mic';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
 import File from '@lucide/astro/icons/file';
+import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
+import heroPortrait from '../assets/john.jpg';
 import { cvPdfPath, publishedName, siteConfig } from '../config';
 import { truncateForPreview } from '../utils/preview';
 import { projectCoverKind } from '../utils/projectImage';
@@ -159,11 +161,15 @@ const recentPublications = allPublications
         </div>
 
         <figure class="hero-photo">
-          <img
-            src="/images/john.jpg"
+          <Image
+            src={heroPortrait}
             alt="John Sohrawardi"
-            width="1204"
-            height="1089"
+            widths={[320, 640]}
+            sizes="(max-width: 768px) 260px, 300px"
+            format="webp"
+            quality={85}
+            loading="eager"
+            fetchpriority="high"
             decoding="async"
           />
         </figure>
@@ -223,6 +229,8 @@ const recentPublications = allPublications
               <img
                 src={project.data.coverImage}
                 alt=""
+                width="176"
+                height="64"
                 class="project-thumb"
                 loading="lazy"
                 decoding="async"
