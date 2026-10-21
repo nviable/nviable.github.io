@@ -1,21 +1,21 @@
 {
-  "name": "website",
+  "name": "nviable.github.io",
   "type": "module",
   "version": "1.1.0",
-  "description": "A case-study-first portfolio theme for Astro",
+  "description": "Personal research portfolio of John Sohrawardi (Saniat Javid Sohrawardi)",
   "keywords": [
     "astro",
-    "theme",
     "portfolio",
-    "case-study",
-    "professional"
+    "hci",
+    "digital-media-forensics",
+    "research"
   ],
-  "author": "Erland <hello@erland.me>",
+  "author": "John Sohrawardi <john.sohrawardi@rit.edu>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/erlandv/case.git"
+    "url": "https://github.com/nviable/nviable.github.io.git"
   },
-  "homepage": "https://case.erland.me",
+  "homepage": "https://nviable.me",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
