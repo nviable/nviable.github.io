@@ -202,9 +202,7 @@ const speakingCount = speakingBlocks.length;
     )}
   </main>
 
-  <script is:inline>
-    const PAGE_SIZE = 10;
-
+  <script>
     function initTimeline() {
       const list = document.getElementById('timeline-list');
       const loadBtn = document.getElementById('timeline-load-more');
@@ -212,8 +210,10 @@ const speakingCount = speakingBlocks.length;
       const filterRoot = document.getElementById('timeline-filters');
       if (!list || !loadBtn || !filterRoot || !endNote) return;
 
+      const pageSize = Number(list.getAttribute('data-page-size')) || 10;
+
       const slots = () =>
-        Array.from(list.querySelectorAll('[data-timeline-item]'));
+        Array.from(list.querySelectorAll<HTMLElement>('[data-timeline-item]'));
 
       const validCategories = Array.from(
         filterRoot.querySelectorAll('.timeline-filter')
@@ -224,7 +224,7 @@ const speakingCount = speakingBlocks.length;
         return requested && validCategories.includes(requested) ? requested : 'all';
       }
 
-      function syncUrl(value) {
+      function syncUrl(value: string) {
         const url = new URL(window.location.href);
         if (value && value !== 'all') {
           url.searchParams.set('filter', value);
@@ -235,7 +235,7 @@ const speakingCount = speakingBlocks.length;
       }
 
       let filter = readFilterFromUrl();
-      let visibleCount = PAGE_SIZE;
+      let visibleCount = pageSize;
 
       function matching() {
         return slots().filter((s) => {
@@ -254,10 +254,10 @@ const speakingCount = speakingBlocks.length;
           m[i].hidden = false;
         }
         const moreLeft = m.length > show;
-        loadBtn.hidden = !moreLeft;
-        endNote.hidden = moreLeft || m.length === 0;
+        loadBtn!.hidden = !moreLeft;
+        endNote!.hidden = moreLeft || m.length === 0;
 
-        filterRoot.querySelectorAll('.timeline-filter').forEach((btn) => {
+        filterRoot!.querySelectorAll('.timeline-filter').forEach((btn) => {
           const cat = btn.getAttribute('data-category');
           const isOn = cat === filter;
           btn.classList.toggle('is-active', isOn);
@@ -265,34 +265,43 @@ const speakingCount = speakingBlocks.length;
         });
       }
 
-      filterRoot.addEventListener('click', (e) => {
-        const el = e.target;
-        if (!(el instanceof Element)) return;
-        const t = el.closest('.timeline-filter');
-        if (!t || !filterRoot.contains(t)) return;
-        const cat = t.getAttribute('data-category') || 'all';
-        filter = cat;
-        visibleCount = PAGE_SIZE;
-        syncUrl(filter);
-        apply();
-      });
+      if (list.dataset.timelineBound !== '1') {
+        list.dataset.timelineBound = '1';
 
-      loadBtn.addEventListener('click', () => {
-        visibleCount += PAGE_SIZE;
-        apply();
-      });
+        filterRoot.addEventListener('click', (e) => {
+          const el = e.target;
+          if (!(el instanceof Element)) return;
+          const t = el.closest('.timeline-filter');
+          if (!t || !filterRoot.contains(t)) return;
+          const cat = t.getAttribute('data-category') || 'all';
+          filter = cat;
+          visibleCount = pageSize;
+          syncUrl(filter);
+          apply();
+        });
 
-      // Keep the view in sync when navigating via browser back/forward.
-      window.addEventListener('popstate', () => {
-        filter = readFilterFromUrl();
-        visibleCount = PAGE_SIZE;
-        apply();
-      });
+        loadBtn.addEventListener('click', () => {
+          visibleCount += pageSize;
+          apply();
+        });
+
+        window.addEventListener('popstate', () => {
+          if (!document.body.contains(list)) return;
+          filter = readFilterFromUrl();
+          visibleCount = pageSize;
+          apply();
+        });
+      }
 
       apply();
     }
 
-    initTimeline();
+    document.addEventListener('astro:page-load', initTimeline);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTimeline, { once: true });
+    } else {
+      initTimeline();
+    }
   </script>
 
   <style>

@@ -451,15 +451,6 @@ const showResourceLinks = Boolean(
     transform: rotate(180deg);
   }
 
-  .tl-expand-btn[aria-expanded='true'] .tl-expand-text {
-    font-size: 0;
-  }
-
-  .tl-expand-btn[aria-expanded='true'] .tl-expand-text::before {
-    content: 'Show less';
-    font-size: 0.875rem;
-  }
-
   .tl-expand-body {
     display: grid;
     grid-template-rows: 0fr;
@@ -518,19 +509,29 @@ const showResourceLinks = Boolean(
   }
 </style>
 
-<script is:inline>
-  (function () {
-    function onExpandClick(e) {
-      var btn = e.target && e.target.closest && e.target.closest('.tl-expand-btn');
-      if (!btn) return;
-      var expanded = btn.getAttribute('aria-expanded') === 'true';
-      var id = btn.getAttribute('aria-controls');
-      var target = id ? document.getElementById(id) : null;
+<script>
+  const root = document.documentElement;
+  if (root.dataset.tlExpandBound !== 'true') {
+    root.dataset.tlExpandBound = 'true';
+
+    document.addEventListener('click', (e) => {
+      const targetEl = e.target;
+      if (!(targetEl instanceof Element)) return;
+      const btn = targetEl.closest('.tl-expand-btn');
+      if (!(btn instanceof HTMLButtonElement)) return;
+
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      const nextExpanded = !expanded;
+      const id = btn.getAttribute('aria-controls');
+      const target = id ? document.getElementById(id) : null;
       if (target) {
-        btn.setAttribute('aria-expanded', String(!expanded));
-        target.setAttribute('aria-hidden', String(expanded));
+        btn.setAttribute('aria-expanded', String(nextExpanded));
+        target.setAttribute('aria-hidden', String(!nextExpanded));
+        const label = btn.querySelector('.tl-expand-text');
+        if (label) {
+          label.textContent = nextExpanded ? 'Show less' : 'Read more';
+        }
       }
-    }
-    document.addEventListener('click', onExpandClick);
-  })();
+    });
+  }
 </script>
