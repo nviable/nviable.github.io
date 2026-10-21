@@ -12,7 +12,7 @@
 import { publishedName, siteConfig } from '../config';
 
 interface Props {
-  type: 'WebSite' | 'Project' | 'Article' | 'Person' | 'BreadcrumbList';
+  type: 'WebSite' | 'Project' | 'Article' | 'Person' | 'BreadcrumbList' | 'PublicationList';
   data?: Record<string, any>;
 }
 
@@ -117,6 +117,48 @@ function generateStructuredData(type: string, data: Record<string, any>) {
           name: item.name,
           item: item.url.startsWith('http') ? item.url : `${siteURL}${item.url}`,
         })),
+      };
+
+    case 'PublicationList':
+      return {
+        '@context': baseContext,
+        '@type': 'ItemList',
+        name: data.name || `Publications by ${siteConfig.author.name}`,
+        itemListElement: data.publications?.map(
+          (
+            pub: {
+              title: string;
+              authors: string;
+              venue: string;
+              year: number;
+              url?: string;
+              doi?: string;
+              tags?: string[];
+            },
+            index: number,
+          ) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            item: {
+              '@type': 'ScholarlyArticle',
+              headline: pub.title,
+              name: pub.title,
+              datePublished: String(pub.year),
+              author: {
+                '@type': 'Person',
+                name: siteConfig.author.name,
+                alternateName: publishedName,
+              },
+              isPartOf: {
+                '@type': 'PublicationIssue',
+                name: pub.venue,
+              },
+              url: pub.url,
+              sameAs: pub.doi ? `https://doi.org/${pub.doi}` : undefined,
+              keywords: pub.tags?.join(', '),
+            },
+          }),
+        ),
       };
     
     default:

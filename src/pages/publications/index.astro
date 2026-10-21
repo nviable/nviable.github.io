@@ -5,6 +5,7 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SEO from '../../components/SEO.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import PageStats from '../../components/PageStats.astro';
 import PublicationRows from '../../components/PublicationRows.astro';
 import { getCollection } from 'astro:content';
@@ -58,6 +59,13 @@ const total = published.length;
     description={pagesConfig.publications.description}
     type="website"
     image="/og/publications.png"
+  />
+
+  <StructuredData
+    type="PublicationList"
+    data={{
+      publications: published.map((entry) => entry.data),
+    }}
   />
 
   <main class="page-container publications-page">

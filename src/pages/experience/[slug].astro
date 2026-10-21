@@ -5,6 +5,7 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SEO from '../../components/SEO.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import { getCollection, getEntry, render } from 'astro:content';
 import { pagesConfig } from '../../pages.config';
@@ -50,6 +51,17 @@ const seoDescription =
     description={seoDescription}
     type="website"
     image={`/og/experience/${entry.id}.png`}
+  />
+
+  <StructuredData
+    type="BreadcrumbList"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: pagesConfig.experience.heading, url: '/experience' },
+        { name: entry.data.breadcrumbLabel, url: `/experience/${entry.id}` },
+      ],
+    }}
   />
 
   <main class="page-container experience-detail">

@@ -91,8 +91,7 @@ const isActive = (href: string) => {
 <script>
   function updateActiveNav() {
     const currentPath = window.location.pathname;
-    /** @type {NodeListOf<HTMLAnchorElement>} */
-    const navLinks = document.querySelectorAll('.nav-link');
+    const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-link');
 
     navLinks.forEach((link) => {
       const href = link.getAttribute('href');
