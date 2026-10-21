@@ -187,13 +187,21 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
     </section>
 
     {banner && (
-      <p class:list={['form-banner', banner.kind === 'ok' ? 'form-banner--ok' : 'form-banner--err']} role="status">
+      <p
+        id="contact-form-banner"
+        class:list={['form-banner', banner.kind === 'ok' ? 'form-banner--ok' : 'form-banner--err']}
+        role="status"
+      >
         {banner.text}
       </p>
     )}
+    {!banner && (
+      <p id="contact-form-banner" class="form-banner" role="status" hidden></p>
+    )}
 
     <section class="form-zone">
-        <form method="POST" action="/contact" class="contact-form">
+      {mailerConfigured && (
+        <form method="POST" action="/contact" class="contact-form" data-contact-form>
           <div class="field">
             <label for="name">Name</label>
             <input id="name" name="name" type="text" required autocomplete="name" />
@@ -225,16 +233,19 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
 
           <button type="submit" class="btn btn-primary submit-btn">Send message</button>
         </form>
+      )}
 
-        <p class="mailto-intro">Or start an email with a topic filled in:</p>
-        <div class="mailto-buttons">
-          {TOPICS.map((t) => (
-            <a class="mailto-btn" href={`mailto:${siteConfig.author.email}?subject=${encodeURIComponent(t)}`}>
-              {t}
-            </a>
-          ))}
-        </div>
-      </section>
+      <p class="mailto-intro">
+        {mailerConfigured ? 'Or start an email with a topic filled in:' : 'Start an email with a topic filled in:'}
+      </p>
+      <div class="mailto-buttons">
+        {TOPICS.map((t) => (
+          <a class="mailto-btn" href={`mailto:${siteConfig.author.email}?subject=${encodeURIComponent(t)}`}>
+            {t}
+          </a>
+        ))}
+      </div>
+    </section>
 
     {socialLinks.length > 0 && (
       <section class="secondary-zone">
@@ -259,6 +270,75 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
       defer
     ></script>
   )}
+
+  <script>
+    const STATUS_MESSAGES: Record<string, { kind: 'ok' | 'err'; text: string }> = {
+      sent: {
+        kind: 'ok',
+        text: 'Thanks — your message is on its way. I read every email and reply within a few days.',
+      },
+      error: {
+        kind: 'err',
+        text: 'Something went wrong sending your message. Please email me directly using the address below.',
+      },
+      invalid: {
+        kind: 'err',
+        text: 'Please check your name, a valid email, and a message, then try again.',
+      },
+      notconfigured: {
+        kind: 'err',
+        text: 'The form isn’t live yet — please email me directly using the address below.',
+      },
+    };
+
+    function bindContactForm() {
+      const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+      const bannerEl = document.getElementById('contact-form-banner');
+      if (!form || !bannerEl || form.dataset.bound === '1') return;
+      form.dataset.bound = '1';
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            redirect: 'follow',
+          });
+          const statusParam = new URL(res.url, window.location.origin).searchParams.get('status');
+          const status = statusParam && STATUS_MESSAGES[statusParam] ? statusParam : (res.ok ? 'sent' : 'error');
+          const info = STATUS_MESSAGES[status] ?? STATUS_MESSAGES.error;
+
+          bannerEl.textContent = info.text;
+          bannerEl.classList.remove('form-banner--ok', 'form-banner--err');
+          bannerEl.classList.add(info.kind === 'ok' ? 'form-banner--ok' : 'form-banner--err');
+          bannerEl.hidden = false;
+
+          if (status === 'sent') {
+            form.reset();
+          }
+        } catch {
+          const info = STATUS_MESSAGES.error;
+          bannerEl.textContent = info.text;
+          bannerEl.classList.remove('form-banner--ok', 'form-banner--err');
+          bannerEl.classList.add('form-banner--err');
+          bannerEl.hidden = false;
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+        }
+      });
+    }
+
+    document.addEventListener('astro:page-load', bindContactForm);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bindContactForm, { once: true });
+    } else {
+      bindContactForm();
+    }
+  </script>
 
   <style>
     .contact-page {
@@ -301,6 +381,10 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
       font-size: 0.9375rem;
       line-height: 1.5;
       border: 1px solid var(--color-border);
+    }
+
+    .form-banner[hidden] {
+      display: none;
     }
 
     .form-banner--ok {
@@ -384,6 +468,10 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
       font-size: 0.9375rem;
       color: var(--color-text-muted);
       margin: 0 0 1rem;
+    }
+
+    .contact-form + .mailto-intro {
+      margin-top: 2rem;
     }
 
     .mailto-buttons {
