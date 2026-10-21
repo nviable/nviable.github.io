@@ -88,7 +88,7 @@ export const pagesConfig = {
    * Experience / resume hub (/experience) — overview with detail subpages
    */
   experience: {
-    title: 'Experience — background, roles & education',
+    title: 'Experience',
     description:
       'Postdoctoral researcher at RIT’s ESL Global Cybersecurity Institute and Young Researcher Associate with the ITU AI for Good AMAS collaboration.',
     heading: 'Experience',

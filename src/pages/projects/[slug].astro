@@ -64,6 +64,8 @@ const metaDescription =
   abstract.replace(/\s+/g, ' ').trim().slice(0, 155) +
   (abstract.replace(/\s+/g, ' ').trim().length > 155 ? '…' : '');
 
+const seoTitle = subtitle ? `${title} — ${subtitle}` : title;
+
 const statusConfig = {
   completed: { label: 'Completed', class: 'status--completed' },
   ongoing: { label: 'Ongoing', class: 'status--ongoing' },
@@ -124,7 +126,7 @@ const showContents = contents.length >= 3;
 <BaseLayout>
   <SEO
     slot="head"
-    title={`${title} - Case Study`}
+    title={seoTitle}
     description={metaDescription}
     type="article"
     image={`/og/projects/${slug}.png`}

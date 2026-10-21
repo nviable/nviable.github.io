@@ -36,7 +36,7 @@ const breadcrumbItems = [
   { label: entry.data.breadcrumbLabel },
 ];
 
-const seoTitle = `${entry.data.breadcrumbLabel} · ${pagesConfig.experience.heading}`;
+const seoTitle = `${entry.data.title} · ${pagesConfig.experience.heading}`;
 const seoDescription =
   entry.data.description ??
   entry.data.metaLine ??
@@ -44,7 +44,13 @@ const seoDescription =
 ---
 
 <BaseLayout>
-  <SEO slot="head" title={seoTitle} description={seoDescription} type="website" />
+  <SEO
+    slot="head"
+    title={seoTitle}
+    description={seoDescription}
+    type="website"
+    image={`/og/experience/${entry.id}.png`}
+  />
 
   <main class="page-container experience-detail">
     <Breadcrumb items={breadcrumbItems} />

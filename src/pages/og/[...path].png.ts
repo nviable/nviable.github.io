@@ -63,6 +63,24 @@ export async function getStaticPaths() {
     });
   }
 
+  const experiences = await getCollection('experience');
+  const experienceCategoryLabels: Record<string, string> = {
+    about: 'About',
+    personal: 'Personal',
+    experience: 'Experience · Position',
+    education: 'Experience · Education',
+  };
+  for (const exp of experiences) {
+    paths.push({
+      params: { path: `experience/${exp.id}` },
+      props: {
+        eyebrow: experienceCategoryLabels[exp.data.category] ?? 'Experience',
+        title: exp.data.title,
+        subtitle: exp.data.subtitle ?? exp.data.metaLine ?? exp.data.description ?? '',
+      },
+    });
+  }
+
   return paths;
 };
 
