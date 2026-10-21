@@ -91,6 +91,10 @@ import Sun from '@lucide/astro/icons/sun';
   const setTheme = (theme: 'light' | 'dark') => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute('content', theme === 'light' ? '#ffffff' : '#0a0a0a');
+    }
   };
 
   // Toggle theme
