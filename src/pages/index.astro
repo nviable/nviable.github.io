@@ -11,8 +11,10 @@ import StructuredData from '../components/StructuredData.astro';
 import ForwardLink from '../components/ForwardLink.astro';
 import PublicationRows from '../components/PublicationRows.astro';
 import Flag from '@lucide/astro/icons/flag';
+import BookOpen from '@lucide/astro/icons/book-open';
 import Presentation from '@lucide/astro/icons/presentation';
 import Users from '@lucide/astro/icons/users';
+import Mic from '@lucide/astro/icons/mic';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
 import File from '@lucide/astro/icons/file';
 import { getCollection } from 'astro:content';
@@ -40,6 +42,20 @@ const homeProjects = homeProjectIds
 /** Compact now-slice. Same Lucide icons as /journey, no year in the date. */
 type NowTone = 'primary' | 'secondary';
 
+const NOW_ICON_BY_CATEGORY: Record<string, typeof Flag> = {
+  conference: Presentation,
+  teaching: BookOpen,
+  milestone: Flag,
+  media: Mic,
+  engagement: Users,
+};
+
+const shortMonthDay = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+
 const nowStatic = [
   {
     icon: Flag,
@@ -57,22 +73,26 @@ const nowStatic = [
   },
 ];
 
-const nowDynamic = [
-  {
-    icon: Presentation,
-    tone: 'secondary' as NowTone,
-    date: 'Oct 20',
-    datetime: '2026-10-20',
-    text: 'Upcoming talk: STOP&SCAN at IPTC.',
-  },
-  {
-    icon: Presentation,
-    tone: 'secondary' as NowTone,
-    date: 'Oct 28',
-    datetime: '2026-10-28',
-    text: 'Upcoming talk: STOP&SCAN at JPEG Trust.',
-  },
-];
+const allSpeaking = await getCollection('speaking');
+const todayUtc = new Date();
+todayUtc.setUTCHours(0, 0, 0, 0);
+
+const nowDynamic = [...allSpeaking]
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 2)
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
+  .map((entry) => {
+    const isUpcoming = entry.data.date.getTime() > todayUtc.getTime();
+    const cleanTitle = entry.data.title.replace(/^Upcoming:\s*/i, '').trim();
+    const prefix = isUpcoming ? 'Upcoming talk: ' : 'Recent talk: ';
+    return {
+      icon: NOW_ICON_BY_CATEGORY[entry.data.type] ?? Presentation,
+      tone: 'secondary' as NowTone,
+      date: shortMonthDay.format(entry.data.date),
+      datetime: entry.data.date.toISOString().slice(0, 10),
+      text: `${prefix}${cleanTitle.replace(/\.$/, '')}.`,
+    };
+  });
 
 /**
  * Homepage slice is selected work (CHI, CCS, journal, dissertation, book chapter),
@@ -86,7 +106,8 @@ const recentPublications = allPublications
       venue.includes('chi') ||
       venue.includes('ccs') ||
       pub.data.kind === 'journal' ||
-      pub.data.kind === 'dissertation';
+      pub.data.kind === 'dissertation' ||
+      pub.data.kind === 'bookChapter';
     const underReview = pub.data.status === 'underReview' || pub.data.status === 'inSubmission';
     return selectedVenue && !underReview && !venue.includes('icdim');
   })
@@ -551,22 +572,6 @@ const recentPublications = allPublications
       letter-spacing: 0.01em;
     }
 
-    .introduction {
-      max-width: 600px;
-      margin-bottom: 5rem;
-      font-size: 1.125rem;
-      line-height: 1.7;
-      color: var(--color-text-secondary);
-    }
-
-    .introduction p {
-      margin-bottom: 1rem;
-    }
-
-    .introduction p:first-child {
-      color: var(--color-text);
-    }
-
     .recent-publications {
       margin-bottom: 3.5rem;
     }
@@ -588,24 +593,6 @@ const recentPublications = allPublications
       color: var(--color-text-muted);
       font-style: italic;
       padding: 1.5rem 0;
-    }
-
-    .thinking {
-      margin-bottom: 5rem;
-    }
-
-    .thinking h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 1.25rem;
-      letter-spacing: -0.01em;
-    }
-
-    .thinking-list {
-      font-size: 1.0625rem;
-      line-height: 1.9;
-      color: var(--color-text-secondary);
-      max-width: 680px;
     }
 
     .cta {
@@ -677,18 +664,10 @@ const recentPublications = allPublications
         padding: var(--card-pad-y) 1.25rem;
       }
 
-      .introduction {
-        font-size: 1rem;
-      }
-
       .section-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
-      }
-
-      .decision-title {
-        font-size: 1rem;
       }
 
       .cta-buttons {

@@ -31,7 +31,8 @@ function publicationGroup(entry: (typeof published)[number]): 'earlier' | 'selec
     venue.includes('chi') ||
     venue.includes('ccs') ||
     entry.data.kind === 'journal' ||
-    entry.data.kind === 'dissertation';
+    entry.data.kind === 'dissertation' ||
+    entry.data.kind === 'bookChapter';
   return selected ? 'selected' : 'other';
 }
 
