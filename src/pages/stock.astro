@@ -14,6 +14,7 @@ import History from '@lucide/astro/icons/history';
 import ListFilter from '@lucide/astro/icons/list-filter';
 import Bell from '@lucide/astro/icons/bell';
 import Volume2 from '@lucide/astro/icons/volume-2';
+import Map from '@lucide/astro/icons/map';
 import Trash2 from '@lucide/astro/icons/trash-2';
 import Download from '@lucide/astro/icons/download';
 
@@ -37,67 +38,73 @@ const TARGET_STORES = [
     description="Real-time Apple Store pickup stock tracker and historical restock log for iPhone Duo around Rochester, Buffalo, and Syracuse (Zip 14623)."
     type="website"
   />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" slot="head" />
+  <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" slot="head"></script>
 
   <main class="stock-container">
     <header class="stock-header">
-      <div class="stock-badge-row">
-        <span class="stock-badge">
-          <Smartphone size={13} aria-hidden="true" />
-          Hardware Tracker
-        </span>
-        <span class="stock-badge stock-badge--geo">
-          <MapPin size={13} aria-hidden="true" />
-          Zip 14623 · Upstate NY
-        </span>
-        <span class="stock-badge stock-badge--d1" id="d1Badge">
-          <Database size={13} aria-hidden="true" />
-          Cloudflare D1 &amp; Cron
-        </span>
-      </div>
-
-      <h1 class="stock-title">iPhone Duo Stock Monitor</h1>
-      <p class="stock-intro">
-        Continuous pickup availability monitor across Apple Stores near Rochester (Eastview), Buffalo (Walden Galleria), and Syracuse (Destiny USA).
-      </p>
-
-      <!-- Quick Control & Stats Bar -->
-      <div class="monitor-bar">
-        <div class="monitor-status">
-          <span class="pulse-indicator" id="pulseIndicator"></span>
-          <span class="status-text" id="monitorStatusText">Ready to check</span>
-          <span class="status-sep">·</span>
-          <span class="last-checked" id="lastCheckedText">Last checked: Never</span>
-        </div>
-
-        <div class="monitor-actions">
-          <button type="button" class="btn btn-primary check-now-btn" id="checkNowBtn">
-            <RefreshCw size={15} class="spin-icon" id="refreshIcon" aria-hidden="true" />
-            <span>Check Now</span>
-          </button>
-
-          <div class="autocheck-picker">
-            <label class="auto-refresh-toggle" for="autoRefreshToggle">
-              <input type="checkbox" id="autoRefreshToggle" />
-              <span class="toggle-label">Auto-check</span>
-            </label>
-            <select id="autoRefreshIntervalSelect" class="interval-select" aria-label="Auto-check frequency">
-              <option value="300000">Every 5 min</option>
-              <option value="600000">Every 10 min</option>
-              <option value="900000">Every 15 min</option>
-              <option value="1800000" selected>Every 30 min</option>
-              <option value="3600000">Every 60 min</option>
-            </select>
+      <div class="stock-header-grid">
+        <div class="stock-header-main">
+          <div class="stock-badge-row">
+            <span class="stock-badge">
+              <Smartphone size={13} aria-hidden="true" />
+              Hardware Tracker
+            </span>
+            <span class="stock-badge stock-badge--geo">
+              <MapPin size={13} aria-hidden="true" />
+              Zip 14623 · Upstate NY
+            </span>
+            <span class="stock-badge stock-badge--d1" id="d1Badge">
+              <Database size={13} aria-hidden="true" />
+              Cloudflare D1 &amp; Cron
+            </span>
           </div>
 
-          <button type="button" class="btn btn-secondary sound-toggle-btn" id="soundToggleBtn" title="Toggle audio chime on restock" aria-pressed="false">
-            <Volume2 size={14} aria-hidden="true" />
-            <span id="soundToggleLabel">Chime: Off</span>
-          </button>
+          <h1 class="stock-title">iPhone Duo Stock Monitor</h1>
+          <p class="stock-intro">
+            Continuous pickup availability monitor across Apple Stores near Rochester (Eastview), Buffalo (Walden Galleria), and Syracuse (Destiny USA).
+          </p>
+        </div>
 
-          <button type="button" class="btn btn-secondary notify-toggle-btn" id="notifyToggleBtn" title="Toggle desktop browser notifications on restock" aria-pressed="false">
-            <Bell size={14} aria-hidden="true" />
-            <span id="notifyToggleLabel">Alerts: Off</span>
-          </button>
+        <!-- Compact Monitoring Control Card alongside Title -->
+        <div class="monitor-card" aria-label="Live monitor controls">
+          <div class="monitor-status">
+            <span class="pulse-indicator" id="pulseIndicator"></span>
+            <span class="status-text" id="monitorStatusText">Ready to check</span>
+            <span class="status-sep">·</span>
+            <span class="last-checked" id="lastCheckedText">Last: Never</span>
+          </div>
+
+          <div class="monitor-actions">
+            <button type="button" class="btn btn-primary check-now-btn" id="checkNowBtn">
+              <RefreshCw size={13} class="spin-icon" id="refreshIcon" aria-hidden="true" />
+              <span>Check Now</span>
+            </button>
+
+            <div class="autocheck-picker">
+              <label class="auto-refresh-toggle" for="autoRefreshToggle">
+                <input type="checkbox" id="autoRefreshToggle" />
+                <span class="toggle-label">Auto</span>
+              </label>
+              <select id="autoRefreshIntervalSelect" class="interval-select" aria-label="Auto-check frequency">
+                <option value="300000">5m</option>
+                <option value="600000">10m</option>
+                <option value="900000">15m</option>
+                <option value="1800000" selected>30m</option>
+                <option value="3600000">60m</option>
+              </select>
+            </div>
+
+            <button type="button" class="btn btn-secondary sound-toggle-btn" id="soundToggleBtn" title="Toggle audio chime on restock" aria-pressed="false">
+              <Volume2 size={13} aria-hidden="true" />
+              <span id="soundToggleLabel">Chime: Off</span>
+            </button>
+
+            <button type="button" class="btn btn-secondary notify-toggle-btn" id="notifyToggleBtn" title="Toggle desktop browser notifications on restock" aria-pressed="false">
+              <Bell size={13} aria-hidden="true" />
+              <span id="notifyToggleLabel">Alerts: Off</span>
+            </button>
+          </div>
         </div>
       </div>
     </header>
@@ -173,6 +180,27 @@ const TARGET_STORES = [
             </div>
           </div>
         ))}
+      </div>
+    </section>
+
+    <!-- Upstate NY Store Availability Map -->
+    <section class="map-section" aria-labelledby="map-heading">
+      <div class="section-title-row">
+        <div>
+          <h2 id="map-heading" class="section-heading">
+            <Map size={18} class="heading-icon" aria-hidden="true" />
+            Regional Inventory Map
+          </h2>
+          <span class="section-hint">Western &amp; Central NY Corridor: Buffalo (R016) · Victor / Rochester (R140) · Syracuse (R107)</span>
+        </div>
+        <div class="map-legend">
+          <span class="legend-item"><span class="legend-dot legend-dot--green"></span> In Stock (Ping)</span>
+          <span class="legend-item"><span class="legend-dot legend-dot--red"></span> Out of Stock (Ping)</span>
+        </div>
+      </div>
+
+      <div class="map-container-card">
+        <div id="stockMap" class="stock-map" aria-label="Interactive map of Upstate NY Apple Store inventory"></div>
       </div>
     </section>
 
@@ -272,9 +300,127 @@ const TARGET_STORES = [
   const INTERVAL_KEY = 'apple_stock_autocheck_interval';
   const AUTOCHECK_KEY = 'apple_stock_autocheck_enabled';
 
+  interface StoreGeo {
+    id: string;
+    name: string;
+    city: string;
+    dist: string;
+    lat: number;
+    lng: number;
+  }
+
+  const STORES_GEO: StoreGeo[] = [
+    { id: 'R016', name: 'Walden Galleria', city: 'Buffalo, NY', dist: '57.4 mi', lat: 42.9135, lng: -78.7615 },
+    { id: 'R140', name: 'Eastview', city: 'Victor / Rochester, NY', dist: '11.3 mi', lat: 43.0270, lng: -77.4410 },
+    { id: 'R107', name: 'Syracuse', city: 'Destiny USA, Syracuse, NY', dist: '74.6 mi', lat: 43.0697, lng: -76.1722 },
+  ];
+
+  let mapInstance: any = null;
+  const mapMarkers: Record<string, any> = {};
+
   let autoRefreshTimer: number | null = null;
   let soundEnabled = false;
   let notifyEnabled = false;
+
+  function initMap() {
+    const mapEl = document.getElementById('stockMap');
+    if (!mapEl) return;
+
+    const L = (window as any).L;
+    if (!L) {
+      setTimeout(initMap, 150);
+      return;
+    }
+
+    if (mapInstance) {
+      mapInstance.remove();
+      mapInstance = null;
+      Object.keys(mapMarkers).forEach((k) => delete mapMarkers[k]);
+    }
+
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const tileUrl = isDark
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+    mapInstance = L.map('stockMap', {
+      zoomControl: true,
+      scrollWheelZoom: false,
+    });
+
+    L.tileLayer(tileUrl, {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      maxZoom: 18,
+      subdomains: 'abcd',
+    }).addTo(mapInstance);
+
+    mapInstance.fitBounds(
+      [
+        [42.75, -79.0],
+        [43.25, -75.9],
+      ],
+      { padding: [35, 35] }
+    );
+
+    // Initial markers with current state from localStorage
+    const prevStates: Record<string, boolean> = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+    const storeAvailMap: Record<string, boolean> = {};
+    STORES_GEO.forEach((s) => {
+      let hasStock = false;
+      ['MK1F4LL/A', 'MK1G4LL/A', 'MK1H4LL/A'].forEach((sku) => {
+        if (prevStates[`${s.id}:${sku}`]) hasStock = true;
+      });
+      storeAvailMap[s.id] = hasStock;
+    });
+
+    updateMapMarkers(storeAvailMap);
+  }
+
+  function updateMapMarkers(storeAvailMap: Record<string, boolean>) {
+    const L = (window as any).L;
+    if (!L || !mapInstance) return;
+
+    STORES_GEO.forEach((store) => {
+      const hasStock = Boolean(storeAvailMap[store.id]);
+      const statusClass = hasStock ? 'map-ping--avail' : 'map-ping--out';
+
+      const icon = L.divIcon({
+        className: 'custom-map-icon',
+        html: `
+          <div class="map-marker-wrapper ${statusClass}">
+            <div class="map-marker-pin">
+              <span class="map-ping-ring"></span>
+              <span class="map-ping-dot"></span>
+            </div>
+            <div class="map-marker-label">
+              <span>Apple ${store.name}</span>
+            </div>
+          </div>
+        `,
+        iconSize: [120, 36],
+        iconAnchor: [60, 10],
+      });
+
+      if (mapMarkers[store.id]) {
+        mapMarkers[store.id].setIcon(icon);
+      } else {
+        const marker = L.marker([store.lat, store.lng], { icon }).addTo(mapInstance);
+        marker.bindPopup(`
+          <div class="map-popup-card">
+            <h4 style="margin:0 0 0.25rem;font-size:0.95rem;color:var(--color-text,#1e293b);">Apple ${store.name}</h4>
+            <div style="font-size:0.8125rem;color:var(--color-text-secondary,#64748b);margin-bottom:0.4rem;">${store.city} · ${store.dist} away</div>
+            <div style="font-size:0.8125rem;font-weight:700;color:${hasStock ? '#10b981' : '#ef4444'};margin-bottom:0.6rem;">
+              ${hasStock ? '● Units available for pickup' : '○ Currently out of stock'}
+            </div>
+            <a href="#store-card-${store.id}" style="display:inline-block;font-size:0.75rem;font-weight:600;padding:0.35rem 0.65rem;background:#0284c7;color:#fff;text-decoration:none;border-radius:4px;">
+              View Stock Cards ↓
+            </a>
+          </div>
+        `);
+        mapMarkers[store.id] = marker;
+      }
+    });
+  }
 
   function initTracker() {
     const checkBtn = document.getElementById('checkNowBtn');
@@ -400,6 +546,9 @@ const TARGET_STORES = [
         }
       });
     }
+
+    // Initialize interactive regional map
+    initMap();
 
     // Run initial stock check on load
     performStockCheck();
@@ -605,6 +754,17 @@ const TARGET_STORES = [
         storeCard.classList.toggle('has-stock', storeHasStock);
       }
     });
+
+    // Update map markers with live store availability
+    const storeAvailMap: Record<string, boolean> = {};
+    stores.forEach((store) => {
+      let storeHasStock = false;
+      Object.values(store.parts).forEach((part) => {
+        if (part.available) storeHasStock = true;
+      });
+      storeAvailMap[store.storeNumber] = storeHasStock;
+    });
+    updateMapMarkers(storeAvailMap);
 
     // Save states
     localStorage.setItem(STATE_KEY, JSON.stringify(currentStates));
@@ -823,22 +983,33 @@ const TARGET_STORES = [
     color: var(--color-text);
   }
 
+  .stock-header-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .stock-header-grid {
+      grid-template-columns: 1fr 340px;
+      gap: 2rem;
+    }
+  }
+
   .stock-intro {
     font-size: 1.0625rem;
     line-height: 1.6;
     color: var(--color-text-secondary);
-    max-width: 48rem;
-    margin: 0 0 1.5rem;
+    margin: 0;
   }
 
-  /* Control bar */
-  .monitor-bar {
+  /* Compact monitor card */
+  .monitor-card {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
     background: var(--color-card);
     border: 1px solid var(--color-border);
     border-bottom: 3px solid var(--color-card-edge);
@@ -847,14 +1018,14 @@ const TARGET_STORES = [
   .monitor-status {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
+    gap: 0.45rem;
+    font-size: 0.8125rem;
     color: var(--color-text-secondary);
   }
 
   .pulse-indicator {
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--color-text-muted);
     flex-shrink: 0;
@@ -885,21 +1056,21 @@ const TARGET_STORES = [
 
   .last-checked {
     color: var(--color-text-muted);
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
   }
 
   .monitor-actions {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.45rem;
     flex-wrap: wrap;
   }
 
   .check-now-btn {
-    --btn-pad-y: 0.45rem;
-    --btn-pad-x: 0.95rem;
-    font-size: 0.875rem;
+    --btn-pad-y: 0.35rem;
+    --btn-pad-x: 0.7rem;
+    font-size: 0.8125rem;
   }
 
   .spin-icon.is-spinning {
@@ -1388,18 +1559,165 @@ const TARGET_STORES = [
     font-style: italic;
   }
 
+  /* Map section */
+  .map-section {
+    margin-bottom: 3rem;
+  }
+
+  .map-legend {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+
+  .legend-dot--green {
+    background-color: #10b981;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+  }
+
+  .legend-dot--red {
+    background-color: #ef4444;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+  }
+
+  .map-container-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    position: relative;
+    overflow: hidden;
+    margin-top: 0.85rem;
+  }
+
+  .stock-map {
+    width: 100%;
+    height: 380px;
+    background: var(--color-bg-secondary);
+    z-index: 1;
+  }
+
+  /* Custom Leaflet Marker styles */
+  .custom-map-icon {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .map-marker-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+  }
+
+  .map-marker-pin {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .map-ping-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    z-index: 2;
+    transition: background-color 0.3s ease;
+  }
+
+  .map-ping-ring {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: map-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    z-index: 1;
+  }
+
+  @keyframes map-ping {
+    0% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    75%, 100% {
+      transform: scale(3.5);
+      opacity: 0;
+    }
+  }
+
+  .map-marker-label {
+    margin-top: 3px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.15rem 0.5rem;
+    background: rgba(15, 23, 42, 0.9);
+    color: #ffffff;
+    border-radius: 4px;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Red (Out of stock) */
+  .map-ping--out .map-ping-dot {
+    background-color: #ef4444;
+  }
+  .map-ping--out .map-ping-ring {
+    background-color: #ef4444;
+  }
+
+  /* Green (In stock) */
+  .map-ping--avail .map-ping-dot {
+    background-color: #10b981;
+  }
+  .map-ping--avail .map-ping-ring {
+    background-color: #10b981;
+  }
+
+  /* Popup style */
+  .map-popup-card {
+    padding: 0.25rem;
+    font-family: inherit;
+  }
+
+  html[data-theme="dark"] .leaflet-layer {
+    filter: brightness(0.82) contrast(1.1) invert(0.92) hue-rotate(180deg);
+  }
+
   @media (max-width: 768px) {
     .stock-container {
       padding: 1.75rem 1rem 4rem;
     }
 
-    .monitor-bar {
-      flex-direction: column;
-      align-items: stretch;
+    .monitor-card {
+      padding: 0.85rem;
     }
 
     .monitor-actions {
       justify-content: flex-start;
+    }
+
+    .stock-map {
+      height: 300px;
     }
   }
 </style>
