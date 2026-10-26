@@ -13,7 +13,7 @@ import ExternalLink from '@lucide/astro/icons/external-link';
 import History from '@lucide/astro/icons/history';
 import ListFilter from '@lucide/astro/icons/list-filter';
 import Bell from '@lucide/astro/icons/bell';
-import Sparkles from '@lucide/astro/icons/sparkles';
+import Volume2 from '@lucide/astro/icons/volume-2';
 import Trash2 from '@lucide/astro/icons/trash-2';
 import Download from '@lucide/astro/icons/download';
 
@@ -72,17 +72,31 @@ const TARGET_STORES = [
         <div class="monitor-actions">
           <button type="button" class="btn btn-primary check-now-btn" id="checkNowBtn">
             <RefreshCw size={15} class="spin-icon" id="refreshIcon" aria-hidden="true" />
-            <span>Check Stock Now</span>
+            <span>Check Now</span>
           </button>
 
-          <label class="auto-refresh-toggle">
-            <input type="checkbox" id="autoRefreshToggle" />
-            <span class="toggle-label">Auto-check (60s)</span>
-          </label>
+          <div class="autocheck-picker">
+            <label class="auto-refresh-toggle" for="autoRefreshToggle">
+              <input type="checkbox" id="autoRefreshToggle" />
+              <span class="toggle-label">Auto-check</span>
+            </label>
+            <select id="autoRefreshIntervalSelect" class="interval-select" aria-label="Auto-check frequency">
+              <option value="300000">Every 5 min</option>
+              <option value="600000">Every 10 min</option>
+              <option value="900000">Every 15 min</option>
+              <option value="1800000" selected>Every 30 min</option>
+              <option value="3600000">Every 60 min</option>
+            </select>
+          </div>
 
-          <button type="button" class="btn btn-secondary sound-toggle-btn" id="soundToggleBtn" title="Toggle audio alert on restock" aria-pressed="false">
+          <button type="button" class="btn btn-secondary sound-toggle-btn" id="soundToggleBtn" title="Toggle audio chime on restock" aria-pressed="false">
+            <Volume2 size={14} aria-hidden="true" />
+            <span id="soundToggleLabel">Chime: Off</span>
+          </button>
+
+          <button type="button" class="btn btn-secondary notify-toggle-btn" id="notifyToggleBtn" title="Toggle desktop browser notifications on restock" aria-pressed="false">
             <Bell size={14} aria-hidden="true" />
-            <span id="soundToggleLabel">Alert Sound: Off</span>
+            <span id="notifyToggleLabel">Alerts: Off</span>
           </button>
         </div>
       </div>
@@ -216,48 +230,6 @@ const TARGET_STORES = [
         </table>
       </div>
     </section>
-
-    <!-- Architecture & Cloudflare Worker Free Tier Guide -->
-    <section class="architecture-guide">
-      <details class="guide-details" open>
-        <summary class="guide-summary">
-          <span class="guide-summary-title">
-            <Sparkles size={16} class="guide-icon" aria-hidden="true" />
-            Do I need the $5/mo Cloudflare Worker Plan? (Setup &amp; Architecture)
-          </span>
-          <span class="guide-badge">Active: 100% Free on Cloudflare</span>
-        </summary>
-
-        <div class="guide-content">
-          <div class="guide-answer-box">
-            <h4>No, you do not need the $5/month Workers Paid plan.</h4>
-            <p>
-              Checking 3 stores every 30 minutes consumes only <strong>48 requests/day</strong> (using location 14623 which queries Rochester, Buffalo, and Syracuse in one HTTP call) or <strong>144 requests/day</strong> (store-by-store). Cloudflare's Free tier provides <strong>100,000 requests/day</strong> and <strong>Cron Triggers</strong> at zero charge.
-            </p>
-          </div>
-
-          <div class="guide-comparison-grid">
-            <div class="guide-card guide-card--active">
-              <h5>Cloudflare D1 (Configured &amp; Active)</h5>
-              <p>Connected to <code>apple-stock-db</code>. Free tier includes <strong>5,000,000 reads/day</strong> and <strong>100,000 writes/day</strong>. Stock checks and restock transitions are stored automatically in SQLite.</p>
-              <code>DB: apple-stock-db (D1)</code>
-            </div>
-
-            <div class="guide-card guide-card--active">
-              <h5>Cloudflare Scheduled Cron</h5>
-              <p>Runs automatically in the background every 30 minutes via Cloudflare's edge network without keeping a browser tab open or paying for a server.</p>
-              <code>crons = ["*/30 * * * *"]</code>
-            </div>
-
-            <div class="guide-card">
-              <h5>Instant Restock Alerts (Optional Webhook)</h5>
-              <p>Whenever an unavailable model becomes available, the worker sends an instant notification to your Discord or Telegram webhook via <code>RESTOCK_WEBHOOK_URL</code>.</p>
-              <code>npx wrangler secret put RESTOCK_WEBHOOK_URL</code>
-            </div>
-          </div>
-        </div>
-      </details>
-    </section>
   </main>
 </BaseLayout>
 
@@ -296,14 +268,20 @@ const TARGET_STORES = [
   const STORAGE_KEY = 'apple_stock_history_14623';
   const STATE_KEY = 'apple_stock_last_state';
   const SOUND_KEY = 'apple_stock_sound_enabled';
+  const NOTIFY_KEY = 'apple_stock_browser_notifications';
+  const INTERVAL_KEY = 'apple_stock_autocheck_interval';
+  const AUTOCHECK_KEY = 'apple_stock_autocheck_enabled';
 
   let autoRefreshTimer: number | null = null;
   let soundEnabled = false;
+  let notifyEnabled = false;
 
   function initTracker() {
     const checkBtn = document.getElementById('checkNowBtn');
     const autoToggle = document.getElementById('autoRefreshToggle') as HTMLInputElement | null;
+    const intervalSelect = document.getElementById('autoRefreshIntervalSelect') as HTMLSelectElement | null;
     const soundBtn = document.getElementById('soundToggleBtn');
+    const notifyBtn = document.getElementById('notifyToggleBtn');
     const filterSelect = document.getElementById('historyFilterSelect') as HTMLSelectElement | null;
     const exportBtn = document.getElementById('exportHistoryBtn');
     const clearBtn = document.getElementById('clearHistoryBtn');
@@ -313,6 +291,23 @@ const TARGET_STORES = [
     // Load sound preference
     soundEnabled = localStorage.getItem(SOUND_KEY) === 'true';
     updateSoundButtonState();
+
+    // Load browser notifications preference
+    notifyEnabled = localStorage.getItem(NOTIFY_KEY) === 'true';
+    updateNotifyButtonState();
+
+    // Load interval preference
+    const savedInterval = localStorage.getItem(INTERVAL_KEY);
+    if (savedInterval && intervalSelect) {
+      intervalSelect.value = savedInterval;
+    }
+
+    // Load auto-check preference
+    const savedAutocheck = localStorage.getItem(AUTOCHECK_KEY);
+    if (savedAutocheck === 'true' && autoToggle) {
+      autoToggle.checked = true;
+      restartAutoCheck();
+    }
 
     // Load initial history
     renderHistoryTable();
@@ -324,18 +319,17 @@ const TARGET_STORES = [
     });
 
     if (autoToggle) {
-      autoToggle.addEventListener('change', (e) => {
-        const checked = (e.target as HTMLInputElement).checked;
-        if (checked) {
-          performStockCheck();
-          autoRefreshTimer = window.setInterval(() => {
-            performStockCheck();
-          }, 60000);
-        } else {
-          if (autoRefreshTimer) {
-            clearInterval(autoRefreshTimer);
-            autoRefreshTimer = null;
-          }
+      autoToggle.addEventListener('change', () => {
+        localStorage.setItem(AUTOCHECK_KEY, String(autoToggle.checked));
+        restartAutoCheck();
+      });
+    }
+
+    if (intervalSelect) {
+      intervalSelect.addEventListener('change', () => {
+        localStorage.setItem(INTERVAL_KEY, intervalSelect.value);
+        if (autoToggle && autoToggle.checked) {
+          restartAutoCheck();
         }
       });
     }
@@ -346,6 +340,43 @@ const TARGET_STORES = [
         localStorage.setItem(SOUND_KEY, String(soundEnabled));
         updateSoundButtonState();
         if (soundEnabled) playChime();
+      });
+    }
+
+    if (notifyBtn) {
+      notifyBtn.addEventListener('click', async () => {
+        if (!('Notification' in window)) {
+          alert('Desktop notifications are not supported by this browser.');
+          return;
+        }
+
+        if (Notification.permission === 'denied') {
+          alert('Browser alerts are currently blocked in your browser site permissions. Please allow notifications for this site in your address bar icon.');
+          updateNotifyButtonState();
+          return;
+        }
+
+        if (Notification.permission === 'default') {
+          const res = await Notification.requestPermission();
+          if (res === 'granted') {
+            notifyEnabled = true;
+            localStorage.setItem(NOTIFY_KEY, 'true');
+            sendBrowserNotification('Alerts Enabled', 'You will receive immediate alerts when iPhone Duo is in stock near 14623.');
+          } else {
+            notifyEnabled = false;
+            localStorage.setItem(NOTIFY_KEY, 'false');
+          }
+          updateNotifyButtonState();
+          return;
+        }
+
+        // Permission is already granted, toggle on/off
+        notifyEnabled = !notifyEnabled;
+        localStorage.setItem(NOTIFY_KEY, String(notifyEnabled));
+        updateNotifyButtonState();
+        if (notifyEnabled) {
+          sendBrowserNotification('Alerts Active', 'Browser restock alerts are enabled.');
+        }
       });
     }
 
@@ -374,12 +405,84 @@ const TARGET_STORES = [
     performStockCheck();
   }
 
+  function restartAutoCheck() {
+    if (autoRefreshTimer) {
+      clearInterval(autoRefreshTimer);
+      autoRefreshTimer = null;
+    }
+    const autoToggle = document.getElementById('autoRefreshToggle') as HTMLInputElement | null;
+    const intervalSelect = document.getElementById('autoRefreshIntervalSelect') as HTMLSelectElement | null;
+    if (autoToggle && autoToggle.checked) {
+      const ms = Number(intervalSelect?.value) || 1800000;
+      autoRefreshTimer = window.setInterval(() => {
+        performStockCheck();
+      }, ms);
+    }
+  }
+
+  function updateNotifyButtonState() {
+    const btn = document.getElementById('notifyToggleBtn');
+    const label = document.getElementById('notifyToggleLabel');
+    if (!btn || !label) return;
+
+    if (!('Notification' in window)) {
+      label.textContent = 'Alerts: N/A';
+      btn.setAttribute('aria-pressed', 'false');
+      btn.classList.add('notify-blocked');
+      btn.title = 'Desktop notifications are not supported in this browser';
+      return;
+    }
+
+    if (Notification.permission === 'denied') {
+      label.textContent = 'Alerts: Blocked';
+      btn.setAttribute('aria-pressed', 'false');
+      btn.classList.remove('notify-active');
+      btn.classList.add('notify-blocked');
+      btn.title = 'Notifications are blocked in your browser site permissions';
+      return;
+    }
+
+    btn.classList.remove('notify-blocked');
+    if (Notification.permission === 'granted' && notifyEnabled) {
+      label.textContent = 'Alerts: On';
+      btn.setAttribute('aria-pressed', 'true');
+      btn.classList.add('notify-active');
+      btn.title = 'Browser restock notifications enabled';
+    } else {
+      label.textContent = 'Alerts: Off';
+      btn.setAttribute('aria-pressed', 'false');
+      btn.classList.remove('notify-active');
+      btn.title = 'Click to enable desktop notifications for restocks';
+    }
+  }
+
+  function sendBrowserNotification(title: string, body: string, url?: string) {
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted' || !notifyEnabled) return;
+    try {
+      const notif = new Notification(title, {
+        body,
+        icon: '/favicon-48x48.png',
+        tag: `apple-stock-restock-${Date.now()}`,
+      });
+      if (url) {
+        notif.onclick = () => {
+          window.focus();
+          window.open(url, '_blank');
+          notif.close();
+        };
+      }
+    } catch (e) {
+      console.warn('Could not display browser notification:', e);
+    }
+  }
+
   function updateSoundButtonState() {
     const btn = document.getElementById('soundToggleBtn');
     const label = document.getElementById('soundToggleLabel');
     if (!btn || !label) return;
     btn.setAttribute('aria-pressed', String(soundEnabled));
-    label.textContent = soundEnabled ? 'Alert Sound: On' : 'Alert Sound: Off';
+    label.textContent = soundEnabled ? 'Chime: On' : 'Chime: Off';
     btn.classList.toggle('sound-active', soundEnabled);
   }
 
@@ -543,9 +646,21 @@ const TARGET_STORES = [
     localStorage.setItem(STORAGE_KEY, JSON.stringify(finalHistory));
     renderHistoryTable();
 
-    // Play sound if restock occurred
-    if (anyRestockDetected && soundEnabled) {
-      playChime();
+    // Play sound and dispatch browser notifications if restock occurred
+    if (anyRestockDetected) {
+      if (soundEnabled) {
+        playChime();
+      }
+      if (notifyEnabled) {
+        const restocked = newHistoryRecords.filter((r) => r.isRestock);
+        if (restocked.length > 0) {
+          const first = restocked[0];
+          const summary = restocked.length > 1
+            ? `${first.productTitle} + ${restocked.length - 1} more models are available at Apple ${first.storeName}!`
+            : `${first.productTitle} is available at Apple ${first.storeName}! Click to reserve.`;
+          sendBrowserNotification('🚨 Apple Store Restock Alert!', summary, first.reservationUrl);
+        }
+      }
     }
 
     updateStatSummary(totalInStockCount);
@@ -796,6 +911,32 @@ const TARGET_STORES = [
     to { transform: rotate(360deg); }
   }
 
+  .autocheck-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    padding: 0.3rem 0.55rem;
+  }
+
+  .interval-select {
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.1rem 0.25rem 0.1rem 0.45rem;
+    outline: none;
+  }
+
+  .interval-select option {
+    background: var(--color-card);
+    color: var(--color-text);
+  }
+
   .auto-refresh-toggle {
     display: inline-flex;
     align-items: center;
@@ -806,7 +947,8 @@ const TARGET_STORES = [
     user-select: none;
   }
 
-  .sound-toggle-btn {
+  .sound-toggle-btn,
+  .notify-toggle-btn {
     --btn-pad-y: 0.45rem;
     --btn-pad-x: 0.75rem;
     font-size: 0.8125rem;
@@ -815,6 +957,17 @@ const TARGET_STORES = [
   .sound-toggle-btn.sound-active {
     border-color: var(--color-accent);
     color: var(--color-accent);
+  }
+
+  .notify-toggle-btn.notify-active {
+    border-color: #22c55e;
+    color: #22c55e;
+  }
+
+  .notify-toggle-btn.notify-blocked {
+    border-color: #ef4444;
+    color: #ef4444;
+    opacity: 0.8;
   }
 
   /* Stats grid */
@@ -1233,120 +1386,6 @@ const TARGET_STORES = [
     text-align: center;
     color: var(--color-text-muted);
     font-style: italic;
-  }
-
-  /* Guide section */
-  .architecture-guide {
-    margin-top: 3.5rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--color-border);
-  }
-
-  .guide-details {
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
-    padding: 1.25rem 1.5rem;
-  }
-
-  .guide-summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    list-style: none;
-  }
-
-  .guide-summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .guide-summary-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  .guide-icon {
-    color: var(--color-accent);
-  }
-
-  .guide-badge {
-    font-size: 0.6875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 0.2rem 0.55rem;
-    border-radius: var(--border-radius-pill);
-    background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
-  }
-
-  .guide-content {
-    margin-top: 1.25rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--color-border);
-  }
-
-  .guide-answer-box {
-    background: var(--color-bg);
-    border-left: 3px solid var(--color-accent);
-    padding: 1rem 1.25rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .guide-answer-box h4 {
-    margin: 0 0 0.4rem;
-    font-size: 1rem;
-    color: var(--color-text);
-  }
-
-  .guide-answer-box p {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: var(--color-text-secondary);
-  }
-
-  .guide-comparison-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
-  }
-
-  .guide-card {
-    padding: 1rem;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-  }
-
-  .guide-card--active {
-    border-color: color-mix(in srgb, #10b981 40%, var(--color-border));
-    background: color-mix(in srgb, #10b981 5%, var(--color-bg-secondary));
-  }
-
-  .guide-card h5 {
-    margin: 0 0 0.5rem;
-    font-size: 0.875rem;
-    color: var(--color-text);
-  }
-
-  .guide-card p {
-    margin: 0 0 0.75rem;
-    font-size: 0.8125rem;
-    line-height: 1.45;
-    color: var(--color-text-secondary);
-  }
-
-  .guide-card code {
-    display: block;
-    font-size: 0.75rem;
-    background: var(--color-bg);
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--color-border);
-    word-break: break-all;
   }
 
   @media (max-width: 768px) {
