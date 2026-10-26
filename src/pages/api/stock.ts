@@ -1,81 +1,69 @@
 import type { APIRoute } from 'astro';
+import {
+  fetchAppleStock,
+  recordStockCheckToD1,
+  getD1RestockHistory,
+  getD1RecentChecks,
+} from '../../lib/stockChecker';
 
 export const prerender = false;
 
-export interface StockStore {
-  storeNumber: string;
-  storeName: string;
-  city: string;
-  state: string;
-  distance: string;
-  reservationUrl: string;
-  parts: Record<
-    string,
-    {
-      title: string;
-      available: boolean;
-      pickupDisplay: string;
-      quote: string;
-    }
-  >;
-}
-
-export interface StockHistoryItem {
-  id: string;
-  timestamp: string;
-  storeNumber: string;
-  storeName: string;
-  city: string;
-  partNumber: string;
-  productTitle: string;
-  available: boolean;
-  type: 'restock' | 'stockout' | 'check';
-  reservationUrl: string;
-}
-
-const DEFAULT_ZIP = '14623';
-const TARGET_STORE_NUMBERS = ['R140', 'R016', 'R107']; // Eastview (Rochester), Walden Galleria (Buffalo), Syracuse
-
-const DEFAULT_PARTS: Record<string, string> = {
-  'MK1F4LL/A': 'iPhone Duo 256GB Night Sky',
-  'MK1G4LL/A': 'iPhone Duo 512GB Star White',
-  'MK1H4LL/A': 'iPhone Duo 512GB Night Sky',
-};
-
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, locals }) => {
   const url = new URL(request.url);
-  const zip = url.searchParams.get('zip') || DEFAULT_ZIP;
-  const customParts = url.searchParams.get('parts');
-  
-  const partsToQuery = customParts
-    ? customParts.split(',').map((p) => p.trim()).filter(Boolean)
-    : Object.keys(DEFAULT_PARTS);
+  const action = url.searchParams.get('action');
+  const env = (locals as any)?.runtime?.env;
+  const db = env?.DB;
+  const webhookUrl = env?.RESTOCK_WEBHOOK_URL;
 
-  const queryParams = new URLSearchParams({
-    pl: 'true',
-    location: zip,
-  });
+  // Endpoint to query only stored history from Cloudflare D1
+  if (action === 'history' || url.searchParams.has('history')) {
+    const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 100);
+    const history = db ? await getD1RestockHistory(db, limit) : [];
+    return new Response(
+      JSON.stringify({
+        status: 'ok',
+        source: db ? 'd1' : 'none',
+        history,
+      }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+      }
+    );
+  }
 
-  partsToQuery.forEach((part, index) => {
-    queryParams.set(`parts.${index}`, part);
-  });
+  // Endpoint to query recent checks (all events)
+  if (action === 'recent') {
+    const limit = Math.min(Number(url.searchParams.get('limit')) || 60, 100);
+    const recent = db ? await getD1RecentChecks(db, limit) : [];
+    return new Response(
+      JSON.stringify({
+        status: 'ok',
+        source: db ? 'd1' : 'none',
+        recent,
+      }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+      }
+    );
+  }
 
-  const appleUrl = `https://www.apple.com/shop/retail/pickup-message?${queryParams.toString()}`;
-
+  // Standard live inventory check
   try {
-    const res = await fetch(appleUrl, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
-        Accept: 'application/json',
-      },
-    });
+    const stockResult = await fetchAppleStock();
 
-    if (!res.ok) {
+    if (!stockResult.success) {
       return new Response(
         JSON.stringify({
-          error: `Apple API returned status ${res.status}`,
           status: 'error',
+          error: stockResult.error || 'Failed to fetch Apple stock data',
         }),
         {
           status: 502,
@@ -84,83 +72,44 @@ export const GET: APIRoute = async ({ request }) => {
       );
     }
 
-    const data: any = await res.json();
-    const rawStores = data.body?.stores || [];
-
-    // Filter to target stores (or top 3 closest if target stores not in list)
-    let filteredStores = rawStores.filter((s: any) =>
-      TARGET_STORE_NUMBERS.includes(s.storeNumber)
-    );
-
-    // If specific target stores aren't found in a different zip query, show the closest 3
-    if (filteredStores.length === 0 && rawStores.length > 0) {
-      filteredStores = rawStores.slice(0, 3);
+    // Persist to Cloudflare D1 and trigger restock notifications
+    let restocks: any[] = [];
+    if (db) {
+      try {
+        const recordResult = await recordStockCheckToD1(db, stockResult, webhookUrl);
+        restocks = recordResult.restocks;
+      } catch (dbErr) {
+        console.error('Failed to log stock check into D1:', dbErr);
+      }
     }
 
-    // Sort to keep Rochester first, then Buffalo, then Syracuse
-    filteredStores.sort((a: any, b: any) => {
-      const idxA = TARGET_STORE_NUMBERS.indexOf(a.storeNumber);
-      const idxB = TARGET_STORE_NUMBERS.indexOf(b.storeNumber);
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-      return 0;
-    });
-
-    const stores: StockStore[] = filteredStores.map((s: any) => {
-      const partsResult: StockStore['parts'] = {};
-      const partsAvail = s.partsAvailability || {};
-
-      for (const partNum of partsToQuery) {
-        const item = partsAvail[partNum];
-        const title =
-          item?.messageTypes?.regular?.storePickupProductTitle ||
-          DEFAULT_PARTS[partNum] ||
-          partNum;
-        const pickupDisplay = item?.pickupDisplay || 'unavailable';
-        const available = pickupDisplay === 'available';
-        const quote =
-          item?.messageTypes?.regular?.storePickupQuote ||
-          item?.pickupSearchQuote ||
-          '';
-
-        partsResult[partNum] = {
-          title,
-          available,
-          pickupDisplay,
-          quote,
-        };
-      }
-
-      return {
-        storeNumber: s.storeNumber,
-        storeName: s.storeName,
-        city: s.city,
-        state: s.state,
-        distance: s.storeDistanceWithUnit || s.distanceWithUnit || '',
-        reservationUrl: s.reservationUrl || `https://www.apple.com/retail/${s.storeName.toLowerCase().replace(/\s+/g, '')}`,
-        parts: partsResult,
-      };
-    });
+    // Retrieve recent restock history from D1
+    const d1History = db ? await getD1RestockHistory(db, 30) : [];
 
     return new Response(
       JSON.stringify({
         status: 'ok',
-        zip,
-        timestamp: new Date().toISOString(),
-        stores,
+        timestamp: stockResult.timestamp,
+        location: stockResult.location,
+        zip: stockResult.location,
+        stores: stockResult.stores,
+        history: d1History,
+        restocks,
+        d1Active: Boolean(db),
       }),
       {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=60, s-maxage=60',
+          'Cache-Control': 'public, max-age=30, s-maxage=30',
         },
       }
     );
   } catch (err: any) {
     return new Response(
       JSON.stringify({
-        error: err?.message || 'Failed to check Apple inventory',
         status: 'error',
+        error: err?.message || 'Internal server error while checking stock',
       }),
       {
         status: 500,

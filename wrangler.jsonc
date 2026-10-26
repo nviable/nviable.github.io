@@ -15,6 +15,17 @@
     "directory": "dist"
   }
 
+  // D1 Database for Apple Stock Tracker
+  ,"d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "apple-stock-db",
+      "database_id": "7e155abd-56a5-49aa-a76f-6dcc69666f1e"
+    }
+  ]
+  ,"triggers": {
+    "crons": ["*/30 * * * *"]
+  }
   // ── Contact form (Cloudflare Email Routing) ──────────────────────────────
   // The /contact page renders a working form ONLY when the CONTACT_MAILER
   // binding below exists; otherwise it falls back to prefilled mailto links.

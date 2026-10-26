@@ -7,6 +7,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SEO from '../components/SEO.astro';
 import Smartphone from '@lucide/astro/icons/smartphone';
 import MapPin from '@lucide/astro/icons/map-pin';
+import Database from '@lucide/astro/icons/database';
 import RefreshCw from '@lucide/astro/icons/refresh-cw';
 import ExternalLink from '@lucide/astro/icons/external-link';
 import History from '@lucide/astro/icons/history';
@@ -47,6 +48,10 @@ const TARGET_STORES = [
         <span class="stock-badge stock-badge--geo">
           <MapPin size={13} aria-hidden="true" />
           Zip 14623 · Upstate NY
+        </span>
+        <span class="stock-badge stock-badge--d1" id="d1Badge">
+          <Database size={13} aria-hidden="true" />
+          Cloudflare D1 &amp; Cron
         </span>
       </div>
 
@@ -214,40 +219,40 @@ const TARGET_STORES = [
 
     <!-- Architecture & Cloudflare Worker Free Tier Guide -->
     <section class="architecture-guide">
-      <details class="guide-details">
+      <details class="guide-details" open>
         <summary class="guide-summary">
           <span class="guide-summary-title">
             <Sparkles size={16} class="guide-icon" aria-hidden="true" />
-            Do I need the $5/mo Cloudflare Worker Plan? (Setup Guide)
+            Do I need the $5/mo Cloudflare Worker Plan? (Setup &amp; Architecture)
           </span>
-          <span class="guide-badge">100% Free on Cloudflare</span>
+          <span class="guide-badge">Active: 100% Free on Cloudflare</span>
         </summary>
 
         <div class="guide-content">
           <div class="guide-answer-box">
             <h4>No, you do not need the $5/month Workers Paid plan.</h4>
             <p>
-              Checking 3 stores every 30 minutes consumes only <strong>48 requests/day</strong> (using location 14623 which queries all 3 stores in one HTTP call) or <strong>144 requests/day</strong> (if queried store-by-store). Cloudflare's Free tier provides <strong>100,000 requests/day</strong> and <strong>Scheduled Cron Triggers</strong> at zero charge.
+              Checking 3 stores every 30 minutes consumes only <strong>48 requests/day</strong> (using location 14623 which queries Rochester, Buffalo, and Syracuse in one HTTP call) or <strong>144 requests/day</strong> (store-by-store). Cloudflare's Free tier provides <strong>100,000 requests/day</strong> and <strong>Cron Triggers</strong> at zero charge.
             </p>
           </div>
 
           <div class="guide-comparison-grid">
-            <div class="guide-card">
-              <h5>Option 1: Cloudflare D1 (Recommended, Free)</h5>
-              <p>Cloudflare's serverless SQLite database. Free tier includes <strong>5,000,000 reads/day</strong> and <strong>100,000 writes/day</strong>. Zero credit card or external signup needed.</p>
-              <code>npx wrangler d1 create apple-stock-db</code>
+            <div class="guide-card guide-card--active">
+              <h5>Cloudflare D1 (Configured &amp; Active)</h5>
+              <p>Connected to <code>apple-stock-db</code>. Free tier includes <strong>5,000,000 reads/day</strong> and <strong>100,000 writes/day</strong>. Stock checks and restock transitions are stored automatically in SQLite.</p>
+              <code>DB: apple-stock-db (D1)</code>
+            </div>
+
+            <div class="guide-card guide-card--active">
+              <h5>Cloudflare Scheduled Cron</h5>
+              <p>Runs automatically in the background every 30 minutes via Cloudflare's edge network without keeping a browser tab open or paying for a server.</p>
+              <code>crons = ["*/30 * * * *"]</code>
             </div>
 
             <div class="guide-card">
-              <h5>Option 2: Cloudflare KV (Fast, Free)</h5>
-              <p>Key-Value storage built directly into Workers. Free tier includes <strong>100,000 reads/day</strong> and <strong>1,000 writes/day</strong>, ideal for caching the last restock timestamp.</p>
-              <code>npx wrangler kv namespace create STOCK_KV</code>
-            </div>
-
-            <div class="guide-card">
-              <h5>Option 3: Supabase (Free Tier)</h5>
-              <p>If you prefer an external Postgres database with an instant web dashboard, Supabase free tier gives 500 MB storage. Can be called directly via <code>fetch()</code> in the worker.</p>
-              <code>POST https://&lt;project&gt;.supabase.co/rest/v1/stock_history</code>
+              <h5>Instant Restock Alerts (Optional Webhook)</h5>
+              <p>Whenever an unavailable model becomes available, the worker sends an instant notification to your Discord or Telegram webhook via <code>RESTOCK_WEBHOOK_URL</code>.</p>
+              <code>npx wrangler secret put RESTOCK_WEBHOOK_URL</code>
             </div>
           </div>
         </div>
@@ -285,6 +290,7 @@ const TARGET_STORES = [
     available: boolean;
     isRestock: boolean;
     reservationUrl: string;
+    source?: string;
   }
 
   const STORAGE_KEY = 'apple_stock_history_14623';
@@ -414,10 +420,10 @@ const TARGET_STORES = [
       const data = await res.json();
 
       if (data.status === 'ok' && Array.isArray(data.stores)) {
-        processStoreData(data.stores);
+        processStoreData(data.stores, data.history);
         const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         if (lastChecked) lastChecked.textContent = `Last checked: ${nowStr}`;
-        if (statusText) statusText.textContent = 'Monitoring active';
+        if (statusText) statusText.textContent = data.d1Active ? 'Monitoring active · D1 Synced' : 'Monitoring active';
         if (pulse) pulse.className = 'pulse-indicator pulse-indicator--healthy';
       } else {
         throw new Error(data.error || 'Invalid API response');
@@ -432,7 +438,7 @@ const TARGET_STORES = [
     }
   }
 
-  function processStoreData(stores: StoreItem[]) {
+  function processStoreData(stores: StoreItem[], d1History?: any[]) {
     const prevStates: Record<string, boolean> = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
     const currentStates: Record<string, boolean> = {};
     const newHistoryRecords: HistoryRecord[] = [];
@@ -469,7 +475,7 @@ const TARGET_STORES = [
           anyRestockDetected = true;
         }
 
-        // Add history entry if state changed OR if manual check
+        // Add history entry if state changed OR if in stock
         if (isRestock || isAvailable) {
           newHistoryRecords.push({
             id: `${Date.now()}-${store.storeNumber}-${cleanSku}`,
@@ -482,6 +488,7 @@ const TARGET_STORES = [
             available: isAvailable,
             isRestock,
             reservationUrl: store.reservationUrl,
+            source: 'Live Check',
           });
         }
       });
@@ -499,13 +506,42 @@ const TARGET_STORES = [
     // Save states
     localStorage.setItem(STATE_KEY, JSON.stringify(currentStates));
 
-    // Save history entries
-    if (newHistoryRecords.length > 0) {
-      const existingHistory: HistoryRecord[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      const updatedHistory = [...newHistoryRecords, ...existingHistory].slice(0, 100); // keep up to 100 entries
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHistory));
-      renderHistoryTable();
+    // Map D1 history entries
+    const d1Mapped: HistoryRecord[] = Array.isArray(d1History)
+      ? d1History.map((dh: any) => ({
+          id: `d1-${dh.id || dh.timestamp}-${dh.store_number}-${dh.part_number}`,
+          timestamp: dh.timestamp,
+          storeNumber: dh.store_number,
+          storeName: dh.store_name,
+          city: dh.store_name,
+          partNumber: dh.part_number,
+          productTitle: dh.product_title,
+          available: Boolean(dh.is_available),
+          isRestock: Boolean(dh.is_restock),
+          reservationUrl: dh.reservation_url || 'https://www.apple.com/shop/buy-iphone',
+          source: 'D1 Sync',
+        }))
+      : [];
+
+    // Save history entries & merge with D1 entries
+    const existingHistory: HistoryRecord[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const combined = [...newHistoryRecords, ...d1Mapped, ...existingHistory];
+    const seen = new Set<string>();
+    const deduplicatedHistory: HistoryRecord[] = [];
+
+    for (const record of combined) {
+      const timeMinute = (record.timestamp || '').slice(0, 16);
+      const key = `${record.storeNumber}:${record.partNumber}:${record.isRestock ? '1' : '0'}:${timeMinute}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        deduplicatedHistory.push(record);
+      }
     }
+
+    deduplicatedHistory.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const finalHistory = deduplicatedHistory.slice(0, 120);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(finalHistory));
+    renderHistoryTable();
 
     // Play sound if restock occurred
     if (anyRestockDetected && soundEnabled) {
@@ -656,6 +692,12 @@ const TARGET_STORES = [
   .stock-badge--geo {
     color: var(--color-accent);
     border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
+  }
+
+  .stock-badge--d1 {
+    color: #10b981;
+    border-color: color-mix(in srgb, #10b981 40%, var(--color-border));
+    background: color-mix(in srgb, #10b981 8%, transparent);
   }
 
   .stock-title {
@@ -1278,6 +1320,11 @@ const TARGET_STORES = [
     padding: 1rem;
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
+  }
+
+  .guide-card--active {
+    border-color: color-mix(in srgb, #10b981 40%, var(--color-border));
+    background: color-mix(in srgb, #10b981 5%, var(--color-bg-secondary));
   }
 
   .guide-card h5 {
