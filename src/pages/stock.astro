@@ -316,11 +316,28 @@ const TARGET_STORES = [
   ];
 
   let mapInstance: any = null;
+  let currentTileLayer: any = null;
   const mapMarkers: Record<string, any> = {};
 
   let autoRefreshTimer: number | null = null;
   let soundEnabled = false;
   let notifyEnabled = false;
+
+  function getTileConfig(isDark: boolean) {
+    // 100% free open tile sources with NO API key and NO watermarks
+    if (isDark) {
+      return {
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+        attribution: 'Tiles &copy; Esri &mdash; OpenStreetMap contributors',
+        maxZoom: 16,
+      };
+    }
+    return {
+      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+    };
+  }
 
   function initMap() {
     const mapEl = document.getElementById('stockMap');
@@ -335,23 +352,21 @@ const TARGET_STORES = [
     if (mapInstance) {
       mapInstance.remove();
       mapInstance = null;
+      currentTileLayer = null;
       Object.keys(mapMarkers).forEach((k) => delete mapMarkers[k]);
     }
 
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const tileUrl = isDark
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+    const tileConfig = getTileConfig(isDark);
 
     mapInstance = L.map('stockMap', {
       zoomControl: true,
       scrollWheelZoom: false,
     });
 
-    L.tileLayer(tileUrl, {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      maxZoom: 18,
-      subdomains: 'abcd',
+    currentTileLayer = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution,
+      maxZoom: tileConfig.maxZoom,
     }).addTo(mapInstance);
 
     mapInstance.fitBounds(
@@ -361,6 +376,21 @@ const TARGET_STORES = [
       ],
       { padding: [35, 35] }
     );
+
+    // Watch for theme toggle to swap tiles seamlessly
+    const themeObserver = new MutationObserver(() => {
+      if (!mapInstance || !(window as any).L) return;
+      const nowDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const nextConfig = getTileConfig(nowDark);
+      if (currentTileLayer) {
+        mapInstance.removeLayer(currentTileLayer);
+      }
+      currentTileLayer = (window as any).L.tileLayer(nextConfig.url, {
+        attribution: nextConfig.attribution,
+        maxZoom: nextConfig.maxZoom,
+      }).addTo(mapInstance);
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     // Initial markers with current state from localStorage
     const prevStates: Record<string, boolean> = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
@@ -1697,10 +1727,6 @@ const TARGET_STORES = [
   .map-popup-card {
     padding: 0.25rem;
     font-family: inherit;
-  }
-
-  html[data-theme="dark"] .leaflet-layer {
-    filter: brightness(0.82) contrast(1.1) invert(0.92) hue-rotate(180deg);
   }
 
   @media (max-width: 768px) {
