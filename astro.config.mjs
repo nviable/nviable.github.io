@@ -213,6 +213,10 @@ export default defineConfig({
     },
   },
 
+  redirects: {
+    '/apple-stock': '/stock',
+  },
+
   adapter: cloudflare({
     imageService: 'compile',
   })
