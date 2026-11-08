@@ -1,13 +1,10 @@
 ---
 /**
- * Project detail page — structured frontmatter plus MDX body.
- *
- * Header (wider than the prose): title, status, primary link, and abstract
- * on one side; dates, classification, and the cover on the other.
- * Team is a compact block under the highlights.
- * Covers render at their own aspect. Logos stay small on gray; figures can be larger.
- * Body (65ch, centered): the MDX story only. The abstract lives in the header.
- * Related items sit in a wider two-column block after the story.
+ * Project detail page — Figma design language:
+ * - Full-bleed Indigo Hero (#282b61) with title, subtitle, abstract, primary CTA,
+ *   cover/logo, metadata panel (dates, role, institution, methodology), and highlights.
+ * - Full-bleed Yellow Band (#f6eb0f) displaying the project's domains & tags.
+ * - Prose case-study body + rounded Team card + Related Publications (rounded homepage paper blocks).
  *
  * Route: /projects/[slug]
  */
@@ -18,10 +15,10 @@ import StructuredData from '../../components/StructuredData.astro';
 import ScrollToTop from '../../components/ScrollToTop.astro';
 import BackLink from '../../components/BackLink.astro';
 import RelatedContent from '../../components/RelatedContent.astro';
-import ProjectHighlightStrip from '../../components/ProjectHighlightStrip.astro';
 import ProjectCollaborators from '../../components/ProjectCollaborators.astro';
 import ProjectArtifactButtons from '../../components/ProjectArtifactButtons.astro';
 import ArrowUpRight from '@lucide/astro/icons/arrow-up-right';
+import Sparkles from '@lucide/astro/icons/sparkles';
 import { getCollection, getEntry, render } from 'astro:content';
 import { calculateReadingTime, formatReadingTime } from '../../utils/readingTime';
 import { projectCoverKind } from '../../utils/projectImage';
@@ -46,12 +43,15 @@ const {
   title,
   subtitle,
   year,
+  role,
+  institution,
   duration,
   abstract,
   highlights,
   collaborators,
   type: classificationType,
   domains,
+  tags = [],
   methodologyClass,
   artifacts,
   relatedProjects,
@@ -76,18 +76,18 @@ const statusInfo = statusConfig[status || 'completed'];
 const showStatus = Boolean(status && status !== 'completed');
 
 const TYPE_LABELS: Record<string, string> = {
-  'research-project': 'Research project',
-  tool: 'Tool',
+  'research-project': 'Research Project',
+  tool: 'Tool & Platform',
   collaboration: 'Collaboration',
-  course: 'Course',
+  course: 'Course & Simulation',
 };
 
 const METHOD_LABELS: Record<string, string> = {
   qualitative: 'Qualitative',
   quantitative: 'Quantitative',
-  mixed: 'Mixed methods',
-  systems: 'Systems',
-  design: 'Design',
+  mixed: 'Mixed Methods',
+  systems: 'Systems & HCI',
+  design: 'Design Research',
 };
 
 function humanLabel(value: string, labels: Record<string, string>): string {
@@ -111,7 +111,6 @@ const dates = dateLabel(duration, year);
 const allText = [abstract, ...highlights, project.body || ''].join(' ');
 const readingMinutes = calculateReadingTime(allText);
 const readingTime = formatReadingTime(readingMinutes);
-/** Short pages don't get "3 min read" chrome. Dungeons & Deepfakes is the long page. */
 const showReadingTime = readingMinutes >= 8;
 
 const primaryArtifact = artifacts[0];
@@ -121,6 +120,19 @@ const coverKind = projectCoverKind(coverImage);
 
 const contents = headings.filter((heading) => heading.depth === 2);
 const showContents = contents.length >= 3;
+
+// Combine unique domains + tags for the yellow band
+const combinedTags: string[] = [];
+const seenTagLower = new Set<string>();
+for (const raw of [...domains, ...tags]) {
+  const clean = raw.trim();
+  if (!clean) continue;
+  const key = clean.toLowerCase();
+  if (!seenTagLower.has(key)) {
+    seenTagLower.add(key);
+    combinedTags.push(clean);
+  }
+}
 ---
 
 <BaseLayout>
@@ -138,99 +150,404 @@ const showContents = contents.length >= 3;
       title,
       description: abstract,
       year,
-      keywords: domains.join(', '),
+      keywords: combinedTags.join(', '),
     }}
   />
 
-  <main class="case-study">
-    <header class="case-study-header">
-      <div class="case-study-top">
-        <div class="case-study-lead">
-          <h1>{title}</h1>
-          {subtitle && <p class="case-study-subtitle">{subtitle}</p>}
-          {showStatus && (
-            <span class:list={['status-badge', statusInfo.class]}>
-              {statusInfo.label}
-            </span>
-          )}
-          {primaryArtifact && (
-            <a
-              class="btn btn-primary case-study-primary"
-              href={primaryArtifact.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {primaryArtifact.label}
-              <ArrowUpRight class="leave-icon" size={14} stroke-width={2} aria-hidden="true" />
-            </a>
-          )}
-          <p class="case-study-abstract">{abstract}</p>
+  <main class="project-page">
+    <!-- ════════════════════════════════════════════════════════════════════════
+         1. PURPLE INDIGO HERO SECTION
+         ════════════════════════════════════════════════════════════════════════ -->
+    <header class="indigo-hero project-hero">
+      <img
+        src="/images/figma/bck-corner-tl.svg"
+        alt=""
+        width="350"
+        height="196"
+        class="indigo-hero__corner indigo-hero__corner--tl"
+        aria-hidden="true"
+      />
+      <img
+        src="/images/figma/bck-corner-br.svg"
+        alt=""
+        width="368"
+        height="219"
+        class="indigo-hero__corner indigo-hero__corner--br"
+        aria-hidden="true"
+      />
+
+      <div class="indigo-hero__inner">
+        <nav class="indigo-hero__breadcrumb" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span aria-hidden="true">/</span>
+          <a href="/projects">Projects</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{title}</span>
+        </nav>
+
+        <div class="project-hero__grid">
+          <div class="project-hero__lead">
+            <div class="project-hero__eyebrow-row">
+              <p class="indigo-hero__eyebrow">{typeLabel} · {methodLabel}</p>
+              {showStatus && (
+                <span class:list={['project-hero__status', statusInfo.class]}>
+                  {statusInfo.label}
+                </span>
+              )}
+            </div>
+
+            <h1 class="indigo-hero__title">{title}</h1>
+            {subtitle && <p class="indigo-hero__subtitle">{subtitle}</p>}
+
+            <p class="project-hero__abstract">{abstract}</p>
+
+            {primaryArtifact && (
+              <div class="project-hero__actions">
+                <a
+                  class="figma-yellow-btn"
+                  href={primaryArtifact.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span>{primaryArtifact.label}</span>
+                  <ArrowUpRight size={15} stroke-width={2.25} aria-hidden="true" />
+                </a>
+              </div>
+            )}
+          </div>
+
+          <aside class="project-hero__meta-card" aria-label="Project metadata">
+            {slug === 'defake-app' ? (
+              <div class="project-hero__brand-lockup">
+                <img
+                  src="/images/figma/defake-icon.svg"
+                  alt=""
+                  width="42"
+                  height="42"
+                />
+                <img
+                  src="/images/figma/defake-logotype.svg"
+                  alt=""
+                  width="114"
+                  height="44"
+                />
+              </div>
+            ) : slug === 'dungeons-and-deepfakes' ? (
+              <div class="project-hero__brand-lockup">
+                <img
+                  src="/images/figma/dnd-logo.svg"
+                  alt=""
+                  width="48"
+                  height="38"
+                />
+              </div>
+            ) : (
+              coverImage &&
+              coverKind && (
+                <figure class:list={['project-hero__cover', `project-hero__cover--${coverKind}`]}>
+                  <img
+                    src={coverImage}
+                    alt={coverKind === 'figure' ? title : ''}
+                    loading="eager"
+                    decoding="async"
+                    onerror="this.closest('figure')?.remove()"
+                  />
+                </figure>
+              )
+            )}
+
+            <dl class="project-hero__dl">
+              <div class="project-hero__dl-item">
+                <dt>Timeline</dt>
+                <dd>
+                  {dates}
+                  {showReadingTime && <span class="project-hero__reading"> · {readingTime}</span>}
+                </dd>
+              </div>
+              <div class="project-hero__dl-item">
+                <dt>Role</dt>
+                <dd>{role}</dd>
+              </div>
+              <div class="project-hero__dl-item">
+                <dt>Institution</dt>
+                <dd>{institution}</dd>
+              </div>
+              <div class="project-hero__dl-item">
+                <dt>Methodology</dt>
+                <dd>{typeLabel} · {methodLabel}</dd>
+              </div>
+            </dl>
+          </aside>
         </div>
 
-        <div class="case-study-aside">
-          <p class="case-study-meta-line"><span class="meta-part">{dates}</span>{showReadingTime && <span class="meta-part">{readingTime}</span>}</p>
-          <div class="case-study-classification">
-            <span class="classification-type">{typeLabel}</span>
-            {domains.length > 0 && (
-              <span class="classification-domains">
-                {domains.map((d) => (
-                  <span class="domain-chip">{d}</span>
-                ))}
-              </span>
-            )}
-            <span class="classification-method">{methodLabel}</span>
-          </div>
-          {coverImage && coverKind && (
-            <figure class:list={['case-study-cover', `case-study-cover--${coverKind}`]}>
-              <img
-                src={coverImage}
-                alt={coverKind === 'figure' ? title : ''}
-                loading="eager"
-                decoding="async"
-                onerror="this.closest('figure')?.remove()"
-              />
-            </figure>
+        {highlights.length > 0 && (
+          <ul class="project-hero__highlights" aria-label="Key project highlights">
+            {highlights.slice(0, 4).map((h) => (
+              <li class="project-hero__highlight-pill">
+                <Sparkles size={14} stroke-width={2.2} class="project-hero__highlight-icon" aria-hidden="true" />
+                <span>{h}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </header>
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         2. YELLOW BAND WITH TAGS & DOMAINS
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div class="yellow-band" role="region" aria-label="Project domains and tags">
+      <div class="yellow-band__inner">
+        <div class="yellow-band__group">
+          <span class="yellow-band__label">Tags:</span>
+          {combinedTags.map((tag) => (
+            <span class="yellow-band__pill yellow-band__pill--static">{tag}</span>
+          ))}
+        </div>
+
+        <div class="yellow-band__group">
+          {collaborators.length > 0 && (
+            <a href="#team-heading" class="yellow-band__pill">Team ({collaborators.length})</a>
+          )}
+          {relatedPublications && relatedPublications.length > 0 && (
+            <a href="#related-work" class="yellow-band__pill">
+              Papers ({relatedPublications.length})
+            </a>
           )}
         </div>
       </div>
-
-      <ProjectHighlightStrip highlights={highlights} />
-      <ProjectCollaborators collaborators={collaborators} />
-    </header>
-
-    <div class="case-study-body">
-      <section class="case-study-content">
-        {showContents && (
-          <nav class="case-study-contents" aria-label="Contents">
-            <ol>
-              {contents.map((heading) => (
-                <li><a href={`#${heading.slug}`}>{heading.text}</a></li>
-              ))}
-            </ol>
-          </nav>
-        )}
-        {Content && <Content />}
-      </section>
-
-      <ProjectArtifactButtons artifacts={secondaryArtifacts} />
     </div>
 
-    <div class="case-study-related">
-      <RelatedContent
-        relatedProjects={relatedProjects}
-        relatedPublications={relatedPublications}
-      />
-      <BackLink href="/projects" text="All projects" />
+    <!-- ════════════════════════════════════════════════════════════════════════
+         3. CASE STUDY BODY, TEAM, & RELATED WORK
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div class="case-study">
+      <div class="case-study-body">
+        {collaborators.length > 0 && (
+          <ProjectCollaborators collaborators={collaborators} />
+        )}
+
+        <section class="case-study-content">
+          {showContents && (
+            <nav class="case-study-contents" aria-label="Contents">
+              <p class="case-study-contents__title">On this page</p>
+              <ol>
+                {contents.map((heading) => (
+                  <li><a href={`#${heading.slug}`}>{heading.text}</a></li>
+                ))}
+              </ol>
+            </nav>
+          )}
+          {Content && <Content />}
+        </section>
+
+        <ProjectArtifactButtons artifacts={secondaryArtifacts} />
+      </div>
+
+      <div class="case-study-related" id="related-work">
+        <RelatedContent
+          relatedProjects={relatedProjects}
+          relatedPublications={relatedPublications}
+        />
+        <BackLink href="/projects" text="All projects" />
+      </div>
     </div>
   </main>
 
   <ScrollToTop />
 
   <style>
+    .project-page {
+      width: 100%;
+    }
+
+    .project-hero__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.85fr);
+      gap: 2rem 2.75rem;
+      align-items: start;
+    }
+
+    .project-hero__lead {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .project-hero__eyebrow-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .project-hero__eyebrow-row .indigo-hero__eyebrow {
+      margin: 0;
+    }
+
+    .project-hero__status {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      font-family: var(--font-display);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .status--ongoing {
+      background: rgba(118, 255, 138, 0.18);
+      border: 1px solid rgba(118, 255, 138, 0.45);
+      color: #8cff9e;
+    }
+
+    .status--archived {
+      background: rgba(255, 255, 255, 0.12);
+      color: #d6d8ff;
+    }
+
+    .status--inactive {
+      background: rgba(246, 235, 15, 0.18);
+      color: #f6eb0f;
+    }
+
+    .project-hero__abstract {
+      margin: 1.15rem 0 0;
+      font-size: 1.03125rem;
+      line-height: 1.72;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .project-hero__actions {
+      margin-top: 1.35rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .project-hero__meta-card {
+      padding: 1.35rem 1.45rem;
+      border-radius: 16px;
+      background: rgba(14, 16, 44, 0.56);
+      border: 1px solid rgba(152, 157, 240, 0.28);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .project-hero__brand-lockup {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.94);
+      align-self: flex-start;
+    }
+
+    .project-hero__cover {
+      margin: 0;
+    }
+
+    .project-hero__cover img {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      border-radius: 10px;
+    }
+
+    .project-hero__cover--logo {
+      display: inline-block;
+      padding: 0.65rem 0.85rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.94);
+      align-self: flex-start;
+    }
+
+    .project-hero__cover--logo img {
+      max-width: 11rem;
+      max-height: 3.75rem;
+      object-fit: contain;
+    }
+
+    .project-hero__cover--figure img {
+      max-height: 11rem;
+      object-fit: cover;
+    }
+
+    .project-hero__dl {
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem 1rem;
+    }
+
+    .project-hero__dl-item {
+      min-width: 0;
+    }
+
+    .project-hero__dl-item dt {
+      font-family: var(--font-display);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #a8adff;
+      margin-bottom: 0.2rem;
+    }
+
+    .project-hero__dl-item dd {
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #ffffff;
+    }
+
+    .project-hero__reading {
+      color: #c8cbff;
+      font-weight: 500;
+    }
+
+    .project-hero__highlights {
+      list-style: none;
+      margin: 1.75rem 0 0;
+      padding: 1.25rem 0 0;
+      border-top: 1px solid rgba(152, 157, 240, 0.22);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .project-hero__highlight-pill {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 12px;
+      background: rgba(14, 16, 44, 0.45);
+      border: 1px solid rgba(152, 157, 240, 0.24);
+      font-size: 0.8125rem;
+      line-height: 1.45;
+      color: #e4e6ff;
+    }
+
+    .project-hero__highlight-icon {
+      flex-shrink: 0;
+      margin-top: 0.12rem;
+      color: #f6eb0f;
+    }
+
+    /* Case study body */
     .case-study {
-      max-width: var(--max-width-wide);
+      max-width: 1120px;
       margin: 0 auto;
-      padding: 2rem 1.5rem 3rem;
+      padding: 2.5rem 1.5rem 3.5rem;
     }
 
     .case-study-body {
@@ -238,186 +555,20 @@ const showContents = contents.length >= 3;
       margin: 0 auto;
     }
 
+    .case-study-body :global(.project-collaborators) {
+      margin-top: 0;
+      margin-bottom: 2.25rem;
+    }
+
     .case-study-related {
       max-width: 100%;
       margin-top: 2.5rem;
     }
 
-    .case-study-header {
-      margin-bottom: 2rem;
-      padding-bottom: 1.75rem;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .case-study-top {
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.8fr);
-      gap: 1.5rem 2.75rem;
-      align-items: start;
-    }
-
-    .case-study-lead {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      min-width: 0;
-    }
-
-    .case-study-primary {
-      --btn-pad-y: 0.4rem;
-      --btn-pad-x: 0.8rem;
-      align-self: flex-start;
-      margin-top: 0.75rem;
-      font-size: 0.8125rem;
-    }
-
-    .case-study-abstract {
-      margin: 1.15rem 0 0;
-      font-size: 1.0625rem;
-      line-height: 1.7;
-      color: var(--color-text-secondary);
-      text-align: start;
-    }
-
-    .case-study-aside {
-      min-width: 0;
-    }
-
-    .case-study-cover {
-      margin: 1.1rem 0 0;
-    }
-
-    .case-study-cover img {
-      display: block;
-      width: auto;
-      height: auto;
-      max-width: 100%;
-    }
-
-    .case-study-cover--logo {
-      display: inline-block;
-      max-width: 100%;
-      padding: 0.75rem 0.9rem;
-      background: var(--color-card);
-    }
-
-    .case-study-cover--logo img {
-      max-width: 11rem;
-      max-height: 4.25rem;
-      object-fit: contain;
-      object-position: left center;
-    }
-
-    .case-study-cover--figure img {
-      max-width: min(100%, 18rem);
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-self: flex-start;
-      align-items: center;
-      margin-top: 0.75rem;
-      font-size: 0.6875rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 0.3rem 0.625rem;
-      border-radius: var(--border-radius-pill);
-    }
-
-    .status--ongoing {
-      background: color-mix(in srgb, var(--color-quaternary) 18%, transparent);
-      color: var(--color-status-ongoing);
-    }
-
-    .status--archived {
-      background: rgba(115, 115, 115, 0.15);
-      color: var(--color-text-muted);
-    }
-
-    .status--inactive {
-      background: var(--color-tertiary-surface);
-      color: var(--color-status-caution);
-    }
-
-    .case-study-header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-    }
-
-    .case-study-subtitle {
-      font-size: 1.25rem;
-      line-height: 1.45;
-      color: var(--color-text-secondary);
-      margin: 0;
-    }
-
-    .case-study-meta-line {
-      margin: 0;
-      font-size: 0.9375rem;
-      line-height: 1.45;
-      color: var(--color-text-muted);
-    }
-
-    .case-study-meta-line + .case-study-meta-line {
-      margin-top: 0.15rem;
-    }
-
-    .meta-part:not(:last-child)::after {
-      content: " · ";
-    }
-
-    .case-study-classification {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.5rem 0.75rem;
-      margin-top: 0.85rem;
-      min-width: 0;
-      max-width: 100%;
-      font-size: 0.875rem;
-      color: var(--color-text-muted);
-    }
-
-    .classification-type {
-      min-width: 0;
-      max-width: 100%;
-      font-weight: 600;
-      color: var(--color-text-secondary);
-    }
-
-    .classification-domains {
-      display: inline-flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-    }
-
-    .domain-chip {
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: var(--border-radius-pill);
-      background: var(--color-bg-secondary);
-      border: 1px solid var(--color-border);
-    }
-
-    .classification-method {
-      flex-basis: 100%;
-      font-size: 0.8125rem;
-    }
-
-    @media (min-width: 640px) {
-      .classification-method {
-        flex-basis: auto;
-      }
-    }
-
     .case-study-content {
       margin-bottom: 2.5rem;
       font-size: 1.0625rem;
-      line-height: 1.7;
+      line-height: 1.72;
       color: var(--color-text-secondary);
       text-align: justify;
       hyphens: auto;
@@ -444,8 +595,22 @@ const showContents = contents.length >= 3;
     }
 
     .case-study-contents {
-      margin: 0 0 1.75rem;
+      margin: 0 0 2rem;
+      padding: 1.1rem 1.35rem;
+      border-radius: 16px;
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
       font-size: 0.9375rem;
+    }
+
+    .case-study-contents__title {
+      margin: 0 0 0.5rem;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
     }
 
     .case-study-contents ol {
@@ -455,10 +620,9 @@ const showContents = contents.length >= 3;
     }
 
     .case-study-contents li {
-      margin: 0.2rem 0;
+      margin: 0.25rem 0;
     }
 
-    /* Paragraphs under "Key decisions" only, until the next heading. */
     .case-study-content :global(h3#key-decisions) ~ :global(p) {
       border-left: 2px solid var(--color-border);
       padding-left: 0.875rem;
@@ -470,14 +634,16 @@ const showContents = contents.length >= 3;
     }
 
     .case-study-content :global(h2) {
+      font-family: var(--font-display);
       font-size: 1.75rem;
       margin-top: 2.5rem;
       margin-bottom: 1rem;
       font-weight: 700;
-      color: var(--color-text);
+      color: var(--color-brand-heading, var(--color-text));
     }
 
     .case-study-content :global(h3) {
+      font-family: var(--font-display);
       font-size: 1.25rem;
       margin-top: 1.5rem;
       margin-bottom: 0.75rem;
@@ -509,19 +675,19 @@ const showContents = contents.length >= 3;
       text-align: left;
     }
 
-    @media (max-width: 800px) {
-      .case-study-top {
+    @media (max-width: 860px) {
+      .project-hero__grid {
         grid-template-columns: 1fr;
       }
     }
 
     @media (max-width: 768px) {
       .case-study {
-        padding: 1.5rem 1rem 2.5rem;
+        padding: 1.75rem 1rem 2.75rem;
       }
 
-      .case-study-header h1 {
-        font-size: 2rem;
+      .project-hero__dl {
+        grid-template-columns: 1fr;
       }
     }
   </style>

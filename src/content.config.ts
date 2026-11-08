@@ -99,6 +99,10 @@ const timelineExtrasSchema = z.object({
   relatedPresentation: z.string().url().optional(),
   relatedPaper: z.string().url().optional(),
   relatedArticle: z.string().url().optional(),
+  /** Optional thumbnail image for media cards */
+  thumbnail: z.string().optional(),
+  /** Optional short badge label for media cards (e.g. 'fact check', 'interview', 'explainer') */
+  badge: z.string().optional(),
 });
 
 /**
@@ -127,6 +131,10 @@ const publicationsCollection = defineCollection({
     doi: z.string().optional(),
     /** Stored BibTeX. A copy button is shown only when this is non-empty. */
     bibtex: z.string().optional(),
+    /** Optional short abstract or summary shown on featured publication cards */
+    abstract: z.string().optional(),
+    /** Optional thumbnail image path/URL for publication cards */
+    thumbnail: z.string().optional(),
     /** Sort order within the same year and kind (lower first) */
     order: z.number().optional(),
   }),

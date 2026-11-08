@@ -77,26 +77,26 @@ const linkTarget = external ? '_blank' : undefined;
   .base-card {
     --card-pad-y: 1.5rem;
     --card-pad-x: 1.75rem;
-    --card-lip: 3px;
-    display: block;
+    display: flex;
+    flex-direction: column;
     position: relative;
     padding: var(--card-pad-y) var(--card-pad-x);
-    background: var(--color-bg-secondary);
+    border-radius: 16px;
+    background: var(--color-card);
     border: 1px solid var(--color-border);
     text-decoration: none;
     transition:
-      border-color var(--transition-base),
-      background-color var(--transition-base),
-      transform var(--transition-fast);
-  }
-
-  .base-card:not(.base-card--static) {
-    border-bottom-width: var(--card-lip);
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
   .base-card:hover {
-    border-color: var(--color-text-muted);
-    background: var(--color-bg-elevated);
+    border-color: var(--color-accent);
+    background: var(--color-card-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
 
   .base-card:not(.base-card--static):hover .card-title {
@@ -108,25 +108,18 @@ const linkTarget = external ? '_blank' : undefined;
     transform: translateX(var(--arrow-shift));
   }
 
-  .base-card:not(.base-card--static):active {
-    border-bottom-width: 0;
-    padding-bottom: calc(var(--card-pad-y) + var(--card-lip));
-    transform: translateY(var(--card-lip));
-  }
-
   .base-card.project-tile {
-    --card-pad-y: 1.25rem;
-    --card-pad-x: 1.5rem;
+    --card-pad-y: 1.5rem;
+    --card-pad-x: 1.65rem;
     height: 100%;
+    border-radius: 16px;
     background: var(--color-card);
-    border-style: solid;
-    border-width: 0 0 var(--card-lip) 0;
-    border-color: var(--color-card-edge);
+    border: 1px solid var(--color-border);
   }
 
   .base-card.project-tile:hover {
     background: var(--color-card-hover);
-    border-color: var(--color-card-edge);
+    border-color: var(--color-accent);
   }
 
   .base-card--static {

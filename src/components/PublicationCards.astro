@@ -1,0 +1,382 @@
+---
+/**
+ * PublicationCards Component
+ *
+ * Renders the Figma rounded publication blocks (.figma-pub-card) with:
+ * - Optional thumbnail image
+ * - Title link (with angled arrow for external venue URLs)
+ * - Emphasized owner name in author list
+ * - Abstract / summary snippet
+ * - Year + full venue line + optional CORE quality badge
+ * - Green "paper" and "bibtex" copy pill buttons
+ */
+import SquareArrowOutUpRight from '@lucide/astro/icons/square-arrow-out-up-right';
+import Copy from '@lucide/astro/icons/copy';
+import Check from '@lucide/astro/icons/check';
+import { emphasizeOwner } from '../utils/authors';
+
+export interface PublicationCardEntry {
+  title: string;
+  authors: string;
+  venue: string;
+  year: number;
+  quality?: string;
+  url?: string;
+  tags?: string[];
+  status?: 'published' | 'inSubmission' | 'inPreparation' | 'underReview';
+  bibtex?: string;
+  abstract?: string;
+  thumbnail?: string;
+}
+
+interface Props {
+  entries: PublicationCardEntry[];
+  columns?: 1 | 2;
+}
+
+const { entries, columns = 2 } = Astro.props;
+
+const VENUE_FULL_NAMES: Record<string, string> = {
+  'ACM CHI': 'International Conference on Human Factors in Computing Systems (ACM CHI)',
+  'ACM CCS': 'ACM SIGSAC Conference on Computer and Communications Security (ACM CCS)',
+  'IEEE IJCB': 'IEEE International Joint Conference on Biometrics (IJCB)',
+  'IEEE ICDIM': 'IEEE International Conference on Digital Information Management (ICDIM)',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  inSubmission: 'In submission',
+  underReview: 'Under review',
+  inPreparation: 'In preparation',
+};
+---
+
+{
+  entries.length > 0 && (
+    <div class:list={['pub-cards-grid', columns === 1 && 'pub-cards-grid--one']}>
+      {entries.map((entry) => {
+        const href = entry.url;
+        const bibtex = entry.bibtex?.trim() ?? '';
+        const venueFull = VENUE_FULL_NAMES[entry.venue] ?? entry.venue;
+        const tags = entry.tags ?? [];
+        const statusLabel =
+          entry.status && entry.status !== 'published' ? STATUS_LABELS[entry.status] : undefined;
+
+        return (
+          <article class="figma-pub-card" data-pub-card data-pub-tags={tags.join('|').toLowerCase()}>
+            {entry.thumbnail && (
+              <div class="figma-pub-card__thumb-wrap">
+                <img
+                  src={entry.thumbnail}
+                  alt=""
+                  width="360"
+                  height="150"
+                  loading="lazy"
+                  decoding="async"
+                  class="figma-pub-card__thumb"
+                />
+              </div>
+            )}
+
+            <div class="figma-pub-card__top">
+              {(statusLabel || entry.quality || tags.length > 0) && (
+                <div class="figma-pub-card__chips">
+                  {statusLabel && <span class="figma-pub-card__chip figma-pub-card__chip--status">{statusLabel}</span>}
+                  {entry.quality && <span class="figma-pub-card__chip figma-pub-card__chip--tier">CORE {entry.quality}</span>}
+                  {tags.slice(0, 3).map((tag) => (
+                    <span class="figma-pub-card__chip">{tag}</span>
+                  ))}
+                </div>
+              )}
+
+              <h3 class="figma-pub-card__title">
+                {href ? (
+                  <a href={href} target="_blank" rel="noopener noreferrer" class="figma-pub-card__title-link">
+                    {entry.title}
+                  </a>
+                ) : (
+                  entry.title
+                )}
+              </h3>
+
+              <p class="figma-pub-card__authors" set:html={emphasizeOwner(entry.authors)} />
+
+              {entry.abstract && <p class="figma-pub-card__abstract">{entry.abstract}</p>}
+            </div>
+
+            <div class="figma-pub-card__bottom">
+              <div class="figma-pub-card__venue-row">
+                <span class="figma-pub-card__year">{entry.year}</span>
+                <span class="figma-pub-card__venue">{venueFull}</span>
+              </div>
+
+              <div class="figma-pub-card__pills">
+                {href && (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="figma-green-pill"
+                  >
+                    <SquareArrowOutUpRight size={13} stroke-width={2.25} aria-hidden="true" />
+                    <span>paper</span>
+                  </a>
+                )}
+
+                {bibtex && (
+                  <button
+                    type="button"
+                    class="figma-green-pill figma-green-pill--btn"
+                    data-pub-card-bibtex={bibtex}
+                    aria-label={`Copy BibTeX for ${entry.title}`}
+                  >
+                    <Copy size={13} stroke-width={2.25} class="icon-copy" aria-hidden="true" />
+                    <Check size={13} stroke-width={2.5} class="icon-check" aria-hidden="true" />
+                    <span data-bibtex-label>bibtex</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  )
+}
+
+<script>
+  function initPubCardBibtex() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-pub-card-bibtex]');
+    buttons.forEach((btn) => {
+      if (btn.dataset.bound === '1') return;
+      btn.dataset.bound = '1';
+
+      btn.addEventListener('click', async () => {
+        const bibtex = btn.dataset.pubCardBibtex || '';
+        const label = btn.querySelector<HTMLElement>('[data-bibtex-label]');
+        if (!bibtex) return;
+        try {
+          await navigator.clipboard.writeText(bibtex);
+          btn.classList.add('is-copied');
+          if (label) label.textContent = 'copied';
+          window.setTimeout(() => {
+            btn.classList.remove('is-copied');
+            if (label) label.textContent = 'bibtex';
+          }, 1800);
+        } catch {
+          if (label) label.textContent = 'error';
+        }
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initPubCardBibtex);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPubCardBibtex, { once: true });
+  } else {
+    initPubCardBibtex();
+  }
+</script>
+
+<style>
+  .pub-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .pub-cards-grid--one {
+    grid-template-columns: 1fr;
+  }
+
+  .figma-pub-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.15rem;
+    padding: 1.4rem 1.5rem;
+    border-radius: 16px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .figma-pub-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+  }
+
+  .figma-pub-card__thumb-wrap {
+    width: 100%;
+    height: 145px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--color-bg-secondary);
+  }
+
+  .figma-pub-card__thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .figma-pub-card__top {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .figma-pub-card__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 0.1rem;
+  }
+
+  .figma-pub-card__chip {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.16rem 0.5rem;
+    border-radius: 999px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+  }
+
+  .figma-pub-card__chip--tier {
+    background: rgba(246, 235, 15, 0.2);
+    border-color: rgba(212, 198, 0, 0.45);
+    color: var(--color-text);
+  }
+
+  .figma-pub-card__chip--status {
+    background: var(--color-tertiary-surface);
+    color: var(--color-status-caution);
+  }
+
+  .figma-pub-card__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.32;
+    color: var(--color-text);
+  }
+
+  .figma-pub-card__title-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .figma-pub-card__title-link:hover {
+    color: var(--color-accent-hover);
+  }
+
+  .figma-pub-card__authors {
+    margin: 0;
+    font-size: 0.84375rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+  }
+
+  .figma-pub-card__abstract {
+    margin: 0.15rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .figma-pub-card__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--color-border-subtle);
+  }
+
+  .figma-pub-card__venue-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.65rem;
+    align-items: baseline;
+  }
+
+  .figma-pub-card__year {
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .figma-pub-card__venue {
+    font-size: 0.8125rem;
+    line-height: 1.38;
+    color: var(--color-text-secondary);
+  }
+
+  .figma-pub-card__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .figma-green-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.85rem;
+    border-radius: 999px;
+    background: #8cff9e;
+    color: #0b2912;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  .figma-green-pill:hover {
+    background: #6bf582;
+    color: #071f0c;
+    transform: translateY(-1px);
+  }
+
+  .figma-green-pill .icon-check {
+    display: none;
+  }
+
+  .figma-green-pill.is-copied {
+    background: #f6eb0f;
+    color: #12142b;
+  }
+
+  .figma-green-pill.is-copied .icon-copy {
+    display: none;
+  }
+
+  .figma-green-pill.is-copied .icon-check {
+    display: inline-block;
+  }
+
+  @media (max-width: 760px) {
+    .pub-cards-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

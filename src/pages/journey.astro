@@ -1,11 +1,13 @@
 ---
 /**
- * Journey & speaking — merged timeline with category filters and load-more batches.
+ * Latest (Journey & speaking) — merged timeline with:
+ * - Full-bleed Indigo Hero (#282b61)
+ * - Full-bleed Yellow Band (#f6eb0f) housing the category filters
+ * - Expandable timeline items + load-more batches
  * Route: /journey
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SEO from '../components/SEO.astro';
-import PageStats from '../components/PageStats.astro';
 import TimelineListItem from '../components/TimelineListItem.astro';
 import { getCollection, render } from 'astro:content';
 import { pagesConfig } from '../pages.config';
@@ -86,40 +88,123 @@ const speakingCount = speakingBlocks.length;
     image="/og/journey.png"
   />
 
-  <main class="page-container">
-    <header class="page-header">
-      <h1 class="page-title">{pagesConfig.journey.heading}</h1>
-      <p class="page-intro">{pagesConfig.journey.intro}</p>
-      <PageStats
-        text={`${merged.length} entries · ${journeyCount} career timeline · ${speakingCount} talks & appearances`}
+  <main class="journey-full-page">
+    <!-- ════════════════════════════════════════════════════════════════════════
+         1. PURPLE INDIGO HERO
+         ════════════════════════════════════════════════════════════════════════ -->
+    <header class="indigo-hero">
+      <img
+        src="/images/figma/bck-corner-tl.svg"
+        alt=""
+        width="350"
+        height="196"
+        class="indigo-hero__corner indigo-hero__corner--tl"
+        aria-hidden="true"
       />
+      <img
+        src="/images/figma/bck-corner-br.svg"
+        alt=""
+        width="368"
+        height="219"
+        class="indigo-hero__corner indigo-hero__corner--br"
+        aria-hidden="true"
+      />
+
+      <div class="indigo-hero__inner">
+        <p class="indigo-hero__eyebrow">Timeline &amp; Updates</p>
+        <h1 class="indigo-hero__title">{pagesConfig.journey.heading}</h1>
+        <p class="indigo-hero__lead">{pagesConfig.journey.intro}</p>
+
+        <div class="indigo-hero__stats" aria-label="Timeline statistics">
+          <span class="indigo-hero__stat-pill">
+            <strong>{merged.length}</strong> total entries
+          </span>
+          <span class="indigo-hero__stat-pill">
+            <strong>{journeyCount}</strong> career milestones
+          </span>
+          <span class="indigo-hero__stat-pill">
+            <strong>{speakingCount}</strong> talks &amp; press
+          </span>
+        </div>
+      </div>
     </header>
 
-    {merged.length === 0 ? (
-      <p class="empty-state">No timeline entries yet. Add content under <code>src/content/journey/</code> or <code>src/content/speaking/</code>.</p>
-    ) : (
-      <>
-        <div class="timeline-toolbar" role="toolbar" aria-label="Filter timeline by category">
-          <span class="timeline-toolbar__label">Show:</span>
-          <div class="timeline-filters" id="timeline-filters">
-            {filterOptions.map(({ value, label }) => (
-              <button
-                type="button"
-                class:list={['timeline-filter', value === 'all' && 'is-active']}
-                data-category={value}
-                aria-pressed={value === 'all' ? 'true' : 'false'}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+    <!-- ════════════════════════════════════════════════════════════════════════
+         2. YELLOW BAND FILTER TOOLBAR
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div class="yellow-band" role="toolbar" aria-label="Filter timeline by category">
+      <div class="yellow-band__inner">
+        <div class="yellow-band__group" id="timeline-filters">
+          <span class="yellow-band__label">Filter:</span>
+          {filterOptions.map(({ value, label }) => (
+            <button
+              type="button"
+              class:list={['yellow-band__pill', 'timeline-filter', value === 'all' && 'is-active']}
+              data-category={value}
+              aria-pressed={value === 'all' ? 'true' : 'false'}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
-        <div class="timeline-list" id="timeline-list" data-page-size={PAGE_SIZE}>
-          {merged.map((item, index) => {
-            const isLast = index === merged.length - 1;
-            if (item.kind === 'journey') {
-              const JourneyBody = item.Content;
+        <span class="yellow-band__label" id="timeline-filter-count" aria-live="polite">
+          Showing {Math.min(PAGE_SIZE, merged.length)} of {merged.length}
+        </span>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         3. TIMELINE CONTENT
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div class="page-container journey-content">
+      {merged.length === 0 ? (
+        <p class="empty-state">
+          No timeline entries yet. Add content under <code>src/content/journey/</code> or{' '}
+          <code>src/content/speaking/</code>.
+        </p>
+      ) : (
+        <>
+          <div class="timeline-list" id="timeline-list" data-page-size={PAGE_SIZE}>
+            {merged.map((item, index) => {
+              const isLast = index === merged.length - 1;
+              if (item.kind === 'journey') {
+                const JourneyBody = item.Content;
+                return (
+                  <div
+                    class="timeline-slot"
+                    data-timeline-item
+                    data-category={item.category}
+                    data-source={item.kind}
+                    hidden={index >= PAGE_SIZE}
+                  >
+                    <TimelineListItem
+                      itemId={`journey-${item.id}`}
+                      date={item.entry.data.date}
+                      category={item.category}
+                      title={item.entry.data.title}
+                      description={item.entry.data.description}
+                      isLast={isLast}
+                      skills={item.entry.data.skills}
+                      hasExpandable={item.hasContent}
+                      event={item.entry.data.event}
+                      url={item.entry.data.url}
+                      location={item.entry.data.location}
+                      duration={item.entry.data.duration}
+                      topics={item.entry.data.topics}
+                      slides={item.entry.data.slides}
+                      video={item.entry.data.video}
+                      featured={item.entry.data.featured}
+                      relatedPresentation={item.entry.data.relatedPresentation}
+                      relatedPaper={item.entry.data.relatedPaper}
+                      relatedArticle={item.entry.data.relatedArticle}
+                    >
+                      {item.hasContent && <JourneyBody />}
+                    </TimelineListItem>
+                  </div>
+                );
+              }
+              const SpeakingBody = item.Content;
               return (
                 <div
                   class="timeline-slot"
@@ -129,14 +214,12 @@ const speakingCount = speakingBlocks.length;
                   hidden={index >= PAGE_SIZE}
                 >
                   <TimelineListItem
-                    itemId={`journey-${item.id}`}
+                    itemId={`speaking-${item.id}`}
                     date={item.entry.data.date}
                     category={item.category}
                     title={item.entry.data.title}
                     description={item.entry.data.description}
                     isLast={isLast}
-                    skills={item.entry.data.skills}
-                    hasExpandable={item.hasContent}
                     event={item.entry.data.event}
                     url={item.entry.data.url}
                     location={item.entry.data.location}
@@ -148,58 +231,31 @@ const speakingCount = speakingBlocks.length;
                     relatedPresentation={item.entry.data.relatedPresentation}
                     relatedPaper={item.entry.data.relatedPaper}
                     relatedArticle={item.entry.data.relatedArticle}
+                    hasExpandable={item.hasContent}
                   >
-                    {item.hasContent && <JourneyBody />}
+                    {item.hasContent && <SpeakingBody />}
                   </TimelineListItem>
                 </div>
               );
-            }
-            const SpeakingBody = item.Content;
-            return (
-              <div
-                class="timeline-slot"
-                data-timeline-item
-                data-category={item.category}
-                data-source={item.kind}
-                hidden={index >= PAGE_SIZE}
-              >
-                <TimelineListItem
-                  itemId={`speaking-${item.id}`}
-                  date={item.entry.data.date}
-                  category={item.category}
-                  title={item.entry.data.title}
-                  description={item.entry.data.description}
-                  isLast={isLast}
-                  event={item.entry.data.event}
-                  url={item.entry.data.url}
-                  location={item.entry.data.location}
-                  duration={item.entry.data.duration}
-                  topics={item.entry.data.topics}
-                  slides={item.entry.data.slides}
-                  video={item.entry.data.video}
-                  featured={item.entry.data.featured}
-                  relatedPresentation={item.entry.data.relatedPresentation}
-                  relatedPaper={item.entry.data.relatedPaper}
-                  relatedArticle={item.entry.data.relatedArticle}
-                  hasExpandable={item.hasContent}
-                >
-                  {item.hasContent && <SpeakingBody />}
-                </TimelineListItem>
-              </div>
-            );
-          })}
-        </div>
+            })}
+          </div>
 
-        <div class="timeline-load-wrap">
-          <button type="button" class="btn btn-tertiary timeline-load-more" id="timeline-load-more" hidden>
-            Load 10 more
-          </button>
-          <p class="timeline-end-note" id="timeline-end-note" hidden>
-            Showing all entries for this filter.
-          </p>
-        </div>
-      </>
-    )}
+          <div class="timeline-load-wrap">
+            <button
+              type="button"
+              class="figma-yellow-btn timeline-load-more"
+              id="timeline-load-more"
+              hidden
+            >
+              Load 10 more
+            </button>
+            <p class="timeline-end-note" id="timeline-end-note" hidden>
+              Showing all entries for this filter.
+            </p>
+          </div>
+        </>
+      )}
+    </div>
   </main>
 
   <script>
@@ -208,6 +264,7 @@ const speakingCount = speakingBlocks.length;
       const loadBtn = document.getElementById('timeline-load-more');
       const endNote = document.getElementById('timeline-end-note');
       const filterRoot = document.getElementById('timeline-filters');
+      const countEl = document.getElementById('timeline-filter-count');
       if (!list || !loadBtn || !filterRoot || !endNote) return;
 
       const pageSize = Number(list.getAttribute('data-page-size')) || 10;
@@ -257,6 +314,10 @@ const speakingCount = speakingBlocks.length;
         loadBtn!.hidden = !moreLeft;
         endNote!.hidden = moreLeft || m.length === 0;
 
+        if (countEl) {
+          countEl.textContent = `Showing ${show} of ${m.length}`;
+        }
+
         filterRoot!.querySelectorAll('.timeline-filter').forEach((btn) => {
           const cat = btn.getAttribute('data-category');
           const isOn = cat === filter;
@@ -305,61 +366,24 @@ const speakingCount = speakingBlocks.length;
   </script>
 
   <style>
-    .timeline-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.75rem 1rem;
-      margin: 1.5rem 0 1.25rem;
+    .journey-full-page {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding: 0;
     }
 
-    .timeline-toolbar__label {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: var(--color-text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .timeline-filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .timeline-filter {
-      font-family: inherit;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      padding: 0.35rem 0.75rem;
-      border-radius: var(--border-radius-pill);
-      border: 1px solid var(--color-border);
-      background: transparent;
-      color: var(--color-text-secondary);
-      cursor: pointer;
-      transition:
-        background 0.15s ease,
-        border-color 0.15s ease,
-        color 0.15s ease;
-    }
-
-    .timeline-filter:hover {
-      border-color: var(--color-accent);
-      color: var(--color-text);
-    }
-
-    .timeline-filter.is-active {
-      border-color: var(--color-accent);
-      background: var(--color-accent-muted);
-      color: var(--color-accent);
+    .journey-content {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 3.5rem;
     }
 
     .timeline-list {
       display: flex;
       flex-direction: column;
       gap: 0;
-      margin-top: 0.5rem;
-      padding-top: 0.25rem;
+      margin-top: 0.25rem;
     }
 
     .timeline-slot[data-timeline-item][hidden] {

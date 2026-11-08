@@ -1,112 +1,542 @@
 ---
 /**
- * Footer Component
- * 
- * Site-wide footer displaying copyright information and social media links.
- * Automatically filters and displays only configured social links from site config.
- * Responsive layout that stacks vertically on mobile devices.
- * 
- * Social links are pulled from siteConfig.social and only displayed if they have
- * a URL value configured. Links open in new tabs with proper security attributes.
- * 
- * @component
- * 
- * @example
- * ```astro
- * <Footer />
- * ```
+ * Footer Component — Figma 3-column layout:
+ * 1. Inline "Get in touch" quick contact form (with progressive enhancement & mailto fallback)
+ * 2. Current affiliation, availability & direct CV/email card
+ * 3. Sitemap quick links, social icon row, and dissertation colophon
  */
-import { siteConfig } from '../config';
+import User from '@lucide/astro/icons/user';
+import AtSign from '@lucide/astro/icons/at-sign';
+import MessageSquare from '@lucide/astro/icons/message-square';
+import FileText from '@lucide/astro/icons/file-text';
+import { cvPdfPath, siteConfig } from '../config';
 
-/**
- * Gets the current year for copyright display
- */
 const currentYear = new Date().getFullYear();
 
-/**
- * Filters and formats social links from site configuration
- * 
- * Only includes platforms that have a URL configured (non-empty values).
- * Capitalizes platform names for display (e.g., "github" becomes "Github").
- * 
- * @returns Array of social link objects with platform name and URL
- */
-const socialLinks = Object.entries(siteConfig.social)
-  .filter(([_, url]) => url)
-  .map(([platform, url]) => ({
-    platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-    url
-  }));
+interface SocialIconEntry {
+  label: string;
+  href: string;
+  iconSrc: string;
+}
+
+const socialIconLinks: SocialIconEntry[] = [
+  {
+    label: 'Google Scholar',
+    href: siteConfig.social.scholar || 'https://scholar.google.com/citations?user=12j0HoYAAAAJ&hl=en',
+    iconSrc: '/images/figma/social-scholar.svg',
+  },
+  {
+    label: 'ORCID',
+    href: siteConfig.social.orcid || 'https://orcid.org/0000-0002-4707-7035',
+    iconSrc: '/images/figma/social-orcid.svg',
+  },
+  {
+    label: 'GitHub',
+    href: siteConfig.social.github || 'https://github.com/nviable',
+    iconSrc: '/images/figma/social-github.svg',
+  },
+  {
+    label: 'LinkedIn',
+    href: siteConfig.social.linkedin || 'https://www.linkedin.com/in/nviable/',
+    iconSrc: '/images/figma/social-linkedin.svg',
+  },
+  {
+    label: 'X (Twitter)',
+    href: siteConfig.social.twitter || 'https://x.com/nviable',
+    iconSrc: '/images/figma/social-x.svg',
+  },
+];
 ---
 
-<footer class="site-footer">
-  <div class="footer-container">
-    <span class="copyright">© {currentYear} {siteConfig.author.name}</span>
-    
-    {socialLinks.length > 0 && (
-      <div class="footer-social">
-        {socialLinks.map((link, index) => (
-          <>
-            <a href={link.url} target="_blank" rel="noopener noreferrer">
-              {link.platform}
-            </a>
-            {index < socialLinks.length - 1 && <span class="separator">·</span>}
-          </>
+<footer class="site-footer" data-contact-email={siteConfig.author.email}>
+  <div class="footer-inner">
+    <!-- Column 1: Get in touch form -->
+    <div class="footer-col footer-form-col">
+      <div class="footer-form-header">
+        <h2 class="footer-heading">Get in touch</h2>
+        <p class="footer-lead">
+          Want to discuss media forensics? Need an opinion on a piece of media? Reach out!
+        </p>
+      </div>
+
+      <form method="POST" action="/contact" class="footer-contact-form" data-footer-contact-form>
+        <div class="footer-form-row">
+          <label class="footer-input-wrap">
+            <span class="visually-hidden">Your name</span>
+            <User size={15} stroke-width={2} class="footer-input-icon" aria-hidden="true" />
+            <input
+              type="text"
+              name="name"
+              placeholder="Your name"
+              required
+              autocomplete="name"
+            />
+          </label>
+          <label class="footer-input-wrap">
+            <span class="visually-hidden">Your email</span>
+            <AtSign size={15} stroke-width={2} class="footer-input-icon" aria-hidden="true" />
+            <input
+              type="email"
+              name="email"
+              placeholder="Your email"
+              required
+              autocomplete="email"
+            />
+          </label>
+        </div>
+
+        <label class="footer-input-wrap footer-textarea-wrap">
+          <span class="visually-hidden">Message</span>
+          <MessageSquare size={15} stroke-width={2} class="footer-input-icon footer-input-icon--top" aria-hidden="true" />
+          <textarea
+            name="message"
+            rows="3"
+            placeholder="Message"
+            required
+          ></textarea>
+        </label>
+
+        <input type="hidden" name="topic" value="Website Footer Inquiry" />
+
+        <div class="footer-hp" aria-hidden="true">
+          <label for="footer-company">Company</label>
+          <input id="footer-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="footer-form-actions">
+          <button type="submit" class="footer-send-btn">Send</button>
+          <span class="footer-form-status" data-footer-form-status role="status" aria-live="polite"></span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Column 2: Affiliation & Availability -->
+    <div class="footer-col footer-middle-col">
+      <h3 class="footer-subhead">Affiliation &amp; Availability</h3>
+      <div class="footer-focus-card">
+        <a href="/contact" class="footer-availability-badge">
+          <span class="footer-availability-dot" aria-hidden="true"></span>
+          Open to new roles &amp; collaborations
+        </a>
+        <p class="footer-focus-text">
+          Postdoctoral Researcher at RIT’s <strong>ESL Global Cybersecurity Institute</strong> &amp; Young Researcher Associate with the <strong>ITU AI for Good AMAS</strong> programme.
+        </p>
+        <div class="footer-focus-links">
+          <a href={`mailto:${siteConfig.author.email}`} class="footer-direct-link">
+            {siteConfig.author.email}
+          </a>
+          <a href={cvPdfPath} class="footer-direct-link">
+            <FileText size={14} stroke-width={2} aria-hidden="true" />
+            Download CV (PDF)
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3: Quick links, socials & colophon -->
+    <div class="footer-col footer-right-col">
+      <nav class="footer-nav-grid" aria-label="Footer navigation">
+        <a href="/publications">Publications</a>
+        <a href="/projects">Case Studies</a>
+        <a href="/projects">Projects</a>
+        <a href="/journey">Latest</a>
+        <a href="/journey?filter=media">Media Articles</a>
+        <a href="/experience">About Me</a>
+        <a href="/projects/stop-and-scan">STOP&amp;SCAN</a>
+        <a href="/contact">Contact</a>
+      </nav>
+
+      <div class="footer-socials" aria-label="Social and academic profiles">
+        {socialIconLinks.map((item) => (
+          <a
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="footer-social-btn"
+            aria-label={item.label}
+            title={item.label}
+          >
+            <img src={item.iconSrc} alt="" width="24" height="24" loading="lazy" decoding="async" />
+          </a>
         ))}
       </div>
-    )}
+
+      <p class="footer-colophon">
+        Designed and developed by me, as I was procrastinating on my dissertation · © {currentYear} {siteConfig.author.name}
+      </p>
+    </div>
   </div>
 </footer>
 
+<script>
+  function setupFooterForm() {
+    const form = document.querySelector<HTMLFormElement>('[data-footer-contact-form]');
+    const statusEl = document.querySelector<HTMLElement>('[data-footer-form-status]');
+    const footerEl = document.querySelector<HTMLElement>('.site-footer');
+    if (!form || !statusEl || form.dataset.bound === '1') return;
+    form.dataset.bound = '1';
+
+    const fallbackEmail = footerEl?.dataset.contactEmail || 'john.sohrawardi@rit.edu';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      const formData = new FormData(form);
+      const name = String(formData.get('name') ?? '').trim();
+      const email = String(formData.get('email') ?? '').trim();
+      const message = String(formData.get('message') ?? '').trim();
+
+      if (!name || !email || !message) {
+        statusEl.textContent = 'Please fill in all fields.';
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      statusEl.textContent = 'Sending…';
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          redirect: 'follow',
+        });
+        const statusParam = new URL(res.url, window.location.origin).searchParams.get('status');
+        if (statusParam === 'sent') {
+          statusEl.textContent = 'Message sent! Thank you.';
+          form.reset();
+        } else {
+          const subject = encodeURIComponent(`Website inquiry from ${name}`);
+          const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+          window.location.href = `mailto:${fallbackEmail}?subject=${subject}&body=${body}`;
+          statusEl.textContent = 'Opening your email client…';
+        }
+      } catch {
+        const subject = encodeURIComponent(`Website inquiry from ${name}`);
+        const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+        window.location.href = `mailto:${fallbackEmail}?subject=${subject}&body=${body}`;
+        statusEl.textContent = 'Opening your email client…';
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+  }
+
+  document.addEventListener('astro:page-load', setupFooterForm);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupFooterForm, { once: true });
+  } else {
+    setupFooterForm();
+  }
+</script>
+
 <style>
   .site-footer {
-    border-top: 1px solid var(--color-border);
-    padding: 2rem 1.5rem;
+    background: var(--color-footer-bg, #282828);
+    color: #f5f5f5;
+    padding: 3rem 1.5rem;
     margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  .footer-container {
-    max-width: 1100px;
+  .footer-inner {
+    max-width: 1144px;
     margin: 0 auto;
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr) 320px;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .footer-col {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 
-  .copyright {
-    font-size: 0.8125rem;
-    color: var(--color-text-muted);
+  .footer-form-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .footer-social {
+  .footer-heading {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.05;
+    color: #f5f5f5;
+    margin: 0;
+  }
+
+  .footer-lead {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: #d4d4d8;
+    margin: 0;
+  }
+
+  .footer-contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .footer-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .footer-input-wrap {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.55rem;
+    background: #dddddd;
+    border: 1px solid #b0b0b0;
+    padding: 0.5rem 0.75rem;
+    color: #171717;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
   }
 
-  .footer-social a {
-    font-size: 0.8125rem;
-    color: var(--color-text-muted);
+  .footer-input-wrap:focus-within {
+    background: #ffffff;
+    border-color: var(--color-brand-yellow, #f6eb0f);
+    outline: 2px solid rgba(185, 189, 255, 0.45);
+  }
+
+  .footer-textarea-wrap {
+    align-items: flex-start;
+  }
+
+  .footer-input-icon {
+    color: #6b7280;
+    flex-shrink: 0;
+  }
+
+  .footer-input-icon--top {
+    margin-top: 0.2rem;
+  }
+
+  .footer-input-wrap input,
+  .footer-input-wrap textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    color: #171717;
+    outline: none;
+    resize: vertical;
+  }
+
+  .footer-input-wrap input::placeholder,
+  .footer-input-wrap textarea::placeholder {
+    color: #7c7c7c;
+  }
+
+  .footer-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .footer-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .footer-send-btn {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #1e2047;
+    background: #b9bdff;
+    border: none;
+    border-radius: 25px;
+    padding: 0.45rem 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .footer-send-btn:hover {
+    background: var(--color-brand-yellow, #f6eb0f);
+    color: #000000;
+    transform: translateY(-1px);
+  }
+
+  .footer-form-status {
+    font-size: 0.75rem;
+    color: #b9bdff;
+  }
+
+  /* Middle column */
+  .footer-subhead {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f5f5f5;
+    margin: 0;
+  }
+
+  .footer-focus-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .footer-availability-badge {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #f5f5f5;
+    background: rgba(118, 255, 138, 0.12);
+    border: 1px solid rgba(118, 255, 138, 0.35);
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: background-color 0.15s ease;
   }
 
-  .footer-social a:hover {
-    color: var(--color-text);
+  .footer-availability-badge:hover {
+    background: rgba(118, 255, 138, 0.22);
+    color: #ffffff;
   }
 
-  .separator {
-    color: var(--color-text-muted);
-    opacity: 0.5;
-    user-select: none;
+  .footer-availability-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #76ff8a;
+    flex-shrink: 0;
   }
 
-  @media (max-width: 480px) {
-    .footer-container {
-      flex-direction: column;
-      gap: 0.75rem;
-      text-align: center;
+  .footer-focus-text {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: #d4d4d8;
+    margin: 0;
+  }
+
+  .footer-focus-text strong {
+    color: #ffffff;
+  }
+
+  .footer-focus-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    padding-top: 0.25rem;
+  }
+
+  .footer-direct-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #b9bdff;
+    text-decoration: none;
+  }
+
+  .footer-direct-link:hover {
+    color: var(--color-brand-yellow, #f6eb0f);
+  }
+
+  /* Right column */
+  .footer-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem 1.5rem;
+  }
+
+  .footer-nav-grid a {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #f5f5f5;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-nav-grid a:hover {
+    color: var(--color-brand-yellow, #f6eb0f);
+  }
+
+  .footer-socials {
+    display: flex;
+    align-items: center;
+    gap: 1.35rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    opacity: 0.85;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+
+  .footer-social-btn:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+
+  .footer-social-btn img {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  .footer-colophon {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: #a3a3a3;
+    margin: 0;
+  }
+
+  @media (max-width: 1024px) {
+    .footer-inner {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .footer-middle-col {
+      grid-column: 1 / -1;
+      order: 3;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .footer-inner {
+      grid-template-columns: 1fr;
+      gap: 2.25rem;
+    }
+
+    .footer-middle-col {
+      order: 2;
+    }
+
+    .footer-right-col {
+      order: 3;
+    }
+
+    .footer-form-row {
+      grid-template-columns: 1fr;
     }
   }
 </style>

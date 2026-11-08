@@ -1,18 +1,11 @@
 ---
 /**
- * Contact Page — on-demand (server-rendered on Cloudflare Workers).
- *
- * Two modes, chosen at request time:
- *  - If the `CONTACT_MAILER` Email Routing binding is configured, render a real
- *    contact form. POSTs are handled here: validate → (optional) Turnstile →
- *    send via the binding → redirect (Post/Redirect/Get) with a ?status flag.
- *  - Otherwise, fall back to polished prefilled-`mailto:` buttons so the page is
- *    useful immediately, before any Cloudflare setup is done.
- *
- * See docs/CONTACT-FORM-SETUP.md to enable the form.
+ * Contact Page — Figma design language:
+ * - Full-bleed Indigo Hero (#282b61) with direct email/ORCID/Scholar/CV links
+ * - Full-bleed Yellow Band (#f6eb0f) with quick topic mailto pills
+ * - Rounded contact form card + social links
  *
  * Route: /contact
- * @page
  */
 export const prerender = false;
 
@@ -25,7 +18,6 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
 const env = (Astro.locals as any)?.runtime?.env ?? {};
 const mailerConfigured = Boolean(env.CONTACT_MAILER);
 
-/** Collaboration types — drive both the form's topic select and the mailto subjects. */
 const TOPICS = [
   'Research partnership or collaboration',
   'Invited talk or panel',
@@ -81,7 +73,6 @@ if (Astro.request.method === 'POST') {
     const honeypot = String(data.get('company') ?? '').trim();
     const token = String(data.get('cf-turnstile-response') ?? '');
 
-    // Honeypot: bots fill the hidden field — pretend success and drop it.
     if (honeypot) return Astro.redirect('/contact?status=sent', 303);
 
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -89,7 +80,6 @@ if (Astro.request.method === 'POST') {
       return Astro.redirect('/contact?status=invalid', 303);
     }
 
-    // Verify Turnstile when a secret is configured.
     if (env.TURNSTILE_SECRET_KEY) {
       const res = await fetch(
         'https://challenges.cloudflare.com/turnstile/v0/siteverify',
@@ -170,96 +160,163 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
     image="/og/contact.png"
   />
 
-  <main class="contact-page">
-    <section class="primary-zone">
-      <h1>{pagesConfig.contact.heading}</h1>
-      <p class="lead">I’m open to new roles and collaborations, in academia and in industry.</p>
-      <ul class="contact-lines">
-        <li><a href={`mailto:${siteConfig.author.email}`}>{siteConfig.author.email}</a></li>
-        {siteConfig.social.orcid && (
-          <li><a href={siteConfig.social.orcid} target="_blank" rel="noopener noreferrer">ORCID</a></li>
-        )}
-        {siteConfig.social.scholar && (
-          <li><a href={siteConfig.social.scholar} target="_blank" rel="noopener noreferrer">Google Scholar</a></li>
-        )}
-        <li><a href={cvPdfPath}>CV (PDF)</a></li>
-      </ul>
-    </section>
+  <main class="contact-page-wrap">
+    <!-- ════════════════════════════════════════════════════════════════════════
+         1. PURPLE INDIGO HERO
+         ════════════════════════════════════════════════════════════════════════ -->
+    <header class="indigo-hero">
+      <img
+        src="/images/figma/bck-corner-tl.svg"
+        alt=""
+        width="350"
+        height="196"
+        class="indigo-hero__corner indigo-hero__corner--tl"
+        aria-hidden="true"
+      />
+      <img
+        src="/images/figma/bck-corner-br.svg"
+        alt=""
+        width="368"
+        height="219"
+        class="indigo-hero__corner indigo-hero__corner--br"
+        aria-hidden="true"
+      />
 
-    {banner && (
-      <p
-        id="contact-form-banner"
-        class:list={['form-banner', banner.kind === 'ok' ? 'form-banner--ok' : 'form-banner--err']}
-        role="status"
-      >
-        {banner.text}
-      </p>
-    )}
-    {!banner && (
-      <p id="contact-form-banner" class="form-banner" role="status" hidden></p>
-    )}
+      <div class="indigo-hero__inner">
+        <p class="indigo-hero__eyebrow">Collaborations, Talks &amp; Media Inquiries</p>
+        <h1 class="indigo-hero__title">{pagesConfig.contact.heading}</h1>
+        <p class="indigo-hero__lead">
+          I’m open to new roles and collaborations, in academia and in industry.
+        </p>
 
-    <section class="form-zone">
-      {mailerConfigured && (
-        <form method="POST" action="/contact" class="contact-form" data-contact-form>
-          <div class="field">
-            <label for="name">Name</label>
-            <input id="name" name="name" type="text" required autocomplete="name" />
-          </div>
-          <div class="field">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" required autocomplete="email" />
-          </div>
-          <div class="field">
-            <label for="topic">What’s this about?</label>
-            <select id="topic" name="topic">
-              {TOPICS.map((t) => <option value={t}>{t}</option>)}
-            </select>
-          </div>
-          <div class="field">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" rows="6" required></textarea>
-          </div>
-
-          {/* Honeypot — hidden from people, tempting to bots */}
-          <div class="hp" aria-hidden="true">
-            <label for="company">Company</label>
-            <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
-          </div>
-
-          {turnstileSiteKey && (
-            <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="auto"></div>
+        <div class="indigo-hero__stats">
+          <a href={`mailto:${siteConfig.author.email}`} class="figma-yellow-btn">
+            {siteConfig.author.email}
+          </a>
+          {siteConfig.social.orcid && (
+            <a
+              href={siteConfig.social.orcid}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="indigo-hero__stat-pill contact-hero-link"
+            >
+              ORCID ↗
+            </a>
           )}
+          {siteConfig.social.scholar && (
+            <a
+              href={siteConfig.social.scholar}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="indigo-hero__stat-pill contact-hero-link"
+            >
+              Google Scholar ↗
+            </a>
+          )}
+          <a href={cvPdfPath} class="indigo-hero__stat-pill contact-hero-link">
+            CV (PDF)
+          </a>
+        </div>
+      </div>
+    </header>
 
-          <button type="submit" class="btn btn-primary submit-btn">Send message</button>
-        </form>
+    <!-- ════════════════════════════════════════════════════════════════════════
+         2. YELLOW BAND WITH QUICK EMAIL TOPICS
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div class="yellow-band">
+      <div class="yellow-band__inner">
+        <div class="yellow-band__group">
+          <span class="yellow-band__label">Quick email:</span>
+          {TOPICS.map((t) => (
+            <a
+              class="yellow-band__pill"
+              href={`mailto:${siteConfig.author.email}?subject=${encodeURIComponent(t)}`}
+            >
+              {t}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         3. CONTACT FORM & SOCIAL LINKS
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div class="contact-page">
+      {banner && (
+        <p
+          id="contact-form-banner"
+          class:list={['form-banner', banner.kind === 'ok' ? 'form-banner--ok' : 'form-banner--err']}
+          role="status"
+        >
+          {banner.text}
+        </p>
+      )}
+      {!banner && (
+        <p id="contact-form-banner" class="form-banner" role="status" hidden></p>
       )}
 
-      <p class="mailto-intro">
-        {mailerConfigured ? 'Or start an email with a topic filled in:' : 'Start an email with a topic filled in:'}
-      </p>
-      <div class="mailto-buttons">
-        {TOPICS.map((t) => (
-          <a class="mailto-btn" href={`mailto:${siteConfig.author.email}?subject=${encodeURIComponent(t)}`}>
-            {t}
-          </a>
-        ))}
-      </div>
-    </section>
+      <section class="form-zone">
+        {mailerConfigured && (
+          <form method="POST" action="/contact" class="contact-form" data-contact-form>
+            <div class="field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" required autocomplete="name" />
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" required autocomplete="email" />
+            </div>
+            <div class="field">
+              <label for="topic">What’s this about?</label>
+              <select id="topic" name="topic">
+                {TOPICS.map((t) => <option value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div class="field">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="6" required></textarea>
+            </div>
 
-    {socialLinks.length > 0 && (
-      <section class="secondary-zone">
-        <h2>Elsewhere</h2>
-        <div class="social-links">
-          {socialLinks.map((link, index) => (
-            <>
-              <a href={link.url} target="_blank" rel="noopener noreferrer">{link.platform}</a>
-              {index < socialLinks.length - 1 && <span class="separator">·</span>}
-            </>
+            <div class="hp" aria-hidden="true">
+              <label for="company">Company</label>
+              <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+            </div>
+
+            {turnstileSiteKey && (
+              <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="auto"></div>
+            )}
+
+            <button type="submit" class="figma-yellow-btn submit-btn">Send message</button>
+          </form>
+        )}
+
+        <p class="mailto-intro">
+          {mailerConfigured ? 'Or start an email with a topic filled in:' : 'Start an email with a topic filled in:'}
+        </p>
+        <div class="mailto-buttons">
+          {TOPICS.map((t) => (
+            <a class="mailto-btn" href={`mailto:${siteConfig.author.email}?subject=${encodeURIComponent(t)}`}>
+              {t}
+            </a>
           ))}
         </div>
       </section>
-    )}
+
+      {socialLinks.length > 0 && (
+        <section class="secondary-zone">
+          <h2>Elsewhere</h2>
+          <div class="social-links">
+            {socialLinks.map((link, index) => (
+              <>
+                <a href={link.url} target="_blank" rel="noopener noreferrer">{link.platform}</a>
+                {index < socialLinks.length - 1 && <span class="separator">·</span>}
+              </>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
   </main>
 
   {turnstileSiteKey && mailerConfigured && (
@@ -341,43 +398,30 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
   </script>
 
   <style>
+    .contact-page-wrap {
+      width: 100%;
+    }
+
+    .contact-hero-link {
+      text-decoration: none;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .contact-hero-link:hover {
+      border-color: #f6eb0f;
+      color: #f6eb0f;
+    }
+
     .contact-page {
-      max-width: 700px;
+      max-width: 740px;
       margin: 0 auto;
-      padding: 3rem 1.5rem 8rem;
-    }
-
-    .primary-zone {
-      margin-bottom: 2rem;
-    }
-
-    .primary-zone h1 {
-      font-size: clamp(1.75rem, 4vw, 2.25rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 1rem;
-    }
-
-    .lead {
-      font-size: 1.0625rem;
-      line-height: 1.7;
-      color: var(--color-text);
-      margin: 0 0 1rem;
-    }
-
-    .contact-lines {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem 1rem;
-      font-size: 0.975rem;
+      padding: 2.5rem 1.5rem 5rem;
     }
 
     .form-banner {
       margin: 0 0 1.75rem;
       padding: 0.85rem 1rem;
+      border-radius: 12px;
       font-size: 0.9375rem;
       line-height: 1.5;
       border: 1px solid var(--color-border);
@@ -403,6 +447,10 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      padding: 1.65rem 1.75rem;
+      border-radius: 16px;
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
     }
 
     .field {
@@ -425,6 +473,7 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
       color: var(--color-text);
       background: var(--color-bg-secondary);
       border: 1px solid var(--color-border);
+      border-radius: 10px;
       padding: 0.65rem 0.85rem;
       width: 100%;
       transition: border-color 0.15s ease;
@@ -452,16 +501,6 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
 
     .submit-btn {
       align-self: flex-start;
-    }
-
-    .form-alt {
-      margin: 1.5rem 0 0;
-      font-size: 0.9375rem;
-      color: var(--color-text-muted);
-    }
-
-    .form-alt a {
-      color: var(--color-text-secondary);
     }
 
     .mailto-intro {
@@ -497,41 +536,20 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
       color: var(--color-text);
     }
 
-    .email-link {
-      display: block;
-      font-size: clamp(1.5rem, 4.5vw, 2.25rem);
-      font-weight: 600;
-      color: var(--color-text);
-      text-decoration: none;
-      letter-spacing: -0.02em;
-      margin-bottom: 1rem;
-      transition: color 0.2s ease;
-    }
-
-    .email-link:hover {
-      color: var(--color-text-secondary);
-    }
-
-    .context {
-      font-size: 1rem;
-      color: var(--color-text-muted);
-      line-height: 1.6;
-      margin: 0;
-    }
-
     .secondary-zone {
-      margin-top: 3rem;
-      padding-top: 3rem;
+      margin-top: 2.5rem;
+      padding-top: 2rem;
       border-top: 1px solid var(--color-border);
     }
 
     .secondary-zone h2 {
+      font-family: var(--font-display);
       font-size: 0.8125rem;
-      font-weight: 500;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
       color: var(--color-text-muted);
-      margin-bottom: 1rem;
+      margin-bottom: 0.85rem;
     }
 
     .social-links {
@@ -559,7 +577,11 @@ const banner = formStatus !== 'idle' ? banners[formStatus] : null;
 
     @media (max-width: 640px) {
       .contact-page {
-        padding: 2.5rem 1rem 6rem;
+        padding: 1.75rem 1rem 4rem;
+      }
+
+      .contact-form {
+        padding: 1.25rem;
       }
     }
   </style>

@@ -44,6 +44,8 @@
   --space-4xl: 6rem;      /* 96px */
   
   /* Typography Scale */
+  --font-display: 'Space Grotesk', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-sans: 'Public Sans', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-size-xs: 0.75rem;    /* 12px */
   --font-size-sm: 0.875rem;   /* 14px */
   --font-size-base: 1rem;     /* 16px */
@@ -53,6 +55,21 @@
   --font-size-3xl: 1.875rem;  /* 30px */
   --font-size-4xl: 2.25rem;   /* 36px */
   --font-size-5xl: 3rem;      /* 48px */
+
+  /* Figma Concept Brand Tokens */
+  --color-hero-bg: #282b61;
+  --color-hero-text: #f5f5f5;
+  --color-hero-muted: #b9bdff;
+  --color-brand-yellow: #f6eb0f;
+  --color-brand-orange: #ffbf24;
+  --color-brand-orange-dark: #d29500;
+  --color-real: #76ff8a;
+  --color-real-pill-bg: #aaffb7;
+  --color-real-pill-fg: #107820;
+  --color-fake: #ff2f72;
+  --color-fake-box: #ff0052;
+  --color-heading-brand: #b9bdff;
+  --color-footer-bg: #1e1f26;
   
   /* Line Heights */
   --line-height-tight: 1.25;
@@ -138,6 +155,8 @@
   --color-card-edge: #b5b5b5;
   --color-nav-highlight: #e6e6e6;
   --color-control-fill: #efefef;
+  --color-heading-brand: #282b61;
+  --color-footer-bg: #282828;
   
   /* Light mode gradients */
   --gradient-text: linear-gradient(135deg, #171717 0%, #525252 100%);
@@ -169,7 +188,7 @@ html {
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-sans);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   min-height: 100vh;

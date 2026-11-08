@@ -98,15 +98,15 @@ export const pagesConfig = {
   },
 
   /**
-   * Journey & speaking timeline (/journey) — merges `journey` and `speaking` collections
+   * Latest / timeline & speaking (/journey) — merges `journey` and `speaking` collections
    */
   journey: {
-    title: 'Journey — timeline, talks & appearances',
+    title: 'Latest — updates, talks & media',
     description:
-      'A timeline of conference talks and papers, teaching, media and press, professional engagement (standards, policy, law enforcement), and career milestones.',
-    heading: 'Journey',
+      'Latest updates, conference talks and papers, media coverage, teaching, professional engagement (standards, policy, law enforcement), and career milestones.',
+    heading: 'Latest',
     intro:
-      'Conferences, teaching, media, professional engagement, and career milestones in one place.',
+      'Recent updates, conferences, media coverage, teaching, professional engagement, and career milestones in one place.',
   },
 
   /**

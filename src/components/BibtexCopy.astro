@@ -44,25 +44,14 @@ const { bibtex } = Astro.props;
         }, 1600);
       };
 
-      const fallback = () => {
-        const area = document.createElement('textarea');
-        area.value = text;
-        area.setAttribute('readonly', '');
-        area.style.position = 'fixed';
-        area.style.left = '-9999px';
-        document.body.append(area);
-        area.select();
-        document.execCommand('copy');
-        area.remove();
-      };
-
       if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(text).then(finish).catch(() => {
-          fallback();
-          finish();
-        });
+        navigator.clipboard
+          .writeText(text)
+          .then(finish)
+          .catch(() => {
+            finish();
+          });
       } else {
-        fallback();
         finish();
       }
     });

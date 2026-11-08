@@ -1,107 +1,302 @@
 ---
 /**
- * Home Page — researcher-focused: HCI, digital media forensics, DeFake / verification research.
- * Route: /
- * @page
+ * Home Page — Figma concept implementation adapted to Astro with Dark/Light mode support:
+ * 1. Full-bleed Indigo Hero with 3-photo Real/Fake deepfake cycling teaser + physics floating word cloud
+ * 2. Fixed-height caption bar + Ctrl+K style Topic Explorer modal with grouped Projects (→), Papers (↗), & Media (↗/→)
+ * 3. Static "Latest" yellow ribbon below hero (4 recent updates + "view all latest →")
+ * 4. Split-column Selected Publications section with green paper/bibtex pills & optional thumbnails
+ * 5. Split-column Project Portfolio bento grid (DeFake Project featured + Varuna, Dungeons & Deepfakes, STOP&SCAN)
+ * 6. Media & Press Articles 3-card thumbnail grid with category badges
  */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SEO from '../components/SEO.astro';
 import StructuredData from '../components/StructuredData.astro';
-import ForwardLink from '../components/ForwardLink.astro';
-import PublicationRows from '../components/PublicationRows.astro';
-import Flag from '@lucide/astro/icons/flag';
-import BookOpen from '@lucide/astro/icons/book-open';
-import Presentation from '@lucide/astro/icons/presentation';
-import Users from '@lucide/astro/icons/users';
-import Mic from '@lucide/astro/icons/mic';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
-import File from '@lucide/astro/icons/file';
+import ArrowUpRight from '@lucide/astro/icons/arrow-up-right';
+import SquareArrowOutUpRight from '@lucide/astro/icons/square-arrow-out-up-right';
+import Copy from '@lucide/astro/icons/copy';
+import Check from '@lucide/astro/icons/check';
+import BookOpenText from '@lucide/astro/icons/book-open-text';
+import Newspaper from '@lucide/astro/icons/newspaper';
+import FolderGit2 from '@lucide/astro/icons/folder-git-2';
+import Search from '@lucide/astro/icons/search';
+import X from '@lucide/astro/icons/x';
+import FileText from '@lucide/astro/icons/file-text';
+import ShieldCheck from '@lucide/astro/icons/shield-check';
+import ScanFace from '@lucide/astro/icons/scan-face';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import heroPortrait from '../assets/john.jpg';
+import heroFake1 from '../assets/john-fake-1.png';
+import heroFake2 from '../assets/john-fake-2.png';
 import { cvPdfPath, publishedName, siteConfig } from '../config';
-import { truncateForPreview } from '../utils/preview';
-import { projectCoverKind } from '../utils/projectImage';
+import { DEFAULT_MEDIA_THUMBNAIL, resolveArticleThumbnail } from '../lib/article-thumbnails';
 
-const allProjects = await getCollection('projects');
-
-/**
- * One project group on the homepage. DeFake first, then Dungeons & Deepfakes,
- * STOP&SCAN, and Varuna. Inactive work (We.DeFake) stays off this page.
- */
-const homeProjectIds = [
-  'defake-app',
-  'dungeons-and-deepfakes',
-  'stop-and-scan',
-  'varuna',
+// ─── 1. HERO WORD CLOUD TOPICS (SINGLE SOURCE OF TRUTH) ────────────────────────
+const wordCloudTopics = [
+  {
+    id: 'deepfake',
+    label: 'Deepfake Detection',
+    size: 'lg',
+    blurb: 'Multi-signal explainable interfaces that surface forensic evidence instead of a single black-box score.',
+  },
+  {
+    id: 'training',
+    label: 'Immersive Training',
+    size: 'lg',
+    blurb: 'Scenario-based tabletop and LLM-driven simulations (Dungeons & Deepfakes) for newsroom verification.',
+  },
+  {
+    id: 'hci',
+    label: 'User Research',
+    size: 'md',
+    blurb: 'Mixed-methods studies with journalists, intelligence analysts, and law enforcement across global contexts.',
+  },
+  {
+    id: 'forensics',
+    label: 'Digital Forensics',
+    size: 'lg',
+    blurb: 'Ontology-driven workflows (Varuna) uniting visual, audio, provenance, and biometric verification.',
+  },
+  {
+    id: 'ethics',
+    label: 'AI Ethics',
+    size: 'md',
+    blurb: 'Calibrating human trust, mitigating automation bias, and countering synthetic media harms.',
+  },
+  {
+    id: 'security',
+    label: 'Cybersecurity',
+    size: 'md',
+    blurb: 'Usable security and resilient open-world detection against evolving adversarial manipulation.',
+  },
+  {
+    id: 'design',
+    label: 'Product Design',
+    size: 'md',
+    blurb: 'Translating complex ML models into human-centered investigative products from Figma to production.',
+  },
+  {
+    id: 'branding',
+    label: 'Branding',
+    size: 'sm',
+    blurb: 'Visual identity systems & mascot-guided public literacy frameworks like STOP&SCAN.',
+  },
 ] as const;
 
-const homeProjects = homeProjectIds
-  .map((id) => allProjects.find((project) => project.id === id))
-  .filter((project): project is (typeof allProjects)[number] => Boolean(project));
+type TopicId = (typeof wordCloudTopics)[number]['id'];
 
-/** Compact now-slice. Same Lucide icons as /journey, no year in the date. */
-type NowTone = 'primary' | 'secondary';
+/**
+ * Maps explicit tags/domains/topics and text cues to the 8 canonical word-cloud topic IDs.
+ */
+function resolveCloudTopics(rawTags: string[] = [], textContext = ''): TopicId[] {
+  const combined = `${rawTags.join(' ')} ${textContext}`.toLowerCase();
+  const matched = new Set<TopicId>();
 
-const NOW_ICON_BY_CATEGORY: Record<string, typeof Flag> = {
-  conference: Presentation,
-  teaching: BookOpen,
-  milestone: Flag,
-  media: Mic,
-  engagement: Users,
+  if (
+    combined.includes('deepfake') ||
+    combined.includes('spoof') ||
+    combined.includes('synthetic-media') ||
+    combined.includes('defake')
+  ) {
+    matched.add('deepfake');
+  }
+  if (
+    combined.includes('immersive training') ||
+    combined.includes('role-play') ||
+    combined.includes('dungeons') ||
+    combined.includes('simulation') ||
+    combined.includes('training') ||
+    combined.includes('education') ||
+    combined.includes('literacy')
+  ) {
+    matched.add('training');
+  }
+  if (
+    combined.includes('user research') ||
+    combined.includes('hci') ||
+    combined.includes('human') ||
+    combined.includes('journalis') ||
+    combined.includes('analyst') ||
+    combined.includes('mixed-methods') ||
+    combined.includes('mixed methods') ||
+    combined.includes('usability')
+  ) {
+    matched.add('hci');
+  }
+  if (
+    combined.includes('digital forensics') ||
+    combined.includes('forensic') ||
+    combined.includes('varuna') ||
+    combined.includes('ontology') ||
+    combined.includes('optical flow') ||
+    combined.includes('audio') ||
+    combined.includes('video') ||
+    combined.includes('jpeg trust') ||
+    combined.includes('iptc')
+  ) {
+    matched.add('forensics');
+  }
+  if (
+    combined.includes('ai ethics') ||
+    combined.includes('ai-ethics') ||
+    combined.includes('ethic') ||
+    combined.includes('clickbait') ||
+    combined.includes('election') ||
+    combined.includes('policy') ||
+    combined.includes('trust') ||
+    combined.includes('misinformation') ||
+    combined.includes('ai-generated-papers')
+  ) {
+    matched.add('ethics');
+  }
+  if (
+    combined.includes('cybersecurity') ||
+    combined.includes('security') ||
+    combined.includes('ccs') ||
+    combined.includes('soups') ||
+    combined.includes('law-enforcement') ||
+    combined.includes('police') ||
+    combined.includes('threat')
+  ) {
+    matched.add('security');
+  }
+  if (
+    combined.includes('product design') ||
+    combined.includes('user-centered design') ||
+    combined.includes('explainable') ||
+    combined.includes('interface') ||
+    combined.includes('ux') ||
+    combined.includes('tool')
+  ) {
+    matched.add('design');
+  }
+  if (
+    combined.includes('branding') ||
+    combined.includes('stop&scan') ||
+    combined.includes('stop-and-scan') ||
+    combined.includes('mascot') ||
+    combined.includes('amito')
+  ) {
+    matched.add('branding');
+  }
+
+  return Array.from(matched);
+}
+
+// ─── 2. PROJECTS DATA ──────────────────────────────────────────────────────────
+const allProjects = await getCollection('projects');
+
+const defakeProject = allProjects.find((p) => p.id === 'defake-app');
+const secondaryProjectIds = ['dungeons-and-deepfakes', 'stop-and-scan'] as const;
+const secondaryProjects = secondaryProjectIds
+  .map((id) => allProjects.find((p) => p.id === id))
+  .filter((p): p is (typeof allProjects)[number] => Boolean(p));
+
+const projectMetaCounts: Record<
+  string,
+  {
+    displayName: string;
+    shortSummary: string;
+    pubs: number;
+    media: number;
+    topics: TopicId[];
+  }
+> = {
+  'defake-app': {
+    displayName: 'DeFake Project',
+    shortSummary:
+      'DeFake is an interdisciplinary research initiative aimed at developing deepfake detection solutions for journalists, forensic experts, and law enforcement agencies by focusing on usability, explainability, and robustness.',
+    pubs: 7,
+    media: 6,
+    topics: ['deepfake', 'forensics', 'hci', 'security', 'design', 'branding'],
+  },
+  varuna: {
+    displayName: 'Varuna Project',
+    shortSummary:
+      'Varuna is a digital media forensics ontology-driven platform to organize and interact with the vast ecosystem of tools, evidence types, and analyst reasoning.',
+    pubs: 2,
+    media: 3,
+    topics: ['forensics', 'hci', 'security', 'design', 'deepfake'],
+  },
+  'dungeons-and-deepfakes': {
+    displayName: 'Dungeons & Deepfakes',
+    shortSummary:
+      'A novel scenario-based role-playing training simulation to engage journalists and media professionals in learning and improving media verification skills.',
+    pubs: 3,
+    media: 4,
+    topics: ['training', 'deepfake', 'hci', 'ethics', 'design', 'branding'],
+  },
+  'stop-and-scan': {
+    displayName: 'STOP&SCAN',
+    shortSummary:
+      'A five-step public trust-calibration framework and mascot-guided educational toolkit built with the ITU AI for Good AMAS programme.',
+    pubs: 1,
+    media: 3,
+    topics: ['ethics', 'design', 'branding', 'training', 'forensics'],
+  },
 };
 
-const shortMonthDay = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  timeZone: 'UTC',
-});
-
-const nowStatic = [
-  {
-    icon: Flag,
-    tone: 'primary' as NowTone,
-    date: 'Dec 6',
-    datetime: '2025-12-06',
-    text: 'Postdoctoral researcher at RIT’s ESL Global Cybersecurity Institute.',
-  },
-  {
-    icon: Users,
-    tone: 'primary' as NowTone,
-    date: 'Mar 6',
-    datetime: '2026-03-06',
-    text: 'Leading the DeFake Project, and co-leading STOP&SCAN with the ITU AI for Good AMAS programme.',
-  },
-];
-
-const allSpeaking = await getCollection('speaking');
-const todayUtc = new Date();
-todayUtc.setUTCHours(0, 0, 0, 0);
-
-const nowDynamic = [...allSpeaking]
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 2)
-  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
-  .map((entry) => {
-    const isUpcoming = entry.data.date.getTime() > todayUtc.getTime();
-    const cleanTitle = entry.data.title.replace(/^Upcoming:\s*/i, '').trim();
-    const prefix = isUpcoming ? 'Upcoming talk: ' : 'Recent talk: ';
+// All projects for the Ctrl+K Topic Explorer modal
+const modalProjects = [...allProjects]
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
+  .map((proj) => {
+    const custom = projectMetaCounts[proj.id];
+    const topics =
+      custom?.topics ??
+      resolveCloudTopics(
+        [...(proj.data.tags ?? []), ...(proj.data.domains ?? [])],
+        `${proj.data.title} ${proj.data.subtitle ?? ''} ${proj.data.abstract}`
+      );
     return {
-      icon: NOW_ICON_BY_CATEGORY[entry.data.type] ?? Presentation,
-      tone: 'secondary' as NowTone,
-      date: shortMonthDay.format(entry.data.date),
-      datetime: entry.data.date.toISOString().slice(0, 10),
-      text: `${prefix}${cleanTitle.replace(/\.$/, '')}.`,
+      id: proj.id,
+      title: custom?.displayName ?? proj.data.title,
+      subtitle: proj.data.subtitle ?? proj.data.type,
+      year: proj.data.year,
+      role: proj.data.role,
+      href: `/projects/${proj.id}`,
+      topics,
     };
   });
 
-/**
- * Homepage slice is selected work (CHI, CCS, journal, dissertation, book chapter),
- * not under-review papers or earlier ICDIM items.
- */
+// ─── 3. LATEST RIBBON DATA (MERGED JOURNEY + SPEAKING) ─────────────────────────
+const allJourney = await getCollection('journey');
+const allSpeaking = await getCollection('speaking');
+
+const mergedUpdates = [
+  ...allJourney.map((entry) => ({
+    id: `journey-${entry.id}`,
+    date: entry.data.date,
+    title: entry.data.title,
+    type: entry.data.type,
+    href: `/journey#journey-${entry.id}`,
+  })),
+  ...allSpeaking.map((entry) => ({
+    id: `speaking-${entry.id}`,
+    date: entry.data.date,
+    title: entry.data.title.replace(/^Upcoming:\s*/i, '').trim(),
+    type: entry.data.type,
+    href: `/journey#speaking-${entry.id}`,
+  })),
+]
+  .sort((a, b) => b.date.getTime() - a.date.getTime())
+  .slice(0, 4);
+
+function formatIsoShort(date: Date): string {
+  const y = date.getUTCFullYear();
+  const m = date.getUTCMonth() + 1;
+  const d = date.getUTCDate();
+  return `${y}-${m}-${d}`;
+}
+
+// ─── 4. PUBLICATIONS DATA ──────────────────────────────────────────────────────
 const allPublications = await getCollection('publications');
-const recentPublications = allPublications
+const isUnpublished = (status: string | undefined) =>
+  status === 'underReview' || status === 'inSubmission' || status === 'inPreparation';
+const publishedPapers = allPublications.filter((p) => !isUnpublished(p.data.status));
+
+const selectedPublications = publishedPapers
   .filter((pub) => {
     const venue = pub.data.venue.toLowerCase();
     const selectedVenue =
@@ -110,14 +305,95 @@ const recentPublications = allPublications
       pub.data.kind === 'journal' ||
       pub.data.kind === 'dissertation' ||
       pub.data.kind === 'bookChapter';
-    const underReview = pub.data.status === 'underReview' || pub.data.status === 'inSubmission';
-    return selectedVenue && !underReview && !venue.includes('icdim');
+    return selectedVenue && !venue.includes('icdim');
   })
   .sort((a, b) => {
     if (b.data.year !== a.data.year) return b.data.year - a.data.year;
     return (a.data.order ?? 999) - (b.data.order ?? 999);
   })
   .slice(0, 4);
+
+const modalPublications = [...publishedPapers]
+  .sort((a, b) => {
+    if (b.data.year !== a.data.year) return b.data.year - a.data.year;
+    return (a.data.order ?? 999) - (b.data.order ?? 999);
+  })
+  .map((pub) => {
+    const topics = resolveCloudTopics(
+      pub.data.tags ?? [],
+      `${pub.data.title} ${pub.data.venue} ${pub.data.abstract ?? ''}`
+    );
+    return {
+      id: pub.id,
+      title: pub.data.title,
+      venue: pub.data.venue,
+      year: pub.data.year,
+      authors: pub.data.authors,
+      href: pub.data.url || '/publications',
+      external: Boolean(pub.data.url),
+      topics,
+    };
+  });
+
+// ─── 5. MEDIA ARTICLES & TALKS DATA ────────────────────────────────────────────
+const mediaDateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+function inferMediaBadge(title: string, event: string, customBadge?: string): string {
+  if (customBadge) return customBadge;
+  const lower = `${title} ${event}`.toLowerCase();
+  if (lower.includes('explainer') || lower.includes('what are')) return 'explainer';
+  if (lower.includes('guide') || lower.includes('tow center')) return 'field guide';
+  if (lower.includes('interview')) return 'interview';
+  if (lower.includes('real or fake') || lower.includes('policy')) return 'fact check';
+  return 'press feature';
+}
+
+const mediaArticles = await Promise.all(
+  allSpeaking
+    .filter((entry) => entry.data.type === 'media')
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    .slice(0, 3)
+    .map(async (entry) => ({
+      id: entry.id,
+      title: entry.data.title,
+      outlet: entry.data.event.replace(/\s*\(.*?\)\s*/g, '').trim(),
+      dateLabel: mediaDateFormatter.format(entry.data.date),
+      datetime: entry.data.date.toISOString().slice(0, 10),
+      href: entry.data.url || `/journey#speaking-${entry.id}`,
+      external: Boolean(entry.data.url),
+      thumbnail: await resolveArticleThumbnail({
+        slug: entry.id,
+        url: entry.data.url,
+        explicitThumbnail: entry.data.thumbnail,
+      }),
+      badge: inferMediaBadge(entry.data.title, entry.data.event, entry.data.badge),
+    }))
+);
+
+const modalMediaAndTalks = [...allSpeaking]
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((entry) => {
+    const topics = resolveCloudTopics(
+      entry.data.topics ?? [],
+      `${entry.data.title} ${entry.data.event} ${entry.data.description}`
+    );
+    const external = Boolean(entry.data.url);
+    return {
+      id: entry.id,
+      title: entry.data.title.replace(/^Upcoming:\s*/i, '').trim(),
+      outlet: entry.data.event,
+      year: entry.data.date.getUTCFullYear(),
+      kindLabel: entry.data.type === 'media' ? 'Press / Media' : 'Invited Talk',
+      href: entry.data.url || `/journey#speaking-${entry.id}`,
+      external,
+      topics,
+    };
+  });
 ---
 
 <BaseLayout>
@@ -130,572 +406,2717 @@ const recentPublications = allPublications
     noSuffix
   />
 
-  <!-- Structured Data for Homepage -->
   <StructuredData type="WebSite" />
   <StructuredData type="Person" />
 
-  <main class="home-page">
-    <section class="hero">
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <h1 class="hero-name">{siteConfig.author.name}</h1>
-          <p class="hero-published">Published as {publishedName}</p>
-          <p class="hero-role">{siteConfig.author.title}</p>
-          <p class="hero-lead">
-            I work on usable systems for internet safety: digital media forensics, content verification, and media literacy. The tools are for journalists, analysts, and investigators; the public pieces, like STOP&amp;SCAN, are for anyone deciding what to trust online.
+  <main class="home-main">
+    <!-- ════════════════════════════════════════════════════════════════════════
+         1. HERO SECTION (Indigo full-bleed + 3-photo Real/Fake carousel + Word Cloud)
+         ════════════════════════════════════════════════════════════════════════ -->
+    <section class="hero-banner" aria-label="Introduction and research overview">
+      <!-- Decorative Figma corner geometry -->
+      <img
+        src="/images/figma/bck-corner-tl.svg"
+        alt=""
+        width="314"
+        height="194"
+        class="hero-corner hero-corner--tl"
+        aria-hidden="true"
+      />
+      <img
+        src="/images/figma/bck-corner-br.svg"
+        alt=""
+        width="314"
+        height="194"
+        class="hero-corner hero-corner--br"
+        aria-hidden="true"
+      />
+
+      <div class="hero-container">
+        <!-- Top row: 3-photo deepfake teaser + Intro copy -->
+        <div class="hero-top-grid">
+          <div
+            class="deepfake-teaser"
+            data-deepfake-carousel
+            aria-label="Interactive deepfake detection photo teaser: cycles between real photo in green and AI-manipulated photos in red"
+          >
+            <div class="deepfake-stage">
+              <!-- Card 0: Fake 1 (Mustache / Pedro Pascal lookalike) -->
+              <button
+                type="button"
+                class="df-card df-card--fake"
+                data-df-card="0"
+                data-df-slot="left"
+                data-df-kind="fake"
+                aria-label="Inspect AI-manipulated portrait 1 (Face Swap)"
+              >
+                <div class="df-card__frame">
+                  <Image
+                    src={heroFake1}
+                    alt="Synthetic face-swapped variation of John Sohrawardi"
+                    widths={[280, 560]}
+                    sizes="(max-width: 768px) 220px, 281px"
+                    format="webp"
+                    quality={85}
+                    loading="eager"
+                    class="df-card__img"
+                  />
+                  <div class="df-face-box df-face-box--1" aria-hidden="true">
+                    <span class="df-corner df-corner--tl"></span>
+                    <span class="df-corner df-corner--tr"></span>
+                    <span class="df-corner df-corner--bl"></span>
+                    <span class="df-corner df-corner--br"></span>
+                    <span class="df-face-tag">
+                      <ScanFace size={11} stroke-width={2.5} />
+                      FAKE · FACE SWAP
+                    </span>
+                  </div>
+                </div>
+              </button>
+
+              <!-- Card 1: Real Photo (Green) -->
+              <button
+                type="button"
+                class="df-card df-card--real"
+                data-df-card="1"
+                data-df-slot="center"
+                data-df-kind="real"
+                aria-label="Inspect authentic portrait of John Sohrawardi"
+              >
+                <div class="df-card__frame">
+                  <Image
+                    src={heroPortrait}
+                    alt="John Sohrawardi (Authentic photo)"
+                    widths={[320, 640]}
+                    sizes="(max-width: 768px) 240px, 281px"
+                    format="webp"
+                    quality={88}
+                    loading="eager"
+                    fetchpriority="high"
+                    class="df-card__img"
+                  />
+                  <div class="df-real-badge" aria-hidden="true">
+                    <ShieldCheck size={12} stroke-width={2.5} />
+                    <span>REAL · AUTHENTIC</span>
+                  </div>
+                </div>
+              </button>
+
+              <!-- Card 2: Fake 2 (Long-haired AI variation) -->
+              <button
+                type="button"
+                class="df-card df-card--fake"
+                data-df-card="2"
+                data-df-slot="right"
+                data-df-kind="fake"
+                aria-label="Inspect AI-generated portrait 2 (Synthetic Restyle)"
+              >
+                <div class="df-card__frame">
+                  <Image
+                    src={heroFake2}
+                    alt="AI-generated long-haired variation of John Sohrawardi"
+                    widths={[280, 560]}
+                    sizes="(max-width: 768px) 220px, 281px"
+                    format="webp"
+                    quality={85}
+                    loading="eager"
+                    class="df-card__img"
+                  />
+                  <div class="df-face-box df-face-box--2" aria-hidden="true">
+                    <span class="df-corner df-corner--tl"></span>
+                    <span class="df-corner df-corner--tr"></span>
+                    <span class="df-corner df-corner--bl"></span>
+                    <span class="df-corner df-corner--br"></span>
+                    <span class="df-face-tag">
+                      <ScanFace size={11} stroke-width={2.5} />
+                      FAKE · AI GENERATED
+                    </span>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            <!-- Status / cycle indicator bar -->
+            <div class="df-controls" aria-hidden="true">
+              <span class="df-status-pill" data-df-status-pill data-kind="real">
+                <span class="df-status-dot"></span>
+                <span data-df-status-text>Verified Real Portrait · Authentic</span>
+              </span>
+              <div class="df-dots">
+                <span class="df-dot" data-df-dot="0"></span>
+                <span class="df-dot is-active" data-df-dot="1"></span>
+                <span class="df-dot" data-df-dot="2"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-bio">
+            <div class="hero-identity">
+              <p class="hero-greeting">Hi, I’m</p>
+              <h1 class="hero-name">{siteConfig.author.name}</h1>
+              <p class="hero-published">I publish as: {publishedName}</p>
+            </div>
+
+            <p class="hero-description">
+              I’m a <strong>Researcher</strong> and <strong>Technologist</strong> empowering journalists,
+              intelligence analysts, and law enforcement with user-centered tools for detecting and
+              interpreting digital manipulated content. With 5+ years of industry and 7+ years of
+              academic research experience I transform cutting-edge research into real-world solutions
+              that the users can comprehend.
+            </p>
+
+            <div class="hero-links">
+              <a href="/experience" class="hero-more-link">
+                more about me <span aria-hidden="true">→</span>
+              </a>
+              <a href={cvPdfPath} class="hero-cv-pill">
+                <FileText size={14} stroke-width={2} aria-hidden="true" />
+                CV (PDF)
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom row: Tagline + Interactive Physics Word Cloud -->
+        <div class="hero-bottom-grid">
+          <p class="hero-tagline">
+            Keeping it <span class="hero-tagline__real">Real</span> in the world where anything can be AI Generated
           </p>
-          <div class="hero-cta">
-            <a href="/projects" class="btn btn-primary">
-              Selected work
-              <ArrowRight class="arrow-icon" size={16} stroke-width={2} aria-hidden="true" />
-            </a>
-            <a href={cvPdfPath} class="btn btn-secondary">
-              <File size={16} stroke-width={2} aria-hidden="true" />
-              CV (PDF)
-            </a>
-            <a href="/contact" class="btn btn-tertiary">
-              Contact
-              <ArrowRight class="arrow-icon" size={16} stroke-width={2} aria-hidden="true" />
-            </a>
-          </div>
-        </div>
 
-        <figure class="hero-photo">
-          <Image
-            src={heroPortrait}
-            alt="John Sohrawardi"
-            widths={[320, 640]}
-            sizes="(max-width: 768px) 260px, 300px"
-            format="webp"
-            quality={85}
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-          />
-        </figure>
-      </div>
-    </section>
-
-    <section class="now-list" aria-labelledby="now-list-label">
-      <div class="now-columns">
-        <div class="now-col">
-          <p id="now-list-label" class="now-list-label">Now</p>
-          <ul class="now-entries">
-            {nowStatic.map((item) => {
-              const Icon = item.icon;
-              return (
-                <li>
-                  <span class:list={['now-icon', item.tone === 'secondary' && 'now-icon--secondary']} aria-hidden="true">
-                    <Icon size={15} stroke-width={2} />
-                  </span>
-                  <time datetime={item.datetime}>{item.date}</time>
-                  <span>{item.text}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-        <div class="now-col">
-          <div class="now-col-header">
-            <ForwardLink href="/journey" text="Journey" variant="muted" class="now-list-view-all" />
+          <div class="hero-cloud-wrap">
+            <div
+              class="hero-wordcloud"
+              data-word-cloud
+              role="group"
+              aria-label="Interactive research topics cloud — hover to preview or click to open topic index"
+            >
+              {wordCloudTopics.map((topic, idx) => (
+                <button
+                  type="button"
+                  class:list={['cloud-node', `cloud-node--${topic.size}`]}
+                  data-cloud-node
+                  data-topic-id={topic.id}
+                  data-topic-label={topic.label}
+                  data-topic-blurb={topic.blurb}
+                  data-seed={idx}
+                  aria-haspopup="dialog"
+                >
+                  {topic.label}
+                </button>
+              ))}
+            </div>
+            <!-- Fixed-height caption box so hovering never shifts layout -->
+            <div class="hero-cloud-caption" data-cloud-caption aria-live="polite">
+              <span class="cloud-caption-text" data-cloud-caption-text>
+                Hover a topic to preview or click any keyword to browse matching projects, papers &amp; press.
+              </span>
+              <button
+                type="button"
+                class="cloud-cmdk-trigger"
+                data-open-cmdk
+                aria-label="Open topic explorer (Ctrl+K)"
+              >
+                <Search size={12} stroke-width={2.5} aria-hidden="true" />
+                <span>Ctrl K</span>
+              </button>
+            </div>
           </div>
-          <ul class="now-entries">
-            {nowDynamic.map((item) => {
-              const Icon = item.icon;
-              return (
-                <li>
-                  <span class:list={['now-icon', item.tone === 'secondary' && 'now-icon--secondary']} aria-hidden="true">
-                    <Icon size={15} stroke-width={2} />
-                  </span>
-                  <time datetime={item.datetime}>{item.date}</time>
-                  <span>{item.text}</span>
-                </li>
-              );
-            })}
-          </ul>
         </div>
       </div>
     </section>
 
-    <section class="home-projects" id="projects" aria-labelledby="home-projects-heading">
-      <div class="section-header">
-        <h2 id="home-projects-heading">Projects</h2>
-        <ForwardLink href="/projects" text="View all" variant="muted" />
+    <!-- ════════════════════════════════════════════════════════════════════════
+         2. "LATEST" RIBBON (Static, high-contrast bar replacing marquee)
+         ════════════════════════════════════════════════════════════════════════ -->
+    <section class="latest-ribbon" aria-label="Latest updates and appearances">
+      <div class="latest-ribbon__inner">
+        <div class="latest-ribbon__items">
+          <span class="latest-ribbon__badge">LATEST</span>
+          {mergedUpdates.map((item) => (
+            <a href={item.href} class="latest-item">
+              <time datetime={item.date.toISOString().slice(0, 10)} class="latest-item__date">
+                {formatIsoShort(item.date)}
+              </time>
+              <span class="latest-item__title">{item.title}</span>
+            </a>
+          ))}
+        </div>
+
+        <a href="/journey" class="latest-ribbon__cta">
+          view all latest <span aria-hidden="true">→</span>
+        </a>
       </div>
-      <div class="home-projects-grid">
-        {homeProjects.map((project) => (
-          <a href={`/projects/${project.id}`} class="case-snapshot">
-            {project.data.coverImage && projectCoverKind(project.data.coverImage) && (
-              <img
-                src={project.data.coverImage}
-                alt=""
-                width="176"
-                height="64"
-                class="project-thumb"
-                loading="lazy"
-                decoding="async"
-                onerror="this.remove()"
-              />
-            )}
-            <span class="case-label">Research · {project.data.role}</span>
-            <span class="case-title-row">
-              <span class="case-title">{project.data.title}</span>
-              <ArrowRight class="case-arrow" size={16} stroke-width={2} aria-hidden="true" />
-            </span>
-            <span class="case-outcome">{truncateForPreview(project.data.abstract)}</span>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         3. SELECTED PUBLICATIONS (Split layout + Figma paper blocks)
+         ════════════════════════════════════════════════════════════════════════ -->
+    <section class="home-section home-publications" id="publications" aria-labelledby="home-pubs-heading">
+      <div class="section-split">
+        <div class="section-intro-col">
+          <h2 id="home-pubs-heading" class="section-brand-title">Publications</h2>
+          <p class="section-brand-copy">
+            I publish at top tier venues in the fields of HCI, AI, Cybersecurity and Psychology with{' '}
+            <strong>{publishedPapers.length}</strong> papers in total having been cited{' '}
+            <strong>414</strong> times.
+          </p>
+          <a href="/publications" class="figma-yellow-btn">
+            <span>View All</span>
+            <ArrowRight size={17} stroke-width={2.25} aria-hidden="true" />
           </a>
-        ))}
+        </div>
+
+        <div class="pub-cards-grid">
+          {selectedPublications.map((pub) => {
+            const bibtex = pub.data.bibtex?.trim() ?? '';
+            return (
+              <article class="pub-block">
+                {pub.data.thumbnail && (
+                  <div class="pub-block__thumb">
+                    <img
+                      src={pub.data.thumbnail}
+                      alt=""
+                      width="320"
+                      height="140"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                )}
+
+                <h3 class="pub-block__title">
+                  {pub.data.url ? (
+                    <a href={pub.data.url} target="_blank" rel="noopener noreferrer">
+                      {pub.data.title}
+                    </a>
+                  ) : (
+                    pub.data.title
+                  )}
+                </h3>
+
+                <p class="pub-block__authors">{pub.data.authors}</p>
+
+                {pub.data.abstract && (
+                  <p class="pub-block__abstract">{pub.data.abstract}</p>
+                )}
+
+                <div class="pub-block__venue-row">
+                  <span class="pub-block__year">{pub.data.year}</span>
+                  <span class="pub-block__venue">
+                    {pub.data.venue}
+                    {pub.data.quality && <span class="pub-block__quality"> · {pub.data.quality}</span>}
+                  </span>
+                </div>
+
+                <div class="pub-block__actions">
+                  {pub.data.url && (
+                    <a
+                      href={pub.data.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="pub-green-pill"
+                    >
+                      <SquareArrowOutUpRight size={12} stroke-width={2.5} aria-hidden="true" />
+                      <span>paper</span>
+                    </a>
+                  )}
+                  {bibtex && (
+                    <button
+                      type="button"
+                      class="pub-green-pill pub-bibtex-btn"
+                      data-home-bibtex={bibtex}
+                      aria-label={`Copy BibTeX for ${pub.data.title}`}
+                    >
+                      <Copy size={12} stroke-width={2.5} class="icon-copy" aria-hidden="true" />
+                      <Check size={12} stroke-width={2.5} class="icon-check" aria-hidden="true" />
+                      <span data-bibtex-label>bibtex</span>
+                    </button>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </div>
     </section>
 
-    <section class="research-focus" aria-label="Focus and availability">
-      <a href="/contact" class="research-focus-availability">
-        <span class="availability-dot" aria-hidden="true"></span>
-        Open to new roles &amp; collaborations
-      </a>
-      <p class="research-focus-body">
-        I started and lead the <strong>DeFake Project</strong>: detection that shows evidence instead of hiding it behind a score, with about 18 researchers across four universities. <strong>Dungeons &amp; Deepfakes</strong> is the training side. With the ITU AMAS programme I co-lead <strong>STOP&amp;SCAN</strong>, a short public method for checking media.
-      </p>
-    </section>
+    <!-- ════════════════════════════════════════════════════════════════════════
+         4. PROJECT PORTFOLIO (Secondary band + Split layout + Bento grid)
+         ════════════════════════════════════════════════════════════════════════ -->
+    <section class="home-section home-projects-band" id="projects" aria-labelledby="home-projects-heading">
+      <div class="section-split">
+        <div class="section-intro-col">
+          <h2 id="home-projects-heading" class="section-brand-title">Project Portfolio</h2>
+          <p class="section-brand-copy">
+            Majority of my recent projects are academic ventures that either were or stemmed off my
+            original research. However, there are several personal projects and case studies as well
+            in the archive.
+          </p>
+          <a href="/projects" class="figma-yellow-btn">
+            <span>View All</span>
+            <ArrowRight size={17} stroke-width={2.25} aria-hidden="true" />
+          </a>
+        </div>
 
-    <!-- Recent publications -->
-    <section class="recent-publications">
-      <div class="section-header">
-        <h2>Selected publications</h2>
-        <ForwardLink href="/publications" text="View all" variant="muted" />
+        <div class="portfolio-bento">
+          {/* Featured left column: DeFake Project */}
+          {defakeProject && (
+            <a
+              href={`/projects/${defakeProject.id}`}
+              class="bento-project bento-project--featured"
+            >
+              <div class="defake-lockup" aria-hidden="true">
+                <img
+                  src="/images/figma/defake-icon.svg"
+                  alt=""
+                  width="43"
+                  height="43"
+                  class="defake-lockup__icon"
+                />
+                <img
+                  src="/images/figma/defake-logotype.svg"
+                  alt=""
+                  width="116"
+                  height="46"
+                  class="defake-lockup__type"
+                />
+              </div>
+
+              <h3 class="bento-project__title bento-project__title--lg">
+                {projectMetaCounts['defake-app'].displayName}
+              </h3>
+
+              <p class="bento-project__desc bento-project__desc--lg">
+                {projectMetaCounts['defake-app'].shortSummary}
+              </p>
+
+              <div class="bento-project__meta">
+                <span class="bento-stat">
+                  <BookOpenText size={14} stroke-width={2} aria-hidden="true" />
+                  <strong>{projectMetaCounts['defake-app'].pubs}</strong> Publications
+                </span>
+                <span class="bento-divider" aria-hidden="true"></span>
+                <span class="bento-stat">
+                  <Newspaper size={14} stroke-width={2} aria-hidden="true" />
+                  <strong>{projectMetaCounts['defake-app'].media}</strong> Media
+                </span>
+                <span class="bento-divider" aria-hidden="true"></span>
+                <span class="bento-view-link">
+                  View Project
+                  <ArrowRight size={14} stroke-width={2.25} class="bento-arrow" aria-hidden="true" />
+                </span>
+              </div>
+            </a>
+          )}
+
+          {/* Right stacked column: Dungeons & Deepfakes, STOP&SCAN */}
+          <div class="bento-stack">
+            {secondaryProjects.map((project) => {
+              const info = projectMetaCounts[project.id] ?? {
+                displayName: project.data.title,
+                shortSummary: project.data.abstract,
+                pubs: project.data.relatedPublications?.length ?? 1,
+                media: 2,
+                topics: ['deepfake', 'hci'],
+              };
+              return (
+                <a
+                  href={`/projects/${project.id}`}
+                  class="bento-project bento-project--compact"
+                >
+                  <div class="bento-logo-row" aria-hidden="true">
+                    {project.id === 'dungeons-and-deepfakes' ? (
+                      <img
+                        src="/images/figma/dnd-logo.svg"
+                        alt=""
+                        width="40"
+                        height="32"
+                        class="bento-logo"
+                      />
+                    ) : project.data.coverImage ? (
+                      <img
+                        src={project.data.coverImage}
+                        alt=""
+                        width="96"
+                        height="32"
+                        class="bento-logo"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : null}
+                  </div>
+
+                  <h3 class="bento-project__title">{info.displayName}</h3>
+                  <p class="bento-project__desc">{info.shortSummary}</p>
+
+                  <div class="bento-project__meta">
+                    <span class="bento-stat">
+                      <BookOpenText size={14} stroke-width={2} aria-hidden="true" />
+                      <strong>{info.pubs}</strong> {info.pubs === 1 ? 'Publication' : 'Publications'}
+                    </span>
+                    <span class="bento-divider" aria-hidden="true"></span>
+                    <span class="bento-stat">
+                      <Newspaper size={14} stroke-width={2} aria-hidden="true" />
+                      <strong>{info.media}</strong> Media
+                    </span>
+                    <span class="bento-divider" aria-hidden="true"></span>
+                    <span class="bento-view-link">
+                      View Project
+                      <ArrowRight size={14} stroke-width={2.25} class="bento-arrow" aria-hidden="true" />
+                    </span>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
       </div>
-
-      {recentPublications.length > 0 ? (
-        <PublicationRows
-          entries={recentPublications.map((pub) => pub.data)}
-          fallbackHref="/publications"
-        />
-      ) : (
-        <p class="no-publications">No publications listed yet.</p>
-      )}
     </section>
 
-    <section class="cta">
-      <h2>Open to new roles and collaborations</h2>
-      <p>
-        Academic and industry. Email <a href={`mailto:${siteConfig.author.email}`}>{siteConfig.author.email}</a>, or use the contact form.
-      </p>
-      <div class="cta-buttons">
-        <a href="/contact" class="btn btn-primary">
-          Contact
-          <ArrowRight class="arrow-icon" size={16} stroke-width={2} aria-hidden="true" />
-        </a>
-        <a href={cvPdfPath} class="btn btn-secondary">
-          <File size={16} stroke-width={2} aria-hidden="true" />
-          CV (PDF)
-        </a>
+    <!-- ════════════════════════════════════════════════════════════════════════
+         5. MEDIA & PRESS ARTICLES (3-column thumbnail cards + tag badges)
+         ════════════════════════════════════════════════════════════════════════ -->
+    <section class="home-section home-media" id="media" aria-labelledby="home-media-heading">
+      <div class="media-container">
+        <div class="media-header">
+          <h2 id="home-media-heading" class="section-brand-title">Media &amp; Press</h2>
+          <p class="media-subtitle">
+            Interviews, explainers, and public verification guides featured in newsrooms and press outlets.
+          </p>
+        </div>
+
+        <div class="media-grid">
+          {mediaArticles.map((article) => (
+            <a
+              href={article.href}
+              target={article.external ? '_blank' : undefined}
+              rel={article.external ? 'noopener noreferrer' : undefined}
+              class="media-card"
+            >
+              <div class="media-card__image-wrap">
+                <img
+                  src={article.thumbnail}
+                  data-media-thumb
+                  data-fallback-src={DEFAULT_MEDIA_THUMBNAIL}
+                  alt=""
+                  width="360"
+                  height="155"
+                  loading="lazy"
+                  decoding="async"
+                  class="media-card__img"
+                />
+                <span class="media-card__tag">{article.badge}</span>
+              </div>
+
+              <div class="media-card__body">
+                <h3 class="media-card__title">{article.title}</h3>
+                <div class="media-card__meta">
+                  <time datetime={article.datetime}>{article.dateLabel}</time>
+                  <span class="media-card__outlet">{article.outlet}</span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        <div class="media-cta-row">
+          <a href="/journey?filter=media" class="figma-yellow-btn">
+            <span>View All Articles</span>
+            <ArrowRight size={17} stroke-width={2.25} aria-hidden="true" />
+          </a>
+        </div>
       </div>
     </section>
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         6. CTRL+K STYLE TOPIC EXPLORER MODAL
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div
+      class="cmdk-backdrop"
+      data-cmdk-modal
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cmdk-dialog-title"
+      hidden
+    >
+      <div class="cmdk-dialog">
+        <h2 id="cmdk-dialog-title" class="visually-hidden">Explore Research by Topic</h2>
+
+        <!-- Top search bar -->
+        <div class="cmdk-search-bar">
+          <Search size={18} stroke-width={2} class="cmdk-search-icon" aria-hidden="true" />
+          <input
+            type="search"
+            class="cmdk-search-input"
+            data-cmdk-input
+            placeholder="Filter projects, papers, and media articles…"
+            autocomplete="off"
+          />
+          <button
+            type="button"
+            class="cmdk-close-btn"
+            data-cmdk-close
+            aria-label="Close topic explorer"
+          >
+            <span class="cmdk-esc-label">ESC</span>
+            <X size={16} stroke-width={2} aria-hidden="true" />
+          </button>
+        </div>
+
+        <!-- Topic filter pills -->
+        <div
+          class="cmdk-topics-bar"
+          role="toolbar"
+          aria-label="Filter by research keyword"
+          data-cmdk-topics-bar
+        >
+          <button
+            type="button"
+            class="cmdk-topic-pill is-active"
+            data-cmdk-topic="all"
+            data-topic-blurb="Showing all projects, peer-reviewed publications, and press coverage."
+          >
+            All Topics
+          </button>
+          {wordCloudTopics.map((t) => (
+            <button
+              type="button"
+              class="cmdk-topic-pill"
+              data-cmdk-topic={t.id}
+              data-topic-label={t.label}
+              data-topic-blurb={t.blurb}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        <!-- Active topic description banner -->
+        <div class="cmdk-topic-blurb" data-cmdk-blurb>
+          Showing all projects, peer-reviewed publications, and press coverage.
+        </div>
+
+        <!-- Grouped results list -->
+        <div class="cmdk-results" data-cmdk-results>
+          <!-- Group 1: Projects (Internal pages -> straight right arrow) -->
+          <div class="cmdk-group" data-cmdk-group="projects">
+            <div class="cmdk-group-header">
+              <FolderGit2 size={14} stroke-width={2} aria-hidden="true" />
+              <span>Projects &amp; Case Studies</span>
+              <span class="cmdk-group-hint">Opens project page →</span>
+            </div>
+            <div class="cmdk-group-list">
+              {modalProjects.map((proj) => (
+                <a
+                  href={proj.href}
+                  class="cmdk-item cmdk-item--internal"
+                  data-cmdk-item
+                  data-topics={proj.topics.join(',')}
+                  data-search={`${proj.title} ${proj.subtitle} ${proj.role}`.toLowerCase()}
+                >
+                  <div class="cmdk-item__main">
+                    <span class="cmdk-item__title">{proj.title}</span>
+                    <span class="cmdk-item__sub">{proj.subtitle} · {proj.year}</span>
+                  </div>
+                  <div class="cmdk-item__action">
+                    <span class="cmdk-badge cmdk-badge--project">Case Study</span>
+                    <ArrowRight size={16} stroke-width={2.25} class="cmdk-arrow cmdk-arrow--straight" aria-hidden="true" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <!-- Group 2: Publications (External venue/PDF -> angled up-right arrow) -->
+          <div class="cmdk-group" data-cmdk-group="publications">
+            <div class="cmdk-group-header">
+              <BookOpenText size={14} stroke-width={2} aria-hidden="true" />
+              <span>Publications</span>
+              <span class="cmdk-group-hint">Opens paper in new tab ↗</span>
+            </div>
+            <div class="cmdk-group-list">
+              {modalPublications.map((pub) => (
+                <a
+                  href={pub.href}
+                  target={pub.external ? '_blank' : undefined}
+                  rel={pub.external ? 'noopener noreferrer' : undefined}
+                  class:list={['cmdk-item', pub.external ? 'cmdk-item--external' : 'cmdk-item--internal']}
+                  data-cmdk-item
+                  data-topics={pub.topics.join(',')}
+                  data-search={`${pub.title} ${pub.venue} ${pub.authors} ${pub.year}`.toLowerCase()}
+                >
+                  <div class="cmdk-item__main">
+                    <span class="cmdk-item__title">{pub.title}</span>
+                    <span class="cmdk-item__sub">{pub.venue} · {pub.year}</span>
+                  </div>
+                  <div class="cmdk-item__action">
+                    <span class="cmdk-badge cmdk-badge--paper">Paper</span>
+                    {pub.external ? (
+                      <ArrowUpRight size={16} stroke-width={2.25} class="cmdk-arrow cmdk-arrow--angled" aria-hidden="true" />
+                    ) : (
+                      <ArrowRight size={16} stroke-width={2.25} class="cmdk-arrow cmdk-arrow--straight" aria-hidden="true" />
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <!-- Group 3: Media, Press & Talks (External press -> angled up-right arrow; internal -> straight arrow) -->
+          <div class="cmdk-group" data-cmdk-group="media">
+            <div class="cmdk-group-header">
+              <Newspaper size={14} stroke-width={2} aria-hidden="true" />
+              <span>Media Articles &amp; Talks</span>
+              <span class="cmdk-group-hint">Press opens in new tab ↗</span>
+            </div>
+            <div class="cmdk-group-list">
+              {modalMediaAndTalks.map((item) => (
+                <a
+                  href={item.href}
+                  target={item.external ? '_blank' : undefined}
+                  rel={item.external ? 'noopener noreferrer' : undefined}
+                  class:list={['cmdk-item', item.external ? 'cmdk-item--external' : 'cmdk-item--internal']}
+                  data-cmdk-item
+                  data-topics={item.topics.join(',')}
+                  data-search={`${item.title} ${item.outlet} ${item.kindLabel} ${item.year}`.toLowerCase()}
+                >
+                  <div class="cmdk-item__main">
+                    <span class="cmdk-item__title">{item.title}</span>
+                    <span class="cmdk-item__sub">{item.outlet} · {item.year}</span>
+                  </div>
+                  <div class="cmdk-item__action">
+                    <span class="cmdk-badge cmdk-badge--media">{item.kindLabel}</span>
+                    {item.external ? (
+                      <ArrowUpRight size={16} stroke-width={2.25} class="cmdk-arrow cmdk-arrow--angled" aria-hidden="true" />
+                    ) : (
+                      <ArrowRight size={16} stroke-width={2.25} class="cmdk-arrow cmdk-arrow--straight" aria-hidden="true" />
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <p class="cmdk-empty" data-cmdk-empty hidden>
+            No matching items found. Try another keyword or clear the search filter.
+          </p>
+        </div>
+
+        <!-- Modal Footer Legend -->
+        <div class="cmdk-footer">
+          <div class="cmdk-footer__keys">
+            <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+            <span><kbd>↵</kbd> open</span>
+            <span><kbd>esc</kbd> close</span>
+          </div>
+          <div class="cmdk-footer__legend">
+            <span class="legend-item">
+              <ArrowRight size={13} stroke-width={2.5} aria-hidden="true" /> Internal page
+            </span>
+            <span class="legend-item">
+              <ArrowUpRight size={13} stroke-width={2.5} aria-hidden="true" /> External link (new tab)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
-
-  <style>
-    .home-page {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 1.5rem 4rem;
-    }
-
-    .hero {
-      padding: 3.5rem 0 0;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(200px, 300px);
-      column-gap: 3rem;
-      align-items: stretch;
-    }
-
-    .hero-name {
-      font-size: 2.25rem;
-      line-height: 1.2;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      margin: 0 0 0.35rem;
-      color: var(--color-text);
-    }
-
-    .hero-published {
-      margin: 0 0 0.85rem;
-      font-size: 0.9375rem;
-      line-height: 1.45;
-      color: var(--color-text-secondary);
-    }
-
-    .hero-role {
-      font-size: 1.0625rem;
-      line-height: 1.45;
-      color: var(--color-text);
-      margin: 0 0 1.25rem;
-    }
-
-    .hero-photo {
-      margin: 0;
-      overflow: hidden;
-      border: 1px solid var(--color-border);
-      background: var(--color-bg-secondary);
-      min-height: 0;
-    }
-
-    .hero-photo img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center 20%;
-    }
-
-    .hero-lead {
-      font-size: 1.125rem;
-      color: var(--color-text);
-      margin: 0 0 1.75rem;
-      line-height: 1.6;
-      max-width: 40rem;
-    }
-
-    .research-focus {
-      margin-bottom: 3.5rem;
-      padding-bottom: 2.5rem;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .research-focus-availability {
-      justify-self: start;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 0 0 1.25rem;
-      padding: 0.35rem 0.75rem;
-      border-radius: var(--border-radius-pill);
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: var(--color-text);
-      background: var(--color-control-fill);
-      border: 1px solid var(--color-border);
-      text-decoration: none;
-      transition: background var(--transition-base), border-color var(--transition-base);
-    }
-
-    .research-focus-availability:hover {
-      background: var(--color-card-hover);
-      border-color: var(--color-border);
-      color: var(--color-text);
-    }
-
-    .availability-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--color-status-ongoing);
-      flex-shrink: 0;
-    }
-
-    .research-focus-body {
-      font-size: 1.0625rem;
-      line-height: 1.75;
-      color: var(--color-text-secondary);
-      margin: 0;
-      max-width: 46rem;
-    }
-
-    .hero-cta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-    }
-
-    .case-snapshot {
-      --card-pad-y: 1.25rem;
-      --card-lip: 3px;
-      display: block;
-      padding: var(--card-pad-y) 1.5rem;
-      background: var(--color-card);
-      border: none;
-      border-bottom: var(--card-lip) solid var(--color-card-edge);
-      color: inherit;
-      text-decoration: none;
-      transition:
-        background-color var(--transition-base),
-        transform var(--transition-fast);
-    }
-
-    .case-snapshot:hover {
-      background: var(--color-card-hover);
-      color: inherit;
-    }
-
-    .case-snapshot:active {
-      border-bottom-width: 0;
-      padding-bottom: calc(var(--card-pad-y) + var(--card-lip));
-      transform: translateY(var(--card-lip));
-    }
-
-    .case-label {
-      display: block;
-      font-size: 0.6875rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--color-text-muted);
-      margin-bottom: 0.375rem;
-    }
-
-    .case-title-row {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .case-title {
-      display: block;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--color-text);
-      line-height: 1.4;
-      transition: color var(--transition-base);
-    }
-
-    .case-arrow {
-      flex-shrink: 0;
-      margin-top: 0.15rem;
-      color: var(--color-accent);
-      transition:
-        color var(--transition-base),
-        transform var(--arrow-duration) ease;
-    }
-
-    .case-snapshot:hover .case-title,
-    .case-snapshot:hover .case-arrow {
-      color: var(--color-accent-hover);
-    }
-
-    .case-snapshot:hover .case-arrow {
-      transform: translateX(var(--arrow-shift));
-    }
-
-    .case-outcome {
-      display: block;
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
-      line-height: 1.5;
-    }
-
-    .home-projects {
-      margin: 3rem 0 3.5rem;
-    }
-
-    .home-projects-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1rem;
-      align-items: stretch;
-    }
-
-    .home-projects-grid .case-snapshot {
-      height: 100%;
-    }
-
-    .now-list {
-      margin-top: 2.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--color-border);
-    }
-
-    .now-columns {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 1.35rem;
-    }
-
-    .now-list-label,
-    .now-col-header {
-      display: flex;
-      align-items: center;
-      min-height: 1.25rem;
-      margin: 0 0 0.85rem;
-    }
-
-    .now-list-label {
-      font-size: 0.6875rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--color-text-muted);
-    }
-
-    .now-col-header :global(.now-list-view-all) {
-      font-size: 0.75rem;
-    }
-
-    .now-entries {
-      display: flex;
-      flex-direction: column;
-      gap: 0.7rem;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    @media (min-width: 769px) {
-      .now-columns {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        column-gap: 2.75rem;
-        align-items: start;
-      }
-    }
-
-    .now-entries li {
-      display: grid;
-      grid-template-columns: 1rem 3.4rem minmax(0, 1fr);
-      gap: 0.55rem;
-      align-items: start;
-      font-size: 0.875rem;
-      line-height: 1.45;
-      color: var(--color-text);
-      margin: 0;
-    }
-
-    .now-icon {
-      display: flex;
-      color: var(--color-accent);
-      margin-top: 0.1rem;
-    }
-
-    .now-icon--secondary {
-      color: var(--color-text-muted);
-    }
-
-    .now-entries time {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-      color: var(--color-text-secondary);
-      letter-spacing: 0.01em;
-    }
-
-    .recent-publications {
-      margin-bottom: 3.5rem;
-    }
-
-    .section-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
-    }
-
-    .section-header h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-    }
-
-    .no-publications {
-      color: var(--color-text-muted);
-      font-style: italic;
-      padding: 1.5rem 0;
-    }
-
-    .cta {
-      padding: 3rem 0;
-      border-top: 1px solid var(--color-border);
-    }
-
-    .cta h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 0.75rem;
-      letter-spacing: -0.01em;
-    }
-
-    .cta p {
-      font-size: 1rem;
-      color: var(--color-text-secondary);
-      margin-bottom: 1.5rem;
-      max-width: 500px;
-      line-height: 1.6;
-    }
-
-    .cta-buttons {
-      display: flex;
-      gap: 1rem;
-    }
-
-    @media (max-width: 768px) {
-      .home-page {
-        padding: 0 1rem 3rem;
-      }
-
-      .hero {
-        padding: 2.25rem 0 0;
-      }
-
-      .hero-grid {
-        grid-template-columns: 1fr;
-        row-gap: 1.5rem;
-        align-items: start;
-      }
-
-      .hero-photo {
-        max-width: min(260px, 72vw);
-        justify-self: start;
-        height: auto;
-      }
-
-      .hero-photo img {
-        height: auto;
-        aspect-ratio: 1204 / 1089;
-        object-fit: cover;
-      }
-
-      .home-projects-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero-name {
-        font-size: 1.75rem;
-      }
-
-      .hero-cta {
-        flex-wrap: wrap;
-      }
-
-      .case-snapshot {
-        --card-pad-y: 1rem;
-        padding: var(--card-pad-y) 1.25rem;
-      }
-
-      .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-      }
-
-      .cta-buttons {
-        flex-direction: column;
-      }
-
-      .cta-buttons .btn {
-        width: 100%;
-      }
-
-      .research-focus-availability {
-        margin-bottom: 0.75rem;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .case-snapshot:active,
-      .case-arrow {
-        transition: none;
-      }
-    }
-  </style>
 </BaseLayout>
+
+<script>
+  // ─── 1. HERO DEEPFAKE 3-PHOTO CYCLING CAROUSEL ───────────────────────────────
+  function initDeepfakeCarousel() {
+    const root = document.querySelector<HTMLElement>('[data-deepfake-carousel]');
+    if (!root || root.dataset.bound === '1') return;
+    root.dataset.bound = '1';
+
+    const cards = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-df-card]'));
+    const dots = Array.from(root.querySelectorAll<HTMLElement>('[data-df-dot]'));
+    const statusPill = root.querySelector<HTMLElement>('[data-df-status-pill]');
+    const statusText = root.querySelector<HTMLElement>('[data-df-status-text]');
+    if (cards.length !== 3) return;
+
+    const statusDescriptions: Record<number, { text: string; kind: 'real' | 'fake' }> = {
+      0: { text: 'Deepfake Detected · Face Swap Anomaly', kind: 'fake' },
+      1: { text: 'Verified Real Portrait · Authentic', kind: 'real' },
+      2: { text: 'Deepfake Detected · Synthetic Generation', kind: 'fake' },
+    };
+
+    let centerIndex = 1;
+    let paused = false;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function applyPositions(activeIdx: number) {
+      centerIndex = ((activeIdx % 3) + 3) % 3;
+      const leftIdx = (centerIndex + 2) % 3;
+      const rightIdx = (centerIndex + 1) % 3;
+
+      cards.forEach((card, idx) => {
+        let slot = 'center';
+        if (idx === leftIdx) slot = 'left';
+        else if (idx === rightIdx) slot = 'right';
+        card.setAttribute('data-df-slot', slot);
+        card.setAttribute('aria-current', slot === 'center' ? 'true' : 'false');
+      });
+
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('is-active', idx === centerIndex);
+      });
+
+      const info = statusDescriptions[centerIndex];
+      if (statusPill && statusText && info) {
+        statusPill.setAttribute('data-kind', info.kind);
+        statusText.textContent = info.text;
+      }
+    }
+
+    cards.forEach((card, idx) => {
+      card.addEventListener('click', () => {
+        applyPositions(idx);
+      });
+    });
+
+    root.addEventListener('mouseenter', () => {
+      paused = true;
+    });
+    root.addEventListener('mouseleave', () => {
+      paused = false;
+    });
+    root.addEventListener('focusin', () => {
+      paused = true;
+    });
+    root.addEventListener('focusout', () => {
+      paused = false;
+    });
+
+    if (!reducedMotion) {
+      const intervalId = window.setInterval(() => {
+        if (!document.body.contains(root)) {
+          window.clearInterval(intervalId);
+          return;
+        }
+        if (!paused) {
+          applyPositions(centerIndex + 1);
+        }
+      }, 3600);
+    }
+  }
+
+  // ─── 2. PHYSICS WORD CLOUD + CTRL+K TOPIC EXPLORER MODAL ─────────────────────
+  function initWordCloudAndModal() {
+    const cloud = document.querySelector<HTMLElement>('[data-word-cloud]');
+    const modal = document.querySelector<HTMLElement>('[data-cmdk-modal]');
+    if (!cloud || !modal || cloud.dataset.bound === '1') return;
+    cloud.dataset.bound = '1';
+
+    const nodes = Array.from(cloud.querySelectorAll<HTMLButtonElement>('[data-cloud-node]'));
+    const captionText = document.querySelector<HTMLElement>('[data-cloud-caption-text]');
+    const openCmdkBtn = document.querySelector<HTMLButtonElement>('[data-open-cmdk]');
+
+    const searchInput = modal.querySelector<HTMLInputElement>('[data-cmdk-input]');
+    const closeBtn = modal.querySelector<HTMLButtonElement>('[data-cmdk-close]');
+    const topicsBar = modal.querySelector<HTMLElement>('[data-cmdk-topics-bar]');
+    const topicPills = Array.from(modal.querySelectorAll<HTMLButtonElement>('[data-cmdk-topic]'));
+    const blurbEl = modal.querySelector<HTMLElement>('[data-cmdk-blurb]');
+    const groups = Array.from(modal.querySelectorAll<HTMLElement>('[data-cmdk-group]'));
+    const allItems = Array.from(modal.querySelectorAll<HTMLAnchorElement>('[data-cmdk-item]'));
+    const emptyEl = modal.querySelector<HTMLElement>('[data-cmdk-empty]');
+
+    const defaultCaption =
+      'Hover a topic to preview or click any keyword to browse matching projects, papers & press.';
+    let hoveredNode: HTMLButtonElement | null = null;
+    let pointerX = -9999;
+    let pointerY = -9999;
+
+    let currentTopic = 'all';
+    let activeItemIndex = -1;
+    let lastFocusedElement: HTMLElement | null = null;
+
+    function getVisibleItems(): HTMLAnchorElement[] {
+      return allItems.filter((item) => !item.hidden);
+    }
+
+    function updateKeyboardHighlight(newIndex: number) {
+      const visible = getVisibleItems();
+      allItems.forEach((item) => item.classList.remove('is-kbd-active'));
+      if (visible.length === 0) {
+        activeItemIndex = -1;
+        return;
+      }
+      activeItemIndex = ((newIndex % visible.length) + visible.length) % visible.length;
+      const target = visible[activeItemIndex];
+      if (target) {
+        target.classList.add('is-kbd-active');
+        target.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    function filterModalResults() {
+      const query = (searchInput?.value || '').trim().toLowerCase();
+      let totalVisible = 0;
+
+      groups.forEach((group) => {
+        const groupItems = Array.from(group.querySelectorAll<HTMLAnchorElement>('[data-cmdk-item]'));
+        let groupVisible = 0;
+
+        groupItems.forEach((item) => {
+          const itemTopics = (item.dataset.topics || '').split(',');
+          const topicMatches = currentTopic === 'all' || itemTopics.includes(currentTopic);
+          const searchStr = item.dataset.search || '';
+          const queryMatches = !query || searchStr.includes(query);
+          const show = topicMatches && queryMatches;
+          item.hidden = !show;
+          if (show) {
+            groupVisible++;
+            totalVisible++;
+          }
+        });
+
+        group.hidden = groupVisible === 0;
+      });
+
+      if (emptyEl) {
+        emptyEl.hidden = totalVisible > 0;
+      }
+      updateKeyboardHighlight(0);
+    }
+
+    function selectModalTopic(topicId: string) {
+      currentTopic = topicId;
+      let activePillEl: HTMLButtonElement | null = null;
+      topicPills.forEach((pill) => {
+        const isMatch = pill.dataset.cmdkTopic === topicId;
+        pill.classList.toggle('is-active', isMatch);
+        if (isMatch) {
+          activePillEl = pill;
+          if (blurbEl && pill.dataset.topicBlurb) {
+            blurbEl.textContent = pill.dataset.topicBlurb;
+          }
+        }
+      });
+      filterModalResults();
+      if (activePillEl && topicsBar) {
+        window.requestAnimationFrame(() => {
+          activePillEl?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        });
+      }
+    }
+
+    function openModal(topicId = 'all') {
+      lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      if (searchInput) searchInput.value = '';
+      selectModalTopic(topicId);
+      modal!.hidden = false;
+      document.body.style.overflow = 'hidden';
+      window.requestAnimationFrame(() => {
+        searchInput?.focus();
+      });
+    }
+
+    function closeModal() {
+      if (modal!.hidden) return;
+      modal!.hidden = true;
+      document.body.style.removeProperty('overflow');
+      if (lastFocusedElement) {
+        lastFocusedElement.focus();
+      }
+    }
+
+    // Word cloud hover + click -> open modal for that topic
+    nodes.forEach((node) => {
+      node.addEventListener('mouseenter', () => {
+        hoveredNode = node;
+        if (captionText && node.dataset.topicBlurb) {
+          captionText.textContent = `${node.dataset.topicLabel}: ${node.dataset.topicBlurb}`;
+        }
+      });
+
+      node.addEventListener('mouseleave', () => {
+        if (hoveredNode === node) hoveredNode = null;
+        if (captionText) {
+          captionText.textContent = defaultCaption;
+        }
+      });
+
+      node.addEventListener('focus', () => {
+        if (captionText && node.dataset.topicBlurb) {
+          captionText.textContent = `${node.dataset.topicLabel}: ${node.dataset.topicBlurb}`;
+        }
+      });
+
+      node.addEventListener('blur', () => {
+        if (captionText) {
+          captionText.textContent = defaultCaption;
+        }
+      });
+
+      node.addEventListener('click', () => {
+        openModal(node.dataset.topicId || 'all');
+      });
+    });
+
+    openCmdkBtn?.addEventListener('click', () => openModal('all'));
+    closeBtn?.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    let isDraggingTopics = false;
+    let dragMoved = false;
+    let dragStartX = 0;
+    let dragStartScrollLeft = 0;
+
+    if (topicsBar) {
+      topicsBar.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        isDraggingTopics = true;
+        dragMoved = false;
+        dragStartX = e.clientX;
+        dragStartScrollLeft = topicsBar.scrollLeft;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDraggingTopics) return;
+        const dx = e.clientX - dragStartX;
+        if (Math.abs(dx) > 4) {
+          dragMoved = true;
+          topicsBar.classList.add('is-dragging');
+        }
+        if (dragMoved) {
+          e.preventDefault();
+          topicsBar.scrollLeft = dragStartScrollLeft - dx;
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (!isDraggingTopics) return;
+        isDraggingTopics = false;
+        topicsBar.classList.remove('is-dragging');
+        window.setTimeout(() => {
+          dragMoved = false;
+        }, 0);
+      });
+
+      topicsBar.addEventListener(
+        'wheel',
+        (e) => {
+          if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            e.preventDefault();
+            topicsBar.scrollLeft += e.deltaY;
+          }
+        },
+        { passive: false }
+      );
+    }
+
+    topicPills.forEach((pill) => {
+      pill.addEventListener('click', (e) => {
+        if (dragMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        selectModalTopic(pill.dataset.cmdkTopic || 'all');
+        searchInput?.focus();
+      });
+    });
+
+    searchInput?.addEventListener('input', () => {
+      filterModalResults();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (modal.hidden) {
+          openModal('all');
+        } else {
+          closeModal();
+        }
+        return;
+      }
+
+      if (modal.hidden) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        updateKeyboardHighlight(activeItemIndex + 1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        updateKeyboardHighlight(activeItemIndex - 1);
+      } else if (e.key === 'Enter' && document.activeElement === searchInput) {
+        const visible = getVisibleItems();
+        const activeItem = visible[activeItemIndex];
+        if (activeItem) {
+          e.preventDefault();
+          activeItem.click();
+          if (activeItem.target !== '_blank') {
+            closeModal();
+          }
+        }
+      }
+    });
+
+    // Floating physics animation for word cloud
+    cloud.addEventListener('mousemove', (e) => {
+      const rect = cloud.getBoundingClientRect();
+      pointerX = e.clientX - rect.left;
+      pointerY = e.clientY - rect.top;
+    });
+
+    cloud.addEventListener('mouseleave', () => {
+      pointerX = -9999;
+      pointerY = -9999;
+    });
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reducedMotion) {
+      const states = nodes.map((node, i) => ({
+        node,
+        phaseX: i * 1.37 + 0.4,
+        phaseY: i * 2.11 + 1.1,
+        speedX: 0.00075 + (i % 3) * 0.00018,
+        speedY: 0.0009 + ((i + 1) % 3) * 0.0002,
+        ampX: 5 + (i % 4) * 1.5,
+        ampY: 4 + (i % 3) * 1.5,
+        currX: 0,
+        currY: 0,
+      }));
+
+      function tick(now: number) {
+        if (!document.body.contains(cloud)) return;
+
+        for (const s of states) {
+          const isHovered = s.node === hoveredNode;
+          let targetX = Math.sin(now * s.speedX + s.phaseX) * s.ampX;
+          let targetY = Math.cos(now * s.speedY + s.phaseY) * s.ampY;
+
+          if (isHovered) {
+            targetX *= 0.2;
+            targetY *= 0.2;
+          } else if (pointerX > -1000) {
+            const rect = s.node.getBoundingClientRect();
+            const cloudRect = cloud!.getBoundingClientRect();
+            const cx = rect.left - cloudRect.left + rect.width / 2;
+            const cy = rect.top - cloudRect.top + rect.height / 2;
+            const dx = cx - pointerX;
+            const dy = cy - pointerY;
+            const dist = Math.hypot(dx, dy);
+            if (dist > 1 && dist < 130) {
+              const push = ((130 - dist) / 130) * 10;
+              targetX += (dx / dist) * push;
+              targetY += (dy / dist) * push;
+            }
+          }
+
+          s.currX += (targetX - s.currX) * 0.08;
+          s.currY += (targetY - s.currY) * 0.08;
+          const scale = isHovered ? 1.09 : 1;
+          s.node.style.transform = `translate3d(${s.currX.toFixed(2)}px, ${s.currY.toFixed(2)}px, 0) scale(${scale})`;
+        }
+
+        window.requestAnimationFrame(tick);
+      }
+
+      window.requestAnimationFrame(tick);
+    }
+  }
+
+  // ─── 3. HOMEPAGE BIBTEX COPY BUTTONS ─────────────────────────────────────────
+  function initHomeBibtex() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-home-bibtex]');
+    buttons.forEach((btn) => {
+      if (btn.dataset.bound === '1') return;
+      btn.dataset.bound = '1';
+
+      btn.addEventListener('click', async () => {
+        const bibtex = btn.dataset.homeBibtex || '';
+        const label = btn.querySelector<HTMLElement>('[data-bibtex-label]');
+        if (!bibtex) return;
+        try {
+          await navigator.clipboard.writeText(bibtex);
+          btn.classList.add('is-copied');
+          if (label) label.textContent = 'copied';
+          window.setTimeout(() => {
+            btn.classList.remove('is-copied');
+            if (label) label.textContent = 'bibtex';
+          }, 1800);
+        } catch {
+          if (label) label.textContent = 'error';
+        }
+      });
+    });
+  }
+
+  function initMediaThumbFallbacks() {
+    const imgs = document.querySelectorAll<HTMLImageElement>('img[data-media-thumb]');
+    imgs.forEach((img) => {
+      if (img.dataset.bound === '1') return;
+      img.dataset.bound = '1';
+      img.addEventListener('error', () => {
+        const fallback = img.dataset.fallbackSrc || '/images/media/media-default-thumb.png';
+        if (img.getAttribute('src') !== fallback) {
+          img.setAttribute('src', fallback);
+        }
+      });
+    });
+  }
+
+  function initHomePage() {
+    initDeepfakeCarousel();
+    initWordCloudAndModal();
+    initHomeBibtex();
+    initMediaThumbFallbacks();
+  }
+
+  document.addEventListener('astro:page-load', initHomePage);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHomePage, { once: true });
+  } else {
+    initHomePage();
+  }
+</script>
+
+<style>
+  .home-main {
+    width: 100%;
+    overflow-x: clip;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     1. HERO BANNER
+     ══════════════════════════════════════════════════════════════════════════ */
+  .hero-banner {
+    position: relative;
+    background: var(--color-hero-bg, #282b61);
+    color: var(--color-hero-text, #f5f5f5);
+    margin-top: -4.15rem;
+    padding: calc(4.15rem + 3.25rem) 1.5rem 3.5rem;
+    overflow: hidden;
+  }
+
+  .hero-corner {
+    position: absolute;
+    width: 314px;
+    height: 194px;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+  }
+
+  .hero-corner--tl {
+    top: 0;
+    left: 0;
+  }
+
+  .hero-corner--br {
+    bottom: 0;
+    right: 0;
+    transform: rotate(180deg);
+  }
+
+  .hero-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1144px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2.75rem;
+  }
+
+  .hero-top-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 548px) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: center;
+  }
+
+  /* ─── 3-Photo Deepfake Teaser Carousel ─── */
+  .deepfake-teaser {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .deepfake-stage {
+    position: relative;
+    width: 100%;
+    max-width: 548px;
+    height: 318px;
+  }
+
+  .df-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 20px;
+    transition:
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      filter 0.55s ease,
+      box-shadow 0.4s ease;
+    will-change: transform, opacity;
+  }
+
+  .df-card:focus-visible {
+    outline: 3px solid var(--color-brand-yellow, #f6eb0f);
+    outline-offset: 4px;
+  }
+
+  .df-card__frame {
+    position: relative;
+    width: 281px;
+    height: 313px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #151736;
+    border: 5px solid transparent;
+    transition: border-color 0.4s ease;
+  }
+
+  .df-card--real .df-card__frame {
+    border-color: var(--color-real, #76ff8a);
+  }
+
+  .df-card--fake .df-card__frame {
+    border-color: var(--color-fake, #ff2f72);
+  }
+
+  .df-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 18%;
+    display: block;
+    pointer-events: none;
+  }
+
+  .df-card[data-df-slot='center'] {
+    z-index: 3;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
+  }
+
+  .df-card[data-df-slot='left'] {
+    z-index: 1;
+    opacity: 0.62;
+    transform: translate(-114%, -50%) scale(0.73);
+    filter: saturate(0.85) brightness(0.88);
+  }
+
+  .df-card[data-df-slot='right'] {
+    z-index: 2;
+    opacity: 0.62;
+    transform: translate(14%, -50%) scale(0.73);
+    filter: saturate(0.85) brightness(0.88);
+  }
+
+  .df-card[data-df-slot='left']:hover,
+  .df-card[data-df-slot='right']:hover {
+    opacity: 0.85;
+    filter: none;
+  }
+
+  /* Red face-detection bounding box on Fake portraits */
+  .df-face-box {
+    position: absolute;
+    pointer-events: none;
+    border: 2px dashed rgba(255, 0, 82, 0.55);
+    transition:
+      border-color 0.35s ease,
+      background-color 0.35s ease,
+      transform 0.35s ease;
+  }
+
+  .df-face-box--1 {
+    top: 17%;
+    left: 25%;
+    width: 50%;
+    height: 45%;
+  }
+
+  .df-face-box--2 {
+    top: 16%;
+    left: 26%;
+    width: 48%;
+    height: 45%;
+  }
+
+  .df-card[data-df-slot='center'] .df-face-box {
+    background: rgba(255, 0, 82, 0.08);
+    border-color: rgba(255, 0, 82, 0.85);
+  }
+
+  .df-corner {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-color: var(--color-fake-box, #ff0052);
+    border-style: solid;
+    border-width: 0;
+  }
+
+  .df-corner--tl {
+    top: -3px;
+    left: -3px;
+    border-top-width: 5px;
+    border-left-width: 5px;
+  }
+
+  .df-corner--tr {
+    top: -3px;
+    right: -3px;
+    border-top-width: 5px;
+    border-right-width: 5px;
+  }
+
+  .df-corner--bl {
+    bottom: -3px;
+    left: -3px;
+    border-bottom-width: 5px;
+    border-left-width: 5px;
+  }
+
+  .df-corner--br {
+    bottom: -3px;
+    right: -3px;
+    border-bottom-width: 5px;
+    border-right-width: 5px;
+  }
+
+  .df-face-tag {
+    position: absolute;
+    bottom: -26px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: var(--color-fake-box, #ff0052);
+    color: #ffffff;
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 0, 82, 0.45);
+  }
+
+  .df-card[data-df-slot='center'] .df-face-tag {
+    opacity: 1;
+  }
+
+  .df-real-badge {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(16, 120, 32, 0.9);
+    border: 1px solid var(--color-real, #76ff8a);
+    color: var(--color-real, #76ff8a);
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .df-card[data-df-slot='center'] .df-real-badge {
+    opacity: 1;
+  }
+
+  .df-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    max-width: 340px;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(15, 17, 45, 0.55);
+    border: 1px solid rgba(185, 189, 255, 0.2);
+  }
+
+  .df-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #e5e7eb;
+  }
+
+  .df-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-real, #76ff8a);
+    box-shadow: 0 0 8px var(--color-real, #76ff8a);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .df-status-pill[data-kind='fake'] .df-status-dot {
+    background: var(--color-fake, #ff2f72);
+    box-shadow: 0 0 8px var(--color-fake, #ff2f72);
+  }
+
+  .df-dots {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .df-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(185, 189, 255, 0.35);
+    transition: transform 0.25s ease, background-color 0.25s ease;
+  }
+
+  .df-dot.is-active {
+    background: var(--color-brand-yellow, #f6eb0f);
+    transform: scale(1.3);
+  }
+
+  /* ─── Right Hero Bio ─── */
+  .hero-bio {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  .hero-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .hero-greeting {
+    font-size: 0.875rem;
+    color: var(--color-hero-muted, #b9bdff);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .hero-name {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3.5vw, 2.35rem);
+    font-weight: 700;
+    line-height: 1.08;
+    color: var(--color-brand-yellow, #f6eb0f);
+    margin: 0;
+  }
+
+  .hero-published {
+    font-size: 0.875rem;
+    color: var(--color-hero-muted, #b9bdff);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+    line-height: 1.9;
+    color: var(--color-hero-text, #f5f5f5);
+    margin: 0;
+  }
+
+  .hero-description strong {
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  .hero-links {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    padding-top: 0.25rem;
+  }
+
+  .hero-more-link {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--color-hero-muted, #b9bdff);
+    text-decoration: none;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .hero-more-link:hover {
+    color: var(--color-brand-yellow, #f6eb0f);
+  }
+
+  .hero-cv-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(185, 189, 255, 0.35);
+    background: rgba(185, 189, 255, 0.1);
+    color: #f5f5f5;
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .hero-cv-pill:hover {
+    background: rgba(246, 235, 15, 0.18);
+    border-color: var(--color-brand-yellow, #f6eb0f);
+    color: var(--color-brand-yellow, #f6eb0f);
+  }
+
+  /* ─── Hero Bottom Row: Tagline + Floating Word Cloud ─── */
+  .hero-bottom-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 542px) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: center;
+    padding-top: 0.5rem;
+  }
+
+  .hero-tagline {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3.6vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.18;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .hero-tagline__real {
+    color: var(--color-real, #76ff8a);
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 5px;
+  }
+
+  .hero-cloud-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .hero-wordcloud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.15rem 2.1rem;
+    padding: 0.5rem 0;
+    min-height: 148px;
+  }
+
+  .cloud-node {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--color-hero-muted, #b9bdff);
+    background: transparent;
+    border: none;
+    padding: 0.2rem 0.45rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease,
+      text-shadow 0.2s ease;
+    will-change: transform;
+  }
+
+  .cloud-node--lg {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+
+  .cloud-node--md {
+    font-size: 1.35rem;
+    line-height: 1.3;
+  }
+
+  .cloud-node--sm {
+    font-size: 1.2rem;
+    line-height: 1.3;
+    opacity: 0.9;
+  }
+
+  .cloud-node:hover,
+  .cloud-node:focus-visible {
+    color: var(--color-brand-yellow, #f6eb0f);
+    text-shadow: 0 0 18px rgba(246, 235, 15, 0.35);
+    outline: none;
+  }
+
+  /* Strictly fixed-height caption box so hovering never shifts layout */
+  .hero-cloud-caption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    height: 3.35rem;
+    min-height: 3.35rem;
+    max-height: 3.35rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 10px;
+    background: rgba(15, 17, 45, 0.45);
+    border: 1px solid rgba(185, 189, 255, 0.16);
+    font-size: 0.78rem;
+    color: #d8dbff;
+    overflow: hidden;
+  }
+
+  .cloud-caption-text {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .cloud-cmdk-trigger {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.55rem;
+    border-radius: 6px;
+    border: 1px solid rgba(185, 189, 255, 0.28);
+    background: rgba(185, 189, 255, 0.12);
+    color: #f5f5f5;
+    font-family: var(--font-display);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .cloud-cmdk-trigger:hover {
+    background: rgba(246, 235, 15, 0.2);
+    border-color: var(--color-brand-yellow, #f6eb0f);
+    color: var(--color-brand-yellow, #f6eb0f);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     2. "LATEST" RIBBON
+     ══════════════════════════════════════════════════════════════════════════ */
+  .latest-ribbon {
+    background: var(--color-brand-yellow, #f6eb0f);
+    color: #0a0a0a;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .latest-ribbon__inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+  }
+
+  .latest-ribbon__items {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    padding: 0.75rem 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .latest-ribbon__items::-webkit-scrollbar {
+    display: none;
+  }
+
+  .latest-ribbon__badge {
+    font-family: var(--font-display);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.55rem;
+    background: #0a0a0a;
+    color: var(--color-brand-yellow, #f6eb0f);
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .latest-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0a0a0a;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .latest-item:hover {
+    opacity: 0.72;
+    color: #0a0a0a;
+  }
+
+  .latest-item__date {
+    color: #b37400;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .latest-item__title {
+    max-width: 24ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .latest-ribbon__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    background: var(--color-brand-orange, #ffbf24);
+    color: #000000;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background-color 0.15s ease;
+  }
+
+  .latest-ribbon__cta:hover {
+    background: #f0ab00;
+    color: #000000;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     SHARED SPLIT-SECTION LAYOUT & FIGMA YELLOW BUTTON
+     ══════════════════════════════════════════════════════════════════════════ */
+  .home-section {
+    padding: 4.25rem 1.5rem;
+  }
+
+  .section-split {
+    max-width: 1144px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .section-intro-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .section-brand-title {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.08;
+    color: var(--color-heading-brand, #282b61);
+    margin: 0;
+  }
+
+  .section-brand-copy {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .figma-yellow-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.15rem;
+    border-radius: 25px;
+    background: var(--color-brand-yellow, #f6eb0f);
+    color: #000000;
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+      transform 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .figma-yellow-btn:hover {
+    background: var(--color-brand-orange, #ffbf24);
+    color: #000000;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(246, 235, 15, 0.25);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     3. PUBLICATIONS SECTION
+     ══════════════════════════════════════════════════════════════════════════ */
+  .pub-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+
+  .pub-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.35rem;
+    border-radius: 25px;
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-elevated);
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .pub-block:hover {
+    border-color: var(--color-border);
+    transform: translateY(-2px);
+  }
+
+  .pub-block__thumb {
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+    aspect-ratio: 16 / 7;
+    background: var(--color-bg-secondary);
+  }
+
+  .pub-block__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .pub-block__title {
+    font-family: var(--font-display);
+    font-size: 1.1875rem;
+    font-weight: 700;
+    line-height: 1.28;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .pub-block__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .pub-block__title a:hover {
+    color: var(--color-accent);
+  }
+
+  .pub-block__authors {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .pub-block__abstract {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-text-muted);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .pub-block__venue-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    margin-top: auto;
+    padding-top: 0.25rem;
+  }
+
+  .pub-block__year {
+    font-weight: 700;
+    color: var(--color-text);
+    flex-shrink: 0;
+  }
+
+  .pub-block__venue {
+    color: var(--color-text-secondary);
+  }
+
+  .pub-block__quality {
+    font-weight: 600;
+    color: var(--color-tertiary-text);
+  }
+
+  .pub-block__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.25rem;
+  }
+
+  .pub-green-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 25px;
+    border: none;
+    background: var(--color-real-pill-bg, #aaffb7);
+    color: var(--color-real-pill-fg, #107820);
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.15s ease;
+  }
+
+  .pub-green-pill:hover {
+    filter: brightness(0.95);
+    color: var(--color-real-pill-fg, #107820);
+    transform: translateY(-1px);
+  }
+
+  .pub-bibtex-btn .icon-check {
+    display: none;
+  }
+
+  .pub-bibtex-btn.is-copied .icon-copy {
+    display: none;
+  }
+
+  .pub-bibtex-btn.is-copied .icon-check {
+    display: block;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     4. PROJECT PORTFOLIO BENTO SECTION
+     ══════════════════════════════════════════════════════════════════════════ */
+  .home-projects-band {
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border-subtle);
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .portfolio-bento {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: stretch;
+  }
+
+  .bento-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .bento-project {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.5rem;
+    border-radius: 20px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-text);
+    text-decoration: none;
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .bento-project:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .bento-project--featured {
+    justify-content: space-between;
+    padding: 2rem;
+  }
+
+  .defake-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .defake-lockup__icon {
+    width: 43px;
+    height: 43px;
+  }
+
+  .defake-lockup__type {
+    height: 44px;
+    width: auto;
+  }
+
+  :global(html[data-theme='dark']) .defake-lockup__type,
+  :global(html[data-theme='dark']) .bento-logo {
+    filter: brightness(1.15);
+  }
+
+  .bento-logo-row {
+    height: 32px;
+    display: flex;
+    align-items: center;
+  }
+
+  .bento-logo {
+    max-height: 32px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .bento-project__title {
+    font-family: var(--font-display);
+    font-size: 1.3125rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .bento-project__title--lg {
+    font-size: 2rem;
+    margin-top: 0.35rem;
+  }
+
+  .bento-project__desc {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .bento-project__desc--lg {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    flex: 1;
+  }
+
+  .bento-project__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    padding-top: 0.5rem;
+    margin-top: auto;
+  }
+
+  .bento-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .bento-stat strong {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .bento-divider {
+    width: 1px;
+    height: 10px;
+    background: var(--color-border);
+  }
+
+  .bento-view-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .bento-arrow {
+    transition: transform 0.18s ease;
+  }
+
+  .bento-project:hover .bento-arrow {
+    transform: translateX(4px);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     5. MEDIA & PRESS ARTICLES
+     ══════════════════════════════════════════════════════════════════════════ */
+  .media-container {
+    max-width: 1144px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .media-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .media-subtitle {
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .media-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+  }
+
+  .media-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 25px;
+    overflow: hidden;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-text);
+    text-decoration: none;
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .media-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+    color: var(--color-text);
+  }
+
+  .media-card__image-wrap {
+    position: relative;
+    height: 155px;
+    width: 100%;
+    overflow: hidden;
+    background: #121526;
+  }
+
+  .media-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  .media-card:hover .media-card__img {
+    transform: scale(1.04);
+  }
+
+  .media-card__tag {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background: var(--color-brand-yellow, #f6eb0f);
+    color: #000000;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.3rem 0.85rem;
+    line-height: 1.1;
+  }
+
+  .media-card__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.15rem;
+    padding: 1.25rem 1.5rem 1.35rem;
+    flex: 1;
+  }
+
+  .media-card__title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.38;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .media-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+
+  .media-cta-row {
+    display: flex;
+    justify-content: center;
+    padding-top: 0.5rem;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     6. CTRL+K TOPIC EXPLORER MODAL
+     ══════════════════════════════════════════════════════════════════════════ */
+  .cmdk-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(10, 11, 24, 0.72);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 5vh 1rem 2rem;
+  }
+
+  .cmdk-backdrop[hidden] {
+    display: none !important;
+  }
+
+  .cmdk-dialog {
+    width: 100%;
+    max-width: 740px;
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg-elevated);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+  }
+
+  .cmdk-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.15rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .cmdk-search-icon {
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .cmdk-search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    outline: none;
+  }
+
+  .cmdk-search-input::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .cmdk-close-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 0.6875rem;
+    font-weight: 700;
+  }
+
+  .cmdk-close-btn:hover {
+    color: var(--color-text);
+    border-color: var(--color-accent);
+  }
+
+  .cmdk-topics-bar {
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 1.15rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
+    scrollbar-width: none;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .cmdk-topics-bar.is-dragging {
+    cursor: grabbing;
+  }
+
+  .cmdk-topics-bar.is-dragging .cmdk-topic-pill {
+    cursor: grabbing;
+  }
+
+  .cmdk-topics-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cmdk-topic-pill {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    line-height: 1.2;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .cmdk-topic-pill:hover {
+    color: var(--color-text);
+    border-color: var(--color-accent);
+  }
+
+  .cmdk-topic-pill.is-active {
+    background: var(--color-hero-bg, #282b61);
+    color: var(--color-brand-yellow, #f6eb0f);
+    border-color: var(--color-hero-bg, #282b61);
+  }
+
+  .cmdk-topic-blurb {
+    padding: 0.55rem 1.15rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    background: var(--color-accent-muted);
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .cmdk-results {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .cmdk-group[hidden] {
+    display: none !important;
+  }
+
+  .cmdk-group-header {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0 0.4rem 0.45rem;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+  }
+
+  .cmdk-group-hint {
+    margin-left: auto;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.7rem;
+  }
+
+  .cmdk-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .cmdk-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    color: var(--color-text);
+    transition:
+      background-color 0.14s ease,
+      border-color 0.14s ease;
+  }
+
+  .cmdk-item[hidden] {
+    display: none !important;
+  }
+
+  .cmdk-item:hover,
+  .cmdk-item.is-kbd-active,
+  .cmdk-item:focus-visible {
+    background: var(--color-card-hover);
+    border-color: var(--color-border);
+    color: var(--color-text);
+    outline: none;
+  }
+
+  .cmdk-item__main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.18rem;
+    min-width: 0;
+  }
+
+  .cmdk-item__title {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--color-text);
+  }
+
+  .cmdk-item__sub {
+    font-size: 0.76rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cmdk-item__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-shrink: 0;
+  }
+
+  .cmdk-badge {
+    font-family: var(--font-display);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.18rem 0.5rem;
+    border-radius: 999px;
+  }
+
+  .cmdk-badge--project {
+    background: var(--color-accent-muted);
+    color: var(--color-accent);
+  }
+
+  .cmdk-badge--paper {
+    background: var(--color-real-pill-bg, #aaffb7);
+    color: var(--color-real-pill-fg, #107820);
+  }
+
+  .cmdk-badge--media {
+    background: rgba(255, 191, 36, 0.2);
+    color: var(--color-tertiary-text);
+  }
+
+  /* Distinct arrow interactions: straight right arrow vs angled external arrow */
+  .cmdk-arrow {
+    flex-shrink: 0;
+    transition: transform 0.18s ease, color 0.18s ease;
+  }
+
+  .cmdk-arrow--straight {
+    color: var(--color-accent);
+  }
+
+  .cmdk-arrow--angled {
+    color: var(--color-secondary-text);
+  }
+
+  .cmdk-item--internal:hover .cmdk-arrow--straight,
+  .cmdk-item--internal.is-kbd-active .cmdk-arrow--straight {
+    transform: translateX(4px);
+    color: var(--color-accent-hover);
+  }
+
+  .cmdk-item--external:hover .cmdk-arrow--angled,
+  .cmdk-item--external.is-kbd-active .cmdk-arrow--angled {
+    transform: translate(3px, -3px);
+  }
+
+  .cmdk-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .cmdk-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.6rem 1.15rem;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg);
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+  }
+
+  .cmdk-footer__keys,
+  .cmdk-footer__legend {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .cmdk-footer kbd {
+    display: inline-block;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    margin-right: 0.2rem;
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     RESPONSIVE BREAKPOINTS
+     ══════════════════════════════════════════════════════════════════════════ */
+  @media (max-width: 1024px) {
+    .hero-top-grid,
+    .hero-bottom-grid,
+    .section-split {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+
+    .media-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 720px) {
+    .hero-banner {
+      margin-top: -3.5rem;
+      padding: calc(3.5rem + 2.25rem) 1rem 2.5rem;
+    }
+
+    .deepfake-stage {
+      height: 270px;
+    }
+
+    .df-card__frame {
+      width: 225px;
+      height: 252px;
+    }
+
+    .df-card[data-df-slot='left'] {
+      transform: translate(-96%, -50%) scale(0.72);
+    }
+
+    .df-card[data-df-slot='right'] {
+      transform: translate(-4%, -50%) scale(0.72);
+    }
+
+    .hero-cloud-caption {
+      height: 3.75rem;
+      min-height: 3.75rem;
+      max-height: 3.75rem;
+    }
+
+    .pub-cards-grid,
+    .portfolio-bento,
+    .media-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .latest-ribbon__inner {
+      flex-direction: column;
+    }
+
+    .latest-ribbon__cta {
+      width: 100%;
+    }
+
+    .cmdk-backdrop {
+      padding: 2vh 0.5rem 1rem;
+    }
+
+    .cmdk-footer__keys {
+      display: none;
+    }
+  }
+</style>

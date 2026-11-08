@@ -1,72 +1,46 @@
 ---
 /**
- * Projects Index Page
- * 
- * Lists all projects as case studies with impact summaries. Projects are displayed
- * in a prioritized order: custom order (if specified) takes precedence, otherwise
- * sorted by year (most recent first). Featured projects are highlighted.
- * 
- * Features:
- * - Queries all projects from content collection
- * - Smart sorting: custom order → year (descending)
- * - Displays project and featured count statistics
- * - Uses ProjectCard component for consistent presentation
- * - SEO optimization
- * - Empty state handling
- * 
+ * Projects Index Page — Figma design language:
+ * - Full-bleed Indigo Hero (#282b61)
+ * - Full-bleed Yellow Band (#f6eb0f) with interactive domain & featured filters
+ * - Rounded project cards grid
+ *
  * Route: /projects
- * 
- * @page
  */
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SEO from '../../components/SEO.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
-import PageStats from '../../components/PageStats.astro';
 import { getCollection } from 'astro:content';
 import { pagesConfig } from '../../pages.config';
 
-/**
- * Queries all projects from the content collection
- */
 const allProjects = await getCollection('projects');
 
-/**
- * Sorts projects with intelligent prioritization
- * 
- * Sorting logic:
- * 1. If both projects have an 'order' field, sort by order (ascending)
- * 2. Projects with 'order' field are prioritized over those without
- * 3. Projects without 'order' are sorted by year (descending - newest first)
- * 
- * This allows manual curation of featured projects while maintaining
- * chronological order for others.
- */
 const sortedProjects = allProjects.sort((a, b) => {
-  // If both have order field, sort by order
   if (a.data.order !== undefined && b.data.order !== undefined) {
     return a.data.order - b.data.order;
   }
-  // If only one has order, prioritize it
   if (a.data.order !== undefined) return -1;
   if (b.data.order !== undefined) return 1;
-  // Otherwise sort by year (descending)
   return b.data.year - a.data.year;
 });
 
-/**
- * Total count of projects for statistics display
- */
 const totalProjects = sortedProjects.length;
+const featuredCount = sortedProjects.filter((p) => p.data.featured).length;
+const ongoingCount = sortedProjects.filter((p) => p.data.status === 'ongoing').length;
 
-/**
- * Count of featured projects for statistics display
- */
-const featuredCount = sortedProjects.filter(p => p.data.featured).length;
+// Collect unique domains across all projects for the yellow band filter
+const domainSet = new Set<string>();
+for (const project of sortedProjects) {
+  for (const d of project.data.domains ?? []) {
+    domainSet.add(d);
+  }
+}
+const allDomains = [...domainSet];
 ---
 
 <BaseLayout>
-  <SEO 
+  <SEO
     slot="head"
     title={pagesConfig.projects.title}
     description={pagesConfig.projects.description}
@@ -74,45 +48,188 @@ const featuredCount = sortedProjects.filter(p => p.data.featured).length;
     image="/og/projects.png"
   />
 
-  <main class="page-container projects-archive">
-    <header class="page-header projects-archive__header">
-      <h1 class="page-title">{pagesConfig.projects.heading}</h1>
-      <p class="page-intro">
-        {pagesConfig.projects.intro}
-      </p>
-      <PageStats text={`${totalProjects} projects · ${featuredCount} featured`} />
+  <main class="projects-full-page">
+    <!-- ════════════════════════════════════════════════════════════════════════
+         1. PURPLE INDIGO HERO
+         ════════════════════════════════════════════════════════════════════════ -->
+    <header class="indigo-hero">
+      <img
+        src="/images/figma/bck-corner-tl.svg"
+        alt=""
+        width="350"
+        height="196"
+        class="indigo-hero__corner indigo-hero__corner--tl"
+        aria-hidden="true"
+      />
+      <img
+        src="/images/figma/bck-corner-br.svg"
+        alt=""
+        width="368"
+        height="219"
+        class="indigo-hero__corner indigo-hero__corner--br"
+        aria-hidden="true"
+      />
+
+      <div class="indigo-hero__inner">
+        <p class="indigo-hero__eyebrow">Research Platforms, Tools &amp; Case Studies</p>
+        <h1 class="indigo-hero__title">{pagesConfig.projects.heading}</h1>
+        <p class="indigo-hero__lead">{pagesConfig.projects.intro}</p>
+
+        <div class="indigo-hero__stats" aria-label="Project statistics">
+          <span class="indigo-hero__stat-pill">
+            <strong>{totalProjects}</strong> projects
+          </span>
+          <span class="indigo-hero__stat-pill">
+            <strong>{featuredCount}</strong> featured case studies
+          </span>
+          {ongoingCount > 0 && (
+            <span class="indigo-hero__stat-pill">
+              <strong>{ongoingCount}</strong> active &amp; ongoing
+            </span>
+          )}
+        </div>
+      </div>
     </header>
 
-    {sortedProjects.length > 0 ? (
-      <div class="card-list">
-        {sortedProjects.map((project) => (
-          <ProjectCard
-            title={project.data.title}
-            slug={project.id}
-            abstract={project.data.abstract}
-            role={project.data.role}
-            year={project.data.year}
-            domains={project.data.domains}
-            featured={project.data.featured}
-            status={project.data.status}
-            icon={project.data.icon}
-            coverImage={project.data.coverImage}
-          />
-        ))}
+    <!-- ════════════════════════════════════════════════════════════════════════
+         2. YELLOW BAND FILTER & DOMAIN BAR
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div class="yellow-band" role="toolbar" aria-label="Filter projects by domain">
+      <div class="yellow-band__inner">
+        <div class="yellow-band__group" id="project-domain-filters">
+          <span class="yellow-band__label">Filter:</span>
+          <button
+            type="button"
+            class="yellow-band__pill is-active"
+            data-project-filter="all"
+            aria-pressed="true"
+          >
+            All ({totalProjects})
+          </button>
+          <button
+            type="button"
+            class="yellow-band__pill"
+            data-project-filter="__featured"
+            aria-pressed="false"
+          >
+            Featured ({featuredCount})
+          </button>
+          {allDomains.map((domain) => (
+            <button
+              type="button"
+              class="yellow-band__pill"
+              data-project-filter={domain.toLowerCase()}
+              aria-pressed="false"
+            >
+              {domain}
+            </button>
+          ))}
+        </div>
       </div>
-    ) : (
-      <p class="empty-state">No projects available yet.</p>
-    )}
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         3. PROJECT CARDS GRID
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div class="projects-body-container">
+      {sortedProjects.length > 0 ? (
+        <div class="card-list" id="projects-grid">
+          {sortedProjects.map((project) => (
+            <div
+              class="project-slot"
+              data-project-slot
+              data-featured={project.data.featured ? 'true' : 'false'}
+              data-domains={(project.data.domains ?? []).join('|').toLowerCase()}
+            >
+              <ProjectCard
+                title={project.data.title}
+                slug={project.id}
+                abstract={project.data.abstract}
+                role={project.data.role}
+                year={project.data.year}
+                domains={project.data.domains}
+                featured={project.data.featured}
+                status={project.data.status}
+                icon={project.data.icon}
+                coverImage={project.data.coverImage}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p class="empty-state">No projects available yet.</p>
+      )}
+    </div>
   </main>
+
+  <script>
+    function initProjectFilters() {
+      const filterRoot = document.getElementById('project-domain-filters');
+      const grid = document.getElementById('projects-grid');
+      if (!filterRoot || !grid || filterRoot.dataset.bound === '1') return;
+      filterRoot.dataset.bound = '1';
+
+      const buttons = Array.from(
+        filterRoot.querySelectorAll<HTMLButtonElement>('[data-project-filter]')
+      );
+      const slots = Array.from(grid.querySelectorAll<HTMLElement>('[data-project-slot]'));
+
+      filterRoot.addEventListener('click', (e) => {
+        const target = e.target;
+        if (!(target instanceof Element)) return;
+        const btn = target.closest<HTMLButtonElement>('[data-project-filter]');
+        if (!btn) return;
+
+        const val = btn.dataset.projectFilter || 'all';
+        buttons.forEach((b) => {
+          const isOn = b === btn;
+          b.classList.toggle('is-active', isOn);
+          b.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+        });
+
+        slots.forEach((slot) => {
+          if (val === 'all') {
+            slot.hidden = false;
+          } else if (val === '__featured') {
+            slot.hidden = slot.dataset.featured !== 'true';
+          } else {
+            const domains = (slot.dataset.domains || '').split('|').filter(Boolean);
+            slot.hidden = !domains.includes(val);
+          }
+        });
+      });
+    }
+
+    document.addEventListener('astro:page-load', initProjectFilters);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initProjectFilters, { once: true });
+    } else {
+      initProjectFilters();
+    }
+  </script>
 </BaseLayout>
 
 <style>
-  .projects-archive {
-    max-width: var(--max-width-wide);
+  .projects-full-page {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
   }
 
-  .projects-archive__header {
-    max-width: var(--max-width-prose);
-    margin-inline: auto;
+  .projects-body-container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .project-slot[hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 768px) {
+    .projects-body-container {
+      padding: 1.75rem 1rem 3rem;
+    }
   }
 </style>

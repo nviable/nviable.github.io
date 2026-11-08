@@ -1,12 +1,15 @@
 ---
 /**
- * Experience detail — MDX body from content collection.
+ * Experience detail — Figma design language:
+ * - Full-bleed Indigo Hero (#282b61) with breadcrumb, category eyebrow, title, subtitle, and meta
+ * - Full-bleed Yellow Band (#f6eb0f) with keywords & back navigation
+ * - Prose MDX body
  * Route: /experience/:slug
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SEO from '../../components/SEO.astro';
 import StructuredData from '../../components/StructuredData.astro';
-import Breadcrumb from '../../components/Breadcrumb.astro';
+import BackLink from '../../components/BackLink.astro';
 import { getCollection, getEntry, render } from 'astro:content';
 import { pagesConfig } from '../../pages.config';
 
@@ -31,17 +34,13 @@ const categoryLabel: Record<string, string> = {
   education: 'Education',
 };
 
-const breadcrumbItems = [
-  { label: 'Home', href: '/' },
-  { label: pagesConfig.experience.heading, href: '/experience' },
-  { label: entry.data.breadcrumbLabel },
-];
-
 const seoTitle = `${entry.data.title} · ${pagesConfig.experience.heading}`;
 const seoDescription =
   entry.data.description ??
   entry.data.metaLine ??
   pagesConfig.experience.description;
+
+const keywords = entry.data.keywords ?? [];
 ---
 
 <BaseLayout>
@@ -64,58 +63,96 @@ const seoDescription =
     }}
   />
 
-  <main class="page-container experience-detail">
-    <Breadcrumb items={breadcrumbItems} />
+  <main class="experience-detail-page">
+    <!-- ════════════════════════════════════════════════════════════════════════
+         1. PURPLE INDIGO HERO
+         ════════════════════════════════════════════════════════════════════════ -->
+    <header class="indigo-hero">
+      <img
+        src="/images/figma/bck-corner-tl.svg"
+        alt=""
+        width="350"
+        height="196"
+        class="indigo-hero__corner indigo-hero__corner--tl"
+        aria-hidden="true"
+      />
+      <img
+        src="/images/figma/bck-corner-br.svg"
+        alt=""
+        width="368"
+        height="219"
+        class="indigo-hero__corner indigo-hero__corner--br"
+        aria-hidden="true"
+      />
 
-    <header class="exp-detail-header">
-      <p class="exp-detail-kind">{categoryLabel[entry.data.category] ?? 'Experience'}</p>
-      <h1 class="page-title exp-detail-title">{entry.data.title}</h1>
-      {entry.data.subtitle && <p class="exp-detail-subtitle">{entry.data.subtitle}</p>}
-      {entry.data.metaLine && <p class="exp-detail-meta">{entry.data.metaLine}</p>}
+      <div class="indigo-hero__inner">
+        <nav class="indigo-hero__breadcrumb" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span aria-hidden="true">/</span>
+          <a href="/experience">{pagesConfig.experience.heading}</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{entry.data.breadcrumbLabel}</span>
+        </nav>
+
+        <p class="indigo-hero__eyebrow">{categoryLabel[entry.data.category] ?? 'Experience'}</p>
+        <h1 class="indigo-hero__title">{entry.data.title}</h1>
+        {entry.data.subtitle && <p class="indigo-hero__subtitle">{entry.data.subtitle}</p>}
+        {entry.data.metaLine && (
+          <div class="indigo-hero__stats">
+            <span class="indigo-hero__stat-pill">{entry.data.metaLine}</span>
+          </div>
+        )}
+      </div>
     </header>
 
-    <div class="exp-detail-body prose">
-      <Content />
+    <!-- ════════════════════════════════════════════════════════════════════════
+         2. YELLOW BAND WITH KEYWORDS & BACK LINK
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div class="yellow-band">
+      <div class="yellow-band__inner">
+        <div class="yellow-band__group">
+          {keywords.length > 0 ? (
+            <>
+              <span class="yellow-band__label">Keywords:</span>
+              {keywords.map((k) => (
+                <span class="yellow-band__pill yellow-band__pill--static">{k}</span>
+              ))}
+            </>
+          ) : (
+            <span class="yellow-band__label">
+              {categoryLabel[entry.data.category] ?? 'Experience'} · {entry.data.breadcrumbLabel}
+            </span>
+          )}
+        </div>
+
+        <a href="/experience" class="yellow-band__pill">← All experience</a>
+      </div>
     </div>
 
-    <p class="exp-detail-back">
-      <a href="/experience">← All experience</a>
-    </p>
+    <!-- ════════════════════════════════════════════════════════════════════════
+         3. PROSE BODY
+         ════════════════════════════════════════════════════════════════════════ -->
+    <div class="page-container experience-detail">
+      <div class="exp-detail-body prose">
+        <Content />
+      </div>
+
+      <div class="exp-detail-back">
+        <BackLink href="/experience" text="All experience" />
+      </div>
+    </div>
   </main>
 </BaseLayout>
 
 <style>
-  .experience-detail .exp-detail-header {
-    margin-bottom: 2rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid var(--color-border);
+  .experience-detail-page {
+    width: 100%;
   }
 
-  .experience-detail .exp-detail-kind {
-    margin: 0 0 0.35rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-
-  .experience-detail .exp-detail-title {
-    margin: 0 0 0.35rem;
-  }
-
-  .experience-detail .exp-detail-subtitle {
-    margin: 0 0 0.35rem;
-    font-size: 1.0625rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-  }
-
-  .experience-detail .exp-detail-meta {
-    margin: 0.5rem 0 0;
-    font-size: 0.9375rem;
-    color: var(--color-text-muted);
-    line-height: 1.5;
+  .experience-detail {
+    max-width: 780px;
+    padding-top: 2.5rem;
+    padding-bottom: 3.5rem;
   }
 
   .experience-detail .exp-detail-body.prose {
@@ -124,16 +161,5 @@ const seoDescription =
 
   .experience-detail .exp-detail-back {
     margin: 2.5rem 0 0;
-    font-size: 0.9375rem;
-  }
-
-  .experience-detail .exp-detail-back a {
-    color: var(--color-accent);
-    text-decoration: none;
-    font-weight: 500;
-  }
-
-  .experience-detail .exp-detail-back a:hover {
-    text-decoration: underline;
   }
 </style>
