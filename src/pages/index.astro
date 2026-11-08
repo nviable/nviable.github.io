@@ -209,7 +209,7 @@ const projectMetaCounts: Record<
     shortSummary:
       'DeFake is an interdisciplinary research initiative aimed at developing deepfake detection solutions for journalists, forensic experts, and law enforcement agencies by focusing on usability, explainability, and robustness.',
     pubs: 7,
-    media: 6,
+    media: 25,
     topics: ['deepfake', 'forensics', 'hci', 'security', 'design', 'branding'],
   },
   varuna: {
@@ -388,7 +388,12 @@ const modalMediaAndTalks = [...allSpeaking]
       title: entry.data.title.replace(/^Upcoming:\s*/i, '').trim(),
       outlet: entry.data.event,
       year: entry.data.date.getUTCFullYear(),
-      kindLabel: entry.data.type === 'media' ? 'Press / Media' : 'Invited Talk',
+      kindLabel:
+        entry.data.badge === 'fact check'
+          ? 'Fact Check'
+          : entry.data.type === 'media'
+            ? 'Press / Media'
+            : 'Invited Talk',
       href: entry.data.url || `/journey#speaking-${entry.id}`,
       external,
       topics,
