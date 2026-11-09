@@ -271,6 +271,16 @@ for (const raw of [...domains, ...tags]) {
                   height="38"
                 />
               </div>
+            ) : slug === 'stop-and-scan' ? (
+              <div class="project-hero__brand-lockup project-hero__brand-lockup--cream">
+                <img
+                  src="/images/projects/stop-and-scan/stop-scan-logotype.png"
+                  alt="STOP&SCAN"
+                  width="110"
+                  height="110"
+                  style="object-fit: contain; width: 110px; height: 110px;"
+                />
+              </div>
             ) : (
               coverImage &&
               coverKind && (
@@ -532,6 +542,11 @@ for (const raw of [...domains, ...tags]) {
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.94);
       align-self: flex-start;
+    }
+
+    .project-hero__brand-lockup--cream {
+      background: #fbf8f2;
+      padding: 0.75rem 1rem;
     }
 
     .project-hero__cover {
