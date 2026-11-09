@@ -778,8 +778,18 @@ for (const raw of [...domains, ...tags]) {
       text-underline-offset: 2px;
     }
 
+    .case-study-content :global(a.figma-yellow-btn) {
+      text-decoration: none;
+      color: #0e1029;
+    }
+
     .case-study-content :global(a):hover {
       text-decoration-thickness: 2px;
+    }
+
+    .case-study-content :global(a.figma-yellow-btn):hover {
+      text-decoration: none;
+      color: #0e1029;
     }
 
     .case-study-content :global(h3#key-decisions) ~ :global(p) {
