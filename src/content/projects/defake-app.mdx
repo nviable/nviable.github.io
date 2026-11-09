@@ -16,30 +16,37 @@ domains:
 methodologyClass: "Mixed-methods HCI (interviews, diary studies, workshops, usability)"
 role: "Founder and lead"
 institution: "Rochester Institute of Technology"
-duration: "2018–present (ongoing)"
+duration: "2019–present (ongoing)"
 collaborators:
   - name: "Matthew Wright"
-    role: "PI"
+    role: "PI · Chair of Cybersecurity"
+    affiliation: "Rochester Institute of Technology"
   - name: "John Sohrawardi"
-    role: "Founder and lead"
-    affiliation: "Rochester Institute of Technology"
-  - name: "Y. Kelly Wu"
-    role: "PhD student"
-    affiliation: "Rochester Institute of Technology"
-  - name: "Ersin Uzun"
-    role: "Collaborator - Usable Security"
+    role: "Founder and lead · Postdoctoral Researcher"
     affiliation: "Rochester Institute of Technology"
   - name: "Andrea Hickerson"
-    role: "Collaborator - Journalism"
+    role: "Co-investigator, Journalism · Dean"
     affiliation: "University of Mississippi"
   - name: "Yu Kong"
-    role: "co-PI - Computer Vision"
+    role: "Co-PI, Computer Vision"
     affiliation: "Michigan State University"
+  - name: "Ersin Uzun"
+    role: "Co-PI, Usable Security · Executive Director, ESL GCI"
+    affiliation: "Rochester Institute of Technology"
   - name: "David Schwartz"
-    role: "co-PI - Gamification"
+    role: "Co-PI, Games & Gamification · Director, IGM"
     affiliation: "Rochester Institute of Technology"
   - name: "Christopher Schwartz"
-    role: "co-PI - Philosophy"
+    role: "Co-PI · Research Scientist, Dept. of Cybersecurity"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Candice R. Gerstner"
+    role: "Collaborator"
+    affiliation: "U.S. Department of Defense"
+  - name: "Y. Kelly Wu"
+    role: "Ph.D. student"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Akib Shahriyar"
+    role: "Ph.D. student"
     affiliation: "Rochester Institute of Technology"
   - name: "Bryce Gernon"
     role: "Ph.D. student"
@@ -50,67 +57,149 @@ collaborators:
   - name: "Palavi Vinod Bhole"
     role: "Ph.D. student"
     affiliation: "Rochester Institute of Technology"
-abstract: "The DeFake Project is an interdisciplinary research initiative building interpretable, workflow-aligned tools that help journalists, intelligence analysts, and investigators verify synthetic and manipulated media — without blind trust in a single model score. Its flagship web application, DeFake.app, layers multiple forensic signals (intra-frame and inter-frame video artifacts, audio, and speaker identity) into a forensic-style interface co-designed with practitioners, rather than reducing a complex judgment to one probability bar. Founded in 2018 and led across four universities, the project spans the flagship application and related efforts — Varuna and Dungeons & Deepfakes — with funding from Knight, NSF, DoD, and Omidyar. We.DeFake, an earlier federated collaboration experiment, is archived. The research has appeared at venues including CHI, SOUPS, CCS, and IEEE, and the work has been featured by outlets such as CNET, Spectrum News, and the Columbia Journalism Review."
+  - name: "Md Akil Raihan Iftee"
+    role: "Ph.D. student"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Zhongyi Cai"
+    role: "Ph.D. student"
+    affiliation: "Michigan State University"
+  - name: "Akash Chintha"
+    role: "Contributor"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Bao Thai"
+    role: "Contributor"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Sovantharith Seng"
+    role: "Contributor"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Raymond Ptucha"
+    role: "Faculty collaborator"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Kartavya Bhatt"
+    role: "Contributor"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Aishwarya Rao"
+    role: "Contributor"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Kaniz Fatima"
+    role: "Contributor"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Xinmiao Lin"
+    role: "Contributor"
+    affiliation: "Rochester Institute of Technology"
+  - name: "Wentao Bao"
+    role: "Contributor"
+    affiliation: "Rochester Institute of Technology"
+abstract: "The DeFake Project builds explainable, multi-signal deepfake detection tools with and for journalists, intelligence analysts, and investigators. Based at the ESL Global Cybersecurity Institute at RIT in collaboration with the University of Mississippi and Michigan State University, the project pairs technical detection research with deep empirical user studies. Rather than reducing complex authenticity verification to a single opaque score, its flagship application, DeFake.app, structures forensic evidence second by second across frame-level visual artifacts, temporal consistency, audio, and speaker identity under an ontology-grounded workflow."
 highlights:
-  - "Funded by Knight, NSF, DoD & Omidyar"
-  - "Multi-signal forensic UI — not a single score"
-  - "Co-designed with journalists, analysts & investigators"
-  - "~18 researchers across four universities"
-  - "Featured by CNET, Spectrum News & CJR"
+  - "Funded by NSF ($2M+ awards), Knight Foundation & DoD"
+  - "Multi-signal forensic UI — explainable cues over a single score"
+  - "Co-designed with 46 journalists & 30 IC intelligence analysts"
+  - "Interdisciplinary research across RIT, Ole Miss & MSU"
+  - "Published at ACM CHI, ACM CCS, SOUPS, IEEE JSTSP & IJCB"
 artifacts:
   - label: "DeFake Project site"
     url: "https://defake.app/about"
     type: website
+relatedProjects:
+  - dungeons-and-deepfakes
+  - varuna
+  - we-defake
 relatedPublications:
   - dissertation-phd-2025
   - open-world-deepfakes-ccs2019
   - journalists-needs-cj-soups2020
   - recurrent-convolutional-jstsp2020
+  - edges-optical-flow-ijcb2020
+  - dungeons-deepfakes-chi2024
   - intelligence-analysts-chi2025
   - verification-ai-newsroom-promise2025
-  - edges-optical-flow-ijcb2020
 tags:
   - "Deepfake Detection"
   - "Digital Forensics"
   - "User Research"
   - "Product Design"
   - "Cybersecurity"
-  - "Branding"
+  - "Explainable AI"
 ---
 
-### Problem
+## Overview
 
-Off-the-shelf deepfake detectors are black boxes. Journalists, intelligence analysts, and investigators need explainable cues, provenance context, and interfaces that match how they already work under time pressure — not a single probability bar they are asked to trust or distrust on faith.
+The DeFake Project builds deepfake detection tools that people who verify media for a living can actually use. The project is based at the ESL Global Cybersecurity Institute at Rochester Institute of Technology. It works with partners at the University of Mississippi School of Journalism and New Media and at Michigan State University. Matthew Wright is the principal investigator. I founded the project and lead it.
 
-### Constraints
+According to RIT, the team formed in 2019, when Wright and the newly formed DeFake team answered a call from the Ethics and Governance of Artificial Intelligence Initiative to build a deepfake detector. RIT reports more than $2 million in funding from the National Science Foundation and the Knight Foundation, along with a 2023 grant from the U.S. Department of Defense. The project was one of the winners of the AI and the News Open Challenge, which the Berkman Klein Center announced in March 2019 as having seven winners (defake.app says eight).
 
-- Stakeholders span newsrooms, government, and academia, each with different threat models
-- Models and attack surfaces evolve faster than traditional release cycles
-- Human-in-the-loop judgment must stay central to avoid automation bias
-- Funding and compliance requirements span multiple sponsors
+The project has two threads that inform each other. Detection research asks which signals reveal manipulation and how well they survive real-world conditions. User research asks how journalists, intelligence analysts, and investigators decide whether media is authentic, and what a tool must show them to support that decision. DeFake.app is where the two threads meet.
 
-### Approach
+The research has appeared at ACM CHI, ACM CCS, USENIX SOUPS, IEEE JSTSP, and IEEE IJCB. Team members also co-authored *Fake-Checking: A Journalist's Guide to Deepfakes* (Routledge, 2025).
 
-Mixed-methods research — interviews, diary studies, workshops, and usability tests — drives requirements and iteration. High-fidelity Figma prototypes are tested with practitioners before engineering commits. The stack combines Flask/React services with PyTorch/Keras models and Dockerized components, and the design surfaces evidence across signals (intra-frame, inter-frame, audio, speaker identity) in a forensic-style interface rather than a single verdict.
+## Research
 
-### Key decisions
+### Detection research
 
-**Prioritize an explainable, multi-signal UI over a single authenticity score** — Expert users need to justify conclusions to editors and, sometimes, to courts; layered evidence reduces harmful over-trust in one number. Alternatives considered: a minimal UI wrapping a single classifier output; a fully automated moderation pipeline.
+The DeFake Project started with one question. Can deepfake detection be useful to the people who verify media for a living? Our early work focused on detectors that hold up outside the lab, where they face unseen generation methods, social-media compression, and adversarial edits.
 
-**Co-design with journalists and analysts from the first prototype** — Workflow fit and trust matter as much as raw model accuracy; field studies surfaced needs no lab study would catch. Alternatives considered: ship a demo first and collect feedback post-launch; rely only on academic peer review for validation.
+Our first prototype paired a detector that worked within and across datasets with an interface designed for journalists (ACM CCS 2019 poster). We then built models that combine spatial and temporal cues:
 
-### Tech stack
+- Recurrent convolutional structures with entropy-based loss functions, which detect both video deepfakes and audio spoofing (IEEE JSTSP 2020).
+- Facial edge maps and dense optical flow, which expose inconsistencies across space and time (IEEE IJCB 2020).
 
-Python, Flask, React, PyTorch, Keras, Figma, Docker.
+We also attacked sequence-based detectors with adversarial perturbations to measure how easily they can be fooled (ACM Workshop on Security Implications of Deepfakes and Cheapfakes, 2022). With collaborators at Michigan State University, we studied visual explanations for video models (BMVC 2021) and open-set face forgery detection (IEEE FG 2026).
 
-### Impact
+Better models were only part of the problem. A detector that outputs one probability gives an expert nothing to defend in front of an editor or a court. Since then the research has moved toward explainable, multi-signal evidence. That means separate signals for:
 
-The DeFake Project has grown from an idea into a sustained, interdisciplinary collaboration of roughly 18 researchers across four universities, supported by Knight, NSF, DoD, and Omidyar. It anchors the analytic interface, [Varuna](/projects/varuna) (an ontology-driven forensics platform), and [Dungeons & Deepfakes](/projects/dungeons-and-deepfakes) (scenario-based verification training). [We.DeFake](/projects/we-defake), a federated collaboration experiment, is archived.
+- frame-level artifacts
+- temporal consistency
+- audio
+- speaker identity
 
-The research program has produced peer-reviewed work at CHI, SOUPS, CCS, and IEEE venues (see the related publications below), and the tool and its findings have reached both practitioner and public audiences — through coverage by CNET, Spectrum News, and the Columbia Journalism Review, and through direct engagement with government and standards communities, including a DARPA briefing on the project's media-forensics ontology.
+These signals are organized under a digital media forensics ontology, so each result maps to a specific kind of manipulation.
 
-### Learnings
+### User research
 
-- Usable security for media integrity means designing for doubt, calibration, and audit trails — not just accuracy
-- Trust is earned at the interface: practitioners adopt detection tools when the evidence and its limits are legible, not when a score is simply high
-- Cross-institution roadmaps need explicit stakeholder alignment and shared definitions of done
+We design with practitioners, not for them. RIT's Cybersecurity department describes the tool as built on interviews with 46 journalists and 30 forensic analysts. Our studies include the following.
+
+- **Journalists.** Formative interviews with journalists covered how they see deepfakes, how they verify media now, and what they expect from a detection tool (USENIX SOUPS 2020 poster, also presented at Computation + Journalism 2020).
+- **Journalists under pressure.** Dungeons & Deepfakes put 24 U.S. journalists, from national broadcast networks to local print media, into scenario-based role-play in a high-stakes newsroom. They had access to detection tools and were free to choose their own verification steps. They verified carefully but sometimes leaned too heavily on the detector's output (ACM CHI 2024).
+- **Intelligence analysts.** Interviews with 30 practitioners from the U.S. Intelligence Community showed that analysts need a comprehensive, explainable tool that supports report writing. That finding led to an analyst-centered design and a digital media forensics ontology (ACM CHI 2025).
+- **Cross-cultural newsrooms.** We compared how journalists in the United States and Bangladesh adopt detection tools, where the tools fit in their verification workflow, and where automation bias appears (chapter in *PROMISE: PROMoting AI's Safe usage for Elections*, Springer, 2025).
+- **Usability.** We run diary studies, workshops, and usability tests on high-fidelity prototypes before engineering starts. The Dungeons & Deepfakes method also serves as a basis for scenario-based verification training.
+
+Across these studies, one finding kept coming back. Practitioners trust a tool when they can see its evidence and its limits, not when its score is high.
+
+## App development
+
+<figure class="remote-image-block">
+  <img
+    src="/images/projects/defake-app/dashboard-v2.1.1.png"
+    alt="DeFake.app detector dashboard showing a New job upload panel, a tool-minutes usage heatmap, a What's new panel for version 2.1.1, a Your jobs table with fake probabilities between 97 and 100 percent, and a Public videos library."
+    loading="lazy"
+    decoding="async"
+    width="1920"
+    height="1080"
+  />
+  <figcaption style="margin-top: 0.65rem; font-size: 0.84rem; line-height: 1.45; color: var(--color-text-muted);">
+    The DeFake.app detector dashboard (v2.1.1). Users start a job by uploading a video or pasting a YouTube or X link. The jobs table shows the tracks, faces, and tools behind each result next to its fake probability. Public example videos can be reused for testing and training.
+  </figcaption>
+</figure>
+
+DeFake.app turns this research into a working tool. It is available to collaborating journalists, forensic analysts, and law enforcement personnel on request.
+
+**Submitting media.** A user uploads a video (MP4, MOV, or WebM) or pastes a YouTube or X post link. They then choose which forensic questions to ask. The options are face swap, lip-sync or reenactment, full synthesis, and voice cloning. For X links, version 2.1.1 also shows where the video came from and gives a short summary after preprocessing.
+
+**Reading the results.** The app runs a set of detectors and shows the results second by second. For each question, it shows which methods support the answer and how much each one contributes.
+
+Behind the interface:
+
+- **Pluggable detection methods.** Each detector is a self-contained module that declares what it needs and what it detects. New models show up in the app without changes to the core system. Current methods include in-house models (EfficientNet, F3Net, and TimeSformer variants) along with external detection services.
+- **Shared preprocessing.** Face detection, tracking, and cropping run once per file and feed every vision model.
+- **Scalable backend.** A Flask API and a gRPC broker hand work to GPU, CPU, and external-API workers. Postgres stores jobs, object storage holds media, and everything runs in Docker.
+- **Weighted evidence.** Specialized detectors count more than general ones toward a verdict. Every score can be traced back to the method and the moment that produced it.
+
+Stack: Python, Flask, gRPC, React, PyTorch, Postgres, Docker, Cloudflare.
+
+## Community contributions
+
+- **Misinformation Combat Alliance, Deepfakes Analysis Unit (India).** The DAU runs a public WhatsApp tipline for suspected AI-generated audio and video. It sends hard cases to detection and forensic partners for expert analysis. We contribute deepfake analyses to the DAU, and RIT reports that the unit's head, Pamposh Raina, often reaches out to our team for an expert view on suspected manipulation.
+- **LEVA (Law Enforcement and Emergency Services Video Association).** LEVA provides forensic video training and certification. We led a workshop on deepfake detection for its members.
+- **SWGDE (Scientific Working Group on Digital Evidence).** SWGDE brings together law enforcement, academic, and commercial organizations to develop consensus standards, guidelines, and best practices for digital and multimedia evidence. We help draft its position documents, guides, and specification documents.

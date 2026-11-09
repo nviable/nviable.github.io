@@ -118,8 +118,38 @@ const secondaryArtifacts = artifacts.slice(1);
 
 const coverKind = projectCoverKind(coverImage);
 
-const contents = headings.filter((heading) => heading.depth === 2);
-const showContents = contents.length >= 3;
+interface TocItem {
+  slug: string;
+  text: string;
+  isSub: boolean;
+}
+
+const mdxHeadings = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const hasMdxH2 = mdxHeadings.some((heading) => heading.depth === 2);
+const hasRelatedPubs = Boolean(relatedPublications && relatedPublications.length > 0);
+const hasRelatedProjs = Boolean(relatedProjects && relatedProjects.length > 0);
+
+const tocItems: TocItem[] = [
+  ...(collaborators.length > 0 ? [{ slug: 'team-heading', text: 'Team', isSub: false }] : []),
+  ...mdxHeadings.map((heading) => ({
+    slug: heading.slug,
+    text: heading.text,
+    isSub: hasMdxH2 && heading.depth === 3,
+  })),
+  ...(hasRelatedPubs || hasRelatedProjs
+    ? [
+        { slug: 'related-work', text: 'Related Work', isSub: false },
+        ...(hasRelatedPubs
+          ? [{ slug: 'related-publications', text: 'Related Publications', isSub: true }]
+          : []),
+        ...(hasRelatedProjs
+          ? [{ slug: 'related-projects', text: 'Related Projects', isSub: true }]
+          : []),
+      ]
+    : []),
+];
+
+const showToc = tocItems.length >= 2;
 
 // Combine unique domains + tags for the yellow band
 const combinedTags: string[] = [];
@@ -304,57 +334,112 @@ for (const raw of [...domains, ...tags]) {
             <span class="yellow-band__pill yellow-band__pill--static">{tag}</span>
           ))}
         </div>
-
-        <div class="yellow-band__group">
-          {collaborators.length > 0 && (
-            <a href="#team-heading" class="yellow-band__pill">Team ({collaborators.length})</a>
-          )}
-          {relatedPublications && relatedPublications.length > 0 && (
-            <a href="#related-work" class="yellow-band__pill">
-              Papers ({relatedPublications.length})
-            </a>
-          )}
-        </div>
       </div>
     </div>
 
     <!-- ════════════════════════════════════════════════════════════════════════
          3. CASE STUDY BODY, TEAM, & RELATED WORK
          ════════════════════════════════════════════════════════════════════════ -->
-    <div class="case-study">
-      <div class="case-study-body">
-        {collaborators.length > 0 && (
-          <ProjectCollaborators collaborators={collaborators} />
-        )}
+    <div class:list={['case-study', { 'case-study--has-toc': showToc }]}>
+      {showToc && (
+        <aside class="project-toc">
+          <p class="project-toc__kicker">On this page</p>
+          <nav data-project-toc aria-label="Sections">
+            <ol>
+              {tocItems.map((item) => (
+                <li class:list={{ 'is-sub': item.isSub }}>
+                  <a href={`#${item.slug}`}>{item.text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        </aside>
+      )}
 
-        <section class="case-study-content">
-          {showContents && (
-            <nav class="case-study-contents" aria-label="Contents">
-              <p class="case-study-contents__title">On this page</p>
-              <ol>
-                {contents.map((heading) => (
-                  <li><a href={`#${heading.slug}`}>{heading.text}</a></li>
-                ))}
-              </ol>
-            </nav>
+      <div class="case-study-main">
+        <div class="case-study-body">
+          {collaborators.length > 0 && (
+            <ProjectCollaborators collaborators={collaborators} />
           )}
-          {Content && <Content />}
-        </section>
 
-        <ProjectArtifactButtons artifacts={secondaryArtifacts} />
-      </div>
+          <section class="case-study-content">
+            {Content && <Content />}
+          </section>
 
-      <div class="case-study-related" id="related-work">
-        <RelatedContent
-          relatedProjects={relatedProjects}
-          relatedPublications={relatedPublications}
-        />
-        <BackLink href="/projects" text="All projects" />
+          <ProjectArtifactButtons artifacts={secondaryArtifacts} />
+        </div>
+
+        <div class="case-study-related" id="related-work">
+          <RelatedContent
+            relatedProjects={relatedProjects}
+            relatedPublications={relatedPublications}
+          />
+          <BackLink href="/projects" text="All projects" />
+        </div>
       </div>
     </div>
   </main>
 
   <ScrollToTop />
+
+  <script>
+    let cleanupTocScroll: (() => void) | undefined;
+
+    function teardownProjectToc() {
+      if (cleanupTocScroll) {
+        cleanupTocScroll();
+        cleanupTocScroll = undefined;
+      }
+    }
+
+    function initProjectToc() {
+      teardownProjectToc();
+
+      const nav = document.querySelector<HTMLElement>('[data-project-toc]');
+      if (!nav) return;
+
+      const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'));
+      const targets = links
+        .map((link) => {
+          const id = link.getAttribute('href')?.slice(1);
+          const el = id ? document.getElementById(id) : null;
+          return el ? { link, el } : null;
+        })
+        .filter((entry): entry is { link: HTMLAnchorElement; el: HTMLElement } => entry !== null);
+
+      if (targets.length === 0) return;
+
+      const onScroll = () => {
+        let active = targets[0];
+        for (const item of targets) {
+          if (item.el.getBoundingClientRect().top < 140) {
+            active = item;
+          }
+        }
+        for (const item of targets) {
+          const isCurrent = item === active;
+          item.link.classList.toggle('is-active', isCurrent);
+          if (isCurrent) {
+            item.link.setAttribute('aria-current', 'location');
+          } else {
+            item.link.removeAttribute('aria-current');
+          }
+        }
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      cleanupTocScroll = () => window.removeEventListener('scroll', onScroll);
+      onScroll();
+    }
+
+    const globalScope = window as unknown as { __projectTocBound?: boolean };
+    if (!globalScope.__projectTocBound) {
+      globalScope.__projectTocBound = true;
+      document.addEventListener('astro:page-load', initProjectToc);
+      document.addEventListener('astro:before-swap', teardownProjectToc);
+    }
+    initProjectToc();
+  </script>
 
   <style>
     .project-page {
@@ -543,16 +628,105 @@ for (const raw of [...domains, ...tags]) {
       color: #f6eb0f;
     }
 
-    /* Case study body */
+    /* Case study grid & sticky sidebar TOC (DeFake blog style) */
     .case-study {
       max-width: 1120px;
       margin: 0 auto;
       padding: 2.5rem 1.5rem 3.5rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+      gap: 2.25rem;
+    }
+
+    .project-toc {
+      display: none;
+    }
+
+    .project-toc__kicker {
+      color: var(--color-text-muted);
+      font-family: var(--font-display);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin: 0 0 0.875rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .project-toc ol {
+      border-left: 1px solid var(--color-border);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .project-toc li {
+      margin: 0;
+    }
+
+    .project-toc a {
+      color: var(--color-text-muted);
+      border-left: 1px solid transparent;
+      margin-left: -1px;
+      padding: 0.45rem 0 0.45rem 0.875rem;
+      font-size: 0.84rem;
+      line-height: 1.35;
+      text-decoration: none;
+      display: block;
+      transition:
+        color var(--transition-fast),
+        border-color var(--transition-fast);
+    }
+
+    .project-toc li.is-sub a {
+      padding-left: 1.625rem;
+      font-size: 0.8125rem;
+    }
+
+    .project-toc a:hover,
+    .project-toc a.is-active {
+      color: var(--color-text);
+      border-left-color: var(--color-accent);
+    }
+
+    .project-toc a:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+
+    .case-study-main {
+      min-width: 0;
     }
 
     .case-study-body {
       max-width: var(--max-width-prose);
       margin: 0 auto;
+    }
+
+    @media (min-width: 1024px) {
+      .case-study.case-study--has-toc {
+        grid-template-columns: 200px minmax(0, 1fr);
+        gap: 3rem 2.75rem;
+      }
+
+      .project-toc {
+        max-height: calc(100vh - 8rem);
+        display: block;
+        position: sticky;
+        top: 5.5rem;
+        overflow: auto;
+      }
+
+      .case-study--has-toc .case-study-body {
+        margin: 0;
+      }
+    }
+
+    .case-study :global(#team-heading),
+    .case-study-content :global(:is(h2, h3, h4)),
+    .case-study-related,
+    .case-study-related :global(:is(h2, h3)) {
+      scroll-margin-top: 6rem;
     }
 
     .case-study-body :global(.project-collaborators) {
@@ -576,7 +750,6 @@ for (const raw of [...domains, ...tags]) {
 
     .case-study-content :global(h2),
     .case-study-content :global(h3),
-    .case-study-contents,
     .case-study-content :global(ul),
     .case-study-content :global(ol),
     .case-study-content :global(figure),
@@ -592,35 +765,6 @@ for (const raw of [...domains, ...tags]) {
 
     .case-study-content :global(a):hover {
       text-decoration-thickness: 2px;
-    }
-
-    .case-study-contents {
-      margin: 0 0 2rem;
-      padding: 1.1rem 1.35rem;
-      border-radius: 16px;
-      background: var(--color-card);
-      border: 1px solid var(--color-border);
-      font-size: 0.9375rem;
-    }
-
-    .case-study-contents__title {
-      margin: 0 0 0.5rem;
-      font-family: var(--font-display);
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--color-text-muted);
-    }
-
-    .case-study-contents ol {
-      margin: 0;
-      padding-left: 1.25rem;
-      list-style-position: outside;
-    }
-
-    .case-study-contents li {
-      margin: 0.25rem 0;
     }
 
     .case-study-content :global(h3#key-decisions) ~ :global(p) {

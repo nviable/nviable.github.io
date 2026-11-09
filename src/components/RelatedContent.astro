@@ -47,14 +47,14 @@ const hasRelated = projects.length > 0 || publications.length > 0;
 
     {publications.length > 0 && (
       <div class="related-section">
-        <h3 class="related-section-title">Related Publications</h3>
+        <h3 id="related-publications" class="related-section-title">Related Publications</h3>
         <PublicationCards entries={publications.map((pub) => pub.data)} columns={2} />
       </div>
     )}
 
     {projects.length > 0 && (
       <div class="related-section">
-        <h3 class="related-section-title">Related Projects</h3>
+        <h3 id="related-projects" class="related-section-title">Related Projects</h3>
         <div class="related-projects-grid">
           {projects.map((project) => (
             <a href={`/projects/${project.id}`} class="related-project-card">
